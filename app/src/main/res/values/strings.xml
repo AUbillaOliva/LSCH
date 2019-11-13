@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LSCH</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="setting_dark_theme_label">Tema Oscuro</string>
+    <string name="settings_general_label">General</string>
+</resources>
