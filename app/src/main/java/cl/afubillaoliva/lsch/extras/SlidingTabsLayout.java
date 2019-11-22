@@ -40,7 +40,7 @@ public class SlidingTabsLayout extends HorizontalScrollView {
     private boolean mDistributeEvenly;
 
     private ViewPager mViewPager;
-    private SparseArray<String> mContentDescriptions = new SparseArray<String>();
+    private SparseArray<String> mContentDescriptions = new SparseArray<>();
     private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
     private final SlidingTabsStrip mTabStrip;
@@ -154,6 +154,7 @@ public class SlidingTabsLayout extends HorizontalScrollView {
         final PagerAdapter adapter = mViewPager.getAdapter();
         final OnClickListener tabClickListener = new TabClickListener();
 
+        assert adapter != null;
         for (int i = 0; i < adapter.getCount(); i++) {
             View tabView = null;
             TextView tabTitleView = null;
@@ -162,7 +163,7 @@ public class SlidingTabsLayout extends HorizontalScrollView {
                 // If there is a custom tab view layout id set, try and inflate it
                 tabView = LayoutInflater.from(getContext()).inflate(mTabViewLayoutId, mTabStrip,
                         false);
-                tabTitleView = (TextView) tabView.findViewById(mTabViewTextViewId);
+                tabTitleView = tabView.findViewById(mTabViewTextViewId);
             }
 
             if (tabView == null) {
@@ -179,6 +180,7 @@ public class SlidingTabsLayout extends HorizontalScrollView {
                 lp.weight = 1;
             }
 
+            assert tabTitleView != null;
             tabTitleView.setText(adapter.getPageTitle(i));
             tabView.setOnClickListener(tabClickListener);
             String desc = mContentDescriptions.get(i, null);

@@ -8,7 +8,7 @@
         <item name="textColor">@android:color/black</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
-
+        <item name="dividerColor">@color/dividerLight</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -19,7 +19,7 @@
         <item name="textColor">@android:color/white</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">false</item>
-
+        <item name="dividerColor">@color/dividerDark</item>
     </style>
 
 </resources>

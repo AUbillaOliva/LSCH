@@ -1,9 +1,14 @@
 package cl.afubillaoliva.lsch.models;
 
-public class Word {
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+public class Word implements Serializable {
 
     private String title;
-    private String[] description, images, sin, ant;
+    private String[] images, category;
+    private ArrayList<String> description, sin, ant;
 
     public String getTitle() {
         return title;
@@ -13,11 +18,28 @@ public class Word {
         this.title = title;
     }
 
-    public String[] getDescription() {
-        return description;
+    public ArrayList<String> getSin() {
+        return sin;
     }
 
-    public void setDescription(String[] description) {
+    public void setSin(ArrayList<String> sin) {
+        this.sin = sin;
+    }
+
+    public ArrayList<String> getAnt() {
+        return ant;
+    }
+
+    public void setAnt(ArrayList<String> ant) {
+        this.ant = ant;
+    }
+
+    public ArrayList<String> getDescription() {
+        return description;
+
+    }
+
+    public void setDescription(ArrayList<String> description) {
         this.description = description;
     }
 
@@ -29,19 +51,11 @@ public class Word {
         this.images = images;
     }
 
-    public String[] getSin() {
-        return sin;
+    public String[] getCategory() {
+        return category;
     }
 
-    public void setSin(String[] sin) {
-        this.sin = sin;
-    }
-
-    public String[] getAnt() {
-        return ant;
-    }
-
-    public void setAnt(String[] ant) {
-        this.ant = ant;
+    public void setCategory(String[] category) {
+        this.category = category;
     }
 }

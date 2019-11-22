@@ -8,15 +8,21 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import cl.afubillaoliva.lsch.activities.SearchActivity;
 import cl.afubillaoliva.lsch.activities.SettingsActivity;
 import cl.afubillaoliva.lsch.adapters.TabsAdapter;
 import cl.afubillaoliva.lsch.extras.SlidingTabsLayout;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
+    public static final String TAG = "API_RESPONSE";
+
     SharedPreference mSharedPreferences;
     public SlidingTabsLayout mSlidingTabLayout;
     public ViewPager mViewPager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         mSharedPreferences = new SharedPreference(this);
@@ -27,11 +33,12 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mViewPager = findViewById(R.id.vp_tabs);
-        mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager(), this));
+        mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
         mSlidingTabLayout = findViewById(R.id.stl_tabs);
         if (mSharedPreferences.loadNightModeState())
             mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark)); //NIGHT MODE
@@ -52,17 +59,27 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (!mSharedPreferences.loadNightModeState()){
+            getMenuInflater().inflate(R.menu.menu_main_light, menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_main_dark, menu);
+        }
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            finish();
+        switch (id){
+            case R.id.action_settings:
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+            case R.id.action_search:
+                startActivity(new Intent(MainActivity.this, SearchActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

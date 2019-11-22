@@ -6,5 +6,6 @@
         <attr name="colorPrimaryDark" format="color|reference"/>
         <attr name="textColor" format="color|reference"/>
         <attr name="textSize" format="dimension"/>
+        <attr name="dividerColor" format="color|reference"/>
     </declare-styleable>
 </resources>

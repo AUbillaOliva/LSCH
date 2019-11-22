@@ -2,9 +2,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="cl.afubillaoliva.lsch.MainActivity">
+
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item android:id="@+id/action_search"
+        android:title="@string/buscar"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_search_black_24dp"/>
+
 </menu>

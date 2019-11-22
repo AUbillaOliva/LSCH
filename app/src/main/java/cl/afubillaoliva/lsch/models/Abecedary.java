@@ -1,7 +1,5 @@
 package cl.afubillaoliva.lsch.models;
 
-import android.util.Log;
-
 public class Abecedary {
     private String image;
     private String letter;

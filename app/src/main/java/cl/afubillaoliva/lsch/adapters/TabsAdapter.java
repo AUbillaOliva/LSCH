@@ -11,11 +11,9 @@ import cl.afubillaoliva.lsch.fragments.Expressions;
 import cl.afubillaoliva.lsch.fragments.Themes;
 
 public class TabsAdapter extends FragmentPagerAdapter {
-    private Context mContext;
     private String[] titles = {"ABECEDARIO","ORDEN TEMÁTICO","EXPRESIONES DE USO COTIDIANO"};
-    public TabsAdapter(FragmentManager fm, Context c) {
+    public TabsAdapter(FragmentManager fm) {
         super(fm);
-        mContext = c;
     }
 
     @Override
@@ -34,6 +32,7 @@ public class TabsAdapter extends FragmentPagerAdapter {
         }
         Bundle bundle = new Bundle();
         bundle.putInt("position", i);
+        assert fragment != null;
         fragment.setArguments(bundle);
         return fragment;
     }

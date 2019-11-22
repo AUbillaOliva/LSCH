@@ -26,8 +26,6 @@ class SlidingTabsStrip extends LinearLayout {
     private final int mSelectedIndicatorThickness;
     private final Paint mSelectedIndicatorPaint;
 
-    private final int mDefaultBottomBorderColor;
-
     private int mSelectedPosition;
     private float mSelectionOffset;
 
@@ -48,8 +46,8 @@ class SlidingTabsStrip extends LinearLayout {
         context.getTheme().resolveAttribute(R.attr.colorForeground, outValue, true);
         final int themeForegroundColor =  outValue.data;
 
-        mDefaultBottomBorderColor = setColorAlpha(themeForegroundColor,
-                DEFAULT_BOTTOM_BORDER_COLOR_ALPHA);
+        int mDefaultBottomBorderColor = setColorAlpha(themeForegroundColor
+        );
 
         mDefaultTabColorizer = new SimpleTabColorizer();
         mDefaultTabColorizer.setIndicatorColors(DEFAULT_SELECTED_INDICATOR_COLOR);
@@ -122,8 +120,8 @@ class SlidingTabsStrip extends LinearLayout {
     /**
      * Set the alpha value of the {@code color} to be the given {@code alpha} value.
      */
-    private static int setColorAlpha(int color, byte alpha) {
-        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
+    private static int setColorAlpha(int color) {
+        return Color.argb(SlidingTabsStrip.DEFAULT_BOTTOM_BORDER_COLOR_ALPHA, Color.red(color), Color.green(color), Color.blue(color));
     }
 
     /**

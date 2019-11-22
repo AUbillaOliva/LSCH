@@ -18,21 +18,21 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.models.Abecedary;
 
-public class AbecedaryListAdapter extends RecyclerView.Adapter<AbecedaryListAdapter.MyViewHolder> {
+public class AbecedaryCardListAdapter extends RecyclerView.Adapter<AbecedaryCardListAdapter.MyViewHolder> {
 
     private ArrayList<Abecedary> dataset;
     private Context context;
     private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
-    public AbecedaryListAdapter(Context context){
+    public AbecedaryCardListAdapter(Context context){
         this.context = context;
-        dataset = new ArrayList<>();
+        this.dataset = new ArrayList<>();
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_card, viewGroup, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_card, viewGroup, false);
         return new MyViewHolder(view);
     }
 

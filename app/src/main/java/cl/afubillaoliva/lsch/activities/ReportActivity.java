@@ -5,10 +5,10 @@ import android.support.v7.app.AppCompatActivity;
 
 import cl.afubillaoliva.lsch.R;
 
-public class LetterListActivity extends AppCompatActivity {
+public class ReportActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.letter_list_activity);
+        setContentView(R.layout.report_activity_layout);
     }
 }

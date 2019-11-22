@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.Toolbar;
 
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;

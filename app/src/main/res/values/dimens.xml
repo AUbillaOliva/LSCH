@@ -1,4 +1,16 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="body_1_size">16sp</dimen>
+    <dimen name="h6_size">20sp</dimen>
+    <dimen name="h5_size">24sp</dimen>
+    <dimen name="h4_size">34sp</dimen>
+    <dimen name="h3_size">48sp</dimen>
+    <dimen name="h2_size">60sp</dimen>
+    <dimen name="h1_size">96sp</dimen>
+    <dimen name="subtitle_1_size">16sp</dimen>
+    <dimen name="subtitle_2_size">14sp</dimen>
+    <dimen name="body_2_size">14sp</dimen>
+    <dimen name="button_text_size">14sp</dimen>
+    <dimen name="caption_size">12sp</dimen>
+    <dimen name="overline_size">10sp</dimen>
 </resources>

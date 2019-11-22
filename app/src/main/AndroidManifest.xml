@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="cl.afubillaoliva.lsch">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,10 +24,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.SettingsActivity">
-        </activity>
-        <activity android:name=".activities.LetterListActivity">
-        </activity>
+        <activity android:name=".activities.SettingsActivity"/>
+        <activity android:name=".activities.ExpressionsListActivity"/>
+        <activity android:name=".activities.ExpressionsDetailActivity"/>
+        <activity android:name=".activities.AbecedaryListActivity"/>
+        <activity android:name=".activities.WordDetailActivity"/>
+        <activity android:name=".activities.ReportActivity"/>
+        <activity android:name=".activities.SearchActivity"/>
     </application>
 
 </manifest>

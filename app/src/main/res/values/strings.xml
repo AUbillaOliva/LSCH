@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">LSCH</string>
     <string name="action_settings">Settings</string>
-
     <string name="setting_dark_theme_label">Tema Oscuro</string>
     <string name="settings_general_label">General</string>
+    <string name="descripcion">Descripción</string>
+    <string name="sinonimos">Sinónimos</string>
+    <string name="antonimos">Antónimos</string>
+    <string name="reportar_error">Reportar Error</string>
+    <string name="compartir">Compartir</string>
+    <string name="buscar">Buscar</string>
+    <string name="search">Buscar</string>
 </resources>

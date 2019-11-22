@@ -1,5 +1,6 @@
 package cl.afubillaoliva.lsch.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -11,13 +12,16 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
+import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.AbecedaryListAdapter;
+import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
+import cl.afubillaoliva.lsch.adapters.AbecedaryCardListAdapter;
 import cl.afubillaoliva.lsch.api.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,40 +31,45 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHack {
 
-    private static final String TAG = "API_RESPONSE";
-    private static final String BASE_URL = "http://192.168.0.16:5000/api/";
-    private SwipeRefreshLayout swipeRefreshLayout;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ProgressBar mProgressBar;
     private Retrofit retrofit;
-    private AbecedaryListAdapter abecedaryListAdapter;
+    private AbecedaryCardListAdapter abecedaryListAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.abecedary_fragment, container,false);
-        swipeRefreshLayout = view.findViewById(R.id.swipe_layout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+        View view = inflater.inflate(R.layout.fragment_layout, container,false);
+        mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
+        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
+        mProgressBar = view.findViewById(R.id.progress_circular);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 getData();
             }
         });
-        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
+
         mRecyclerView.setHasFixedSize(true);
-        abecedaryListAdapter = new AbecedaryListAdapter(getContext());
+        abecedaryListAdapter = new AbecedaryCardListAdapter(getContext());
         mRecyclerView.setAdapter(abecedaryListAdapter);
         mRecyclerView.setNestedScrollingEnabled(false);
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
         abecedaryListAdapter.setRecyclerViewOnClickListenerHack(this);
+
         retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(MainActivity.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+
         getData();
         return view;
     }
 
     public void getData(){
-        ApiService.LettersService service = retrofit.create(ApiService.LettersService.class);
+        ApiService.AbecedaryService service = retrofit.create(ApiService.AbecedaryService.class);
         Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> responseCall = service.getAbecedary();
 
         responseCall.enqueue(new Callback<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>>() {
@@ -69,29 +78,42 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                 if(response.isSuccessful()){
                     ArrayList<cl.afubillaoliva.lsch.models.Abecedary> apiResponse = response.body();
                     if(abecedaryListAdapter.getItemCount() != 0){
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mProgressBar.setVisibility(View.GONE);
+                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                         abecedaryListAdapter.updateData(apiResponse);
-                        swipeRefreshLayout.setRefreshing(false);
                         Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
                     } else {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mProgressBar.setVisibility(View.GONE);
+                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                         abecedaryListAdapter.addData(apiResponse);
-                        swipeRefreshLayout.setRefreshing(false);
                     }
                 } else {
-                    Log.e(TAG, "onResponse: " + response.errorBody());
-                    swipeRefreshLayout.setRefreshing(false);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mProgressBar.setVisibility(View.GONE);
+                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                    Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> call, @NonNull Throwable t) {
-                Log.i(TAG, "onFailure: " + t.getMessage());
+                Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
+                mSwipeRefreshLayout.setRefreshing(false);
+                mProgressBar.setVisibility(View.GONE);
+                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onClickListener(View view, int position) {
-        Toast.makeText(getContext(), "" + abecedaryListAdapter.getLetter(position), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
+        intent.putExtra("letter", abecedaryListAdapter.getLetter(position));
+        startActivity(intent);
     }
 
     @Override
@@ -103,7 +125,7 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.swipe_layout:
-                swipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout.setRefreshing(true);
                 getData();
                 return true;
         }
