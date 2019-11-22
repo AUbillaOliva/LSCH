@@ -22,18 +22,16 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordListAdapter;
+import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class AbecedaryListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
-    private Retrofit retrofit;
     private Intent intent;
     private WordListAdapter adapter;
     private ProgressBar mProgressBar;
@@ -68,11 +66,6 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MainActivity.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -86,7 +79,7 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
     }
 
     public void getData(){
-        ApiService.WordsOfLetterService service = retrofit.create(ApiService.WordsOfLetterService.class);
+        ApiService.WordsOfLetterService service = ApiClient.getClient().create(ApiService.WordsOfLetterService.class);
         Call<ArrayList<Word>> responseCall = service.getWords(intent.getStringExtra("letter"));
 
         responseCall.enqueue(new Callback<ArrayList<Word>>() {

@@ -22,18 +22,16 @@ import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
 import cl.afubillaoliva.lsch.adapters.AbecedaryCardListAdapter;
+import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHack {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private Retrofit retrofit;
     private AbecedaryCardListAdapter abecedaryListAdapter;
 
     @Override
@@ -59,17 +57,12 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
         mRecyclerView.setLayoutManager(layoutManager);
         abecedaryListAdapter.setRecyclerViewOnClickListenerHack(this);
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MainActivity.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         getData();
         return view;
     }
 
     public void getData(){
-        ApiService.AbecedaryService service = retrofit.create(ApiService.AbecedaryService.class);
+        ApiService.AbecedaryService service = ApiClient.getClient().create(ApiService.AbecedaryService.class);
         Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> responseCall = service.getAbecedary();
 
         responseCall.enqueue(new Callback<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>>() {

@@ -11,8 +11,6 @@ import java.util.ArrayList;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.models.Abecedary;
-import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.models.Word;
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.MyViewHolder> implements RecyclerViewOnClickListenerHack {
@@ -87,6 +85,6 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.MyView
         @Override
         public void onClick(View v) {
             if(mRecyclerViewOnClickListenerHack != null)
-                mRecyclerViewOnClickListenerHack.onClickListener(v, getPosition());        }
+                mRecyclerViewOnClickListenerHack.onClickListener(v, getLayoutPosition());        }
     }
 }

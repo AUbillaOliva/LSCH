@@ -12,9 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ import java.util.Objects;
 
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.ListAdapter;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
@@ -149,7 +146,13 @@ public class WordDetailActivity extends AppCompatActivity {
                 startActivity(report);
                 break;
             case R.id.send:
-                Toast.makeText(this, "Share", Toast.LENGTH_SHORT).show();
+                //TODO: IMPROVE TEXT
+                Intent send = new Intent();
+                send.setAction(Intent.ACTION_SEND);
+                send.putExtra(Intent.EXTRA_TEXT, word.getTitle() + "\n" + word.getDescription() + "\n" + word
+                .getSin() + "\n" + word.getAnt());
+                send.setType("text/plain");
+                startActivity(send);
                 break;
         }
         return super.onOptionsItemSelected(item);

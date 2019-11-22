@@ -1,6 +1,7 @@
 package cl.afubillaoliva.lsch.models;
 
 public class Abecedary {
+
     private String image;
     private String letter;
 

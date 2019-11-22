@@ -1,9 +1,5 @@
 package cl.afubillaoliva.lsch.extras;
 
-/**
- * Created by viniciusthiengo on 5/18/15.
- */
-import android.R;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -43,11 +39,10 @@ class SlidingTabsStrip extends LinearLayout {
         final float density = getResources().getDisplayMetrics().density;
 
         TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.colorForeground, outValue, true);
+        context.getTheme().resolveAttribute(android.R.attr.colorForeground, outValue, true);
         final int themeForegroundColor =  outValue.data;
 
-        int mDefaultBottomBorderColor = setColorAlpha(themeForegroundColor
-        );
+        int mDefaultBottomBorderColor = setColorAlpha(themeForegroundColor);
 
         mDefaultTabColorizer = new SimpleTabColorizer();
         mDefaultTabColorizer.setIndicatorColors(DEFAULT_SELECTED_INDICATOR_COLOR);
@@ -58,11 +53,6 @@ class SlidingTabsStrip extends LinearLayout {
 
         mSelectedIndicatorThickness = (int) (SELECTED_INDICATOR_THICKNESS_DIPS * density);
         mSelectedIndicatorPaint = new Paint();
-    }
-
-    void setCustomTabColorizer(SlidingTabsLayout.TabColorizer customTabColorizer) {
-        mCustomTabColorizer = customTabColorizer;
-        invalidate();
     }
 
     void setSelectedIndicatorColors(int... colors) {

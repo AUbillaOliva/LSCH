@@ -1,6 +1,5 @@
 package cl.afubillaoliva.lsch.adapters;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.models.Abecedary;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> implements RecyclerViewOnClickListenerHack {
 
@@ -83,6 +81,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         @Override
         public void onClick(View v) {
             if(mRecyclerViewOnClickListenerHack != null)
-                mRecyclerViewOnClickListenerHack.onClickListener(v, getPosition());        }
+                mRecyclerViewOnClickListenerHack.onClickListener(v, getLayoutPosition());        }
     }
 }

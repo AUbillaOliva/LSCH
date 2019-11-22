@@ -8,10 +8,8 @@ import android.view.View;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.ExpressionsListAdapter;
 import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
-
 
 public class ExpressionsDetailActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 

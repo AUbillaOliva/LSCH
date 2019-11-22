@@ -9,13 +9,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.R;
 
-public class WordElementsListAdapter extends RecyclerView.Adapter<WordElementsListAdapter.MyViewHolder> implements RecyclerViewOnClickListenerHack {
+public class WordElementsListAdapter extends RecyclerView.Adapter<WordElementsListAdapter.MyViewHolder> {
 
     private ArrayList<String> dataset;
-    private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
     public WordElementsListAdapter(){
         this.dataset = new ArrayList<>();
@@ -46,30 +44,7 @@ public class WordElementsListAdapter extends RecyclerView.Adapter<WordElementsLi
         notifyDataSetChanged();
     }
 
-    public void updateData(ArrayList<String> list){
-        dataset.clear();
-        addData(list);
-        notifyDataSetChanged();
-    }
-
-    public String getCategory(int position){
-        return dataset.get(position);
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-
-    }
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
-    }
-
-    public void setRecyclerViewOnClickListenerHack(RecyclerViewOnClickListenerHack rvoclh) {
-        mRecyclerViewOnClickListenerHack = rvoclh;
-    }
-
-    class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class MyViewHolder extends RecyclerView.ViewHolder {
 
         private TextView listText, listNumber;
 
@@ -77,12 +52,7 @@ public class WordElementsListAdapter extends RecyclerView.Adapter<WordElementsLi
             super(itemView);
             listText = itemView.findViewById(R.id.element_text);
             listNumber = itemView.findViewById(R.id.element_number);
-            itemView.setOnClickListener(this);
         }
-
-        @Override
-        public void onClick(View v) {
-            if(mRecyclerViewOnClickListenerHack != null)
-                mRecyclerViewOnClickListenerHack.onClickListener(v, getPosition());        }
     }
+
 }

@@ -20,6 +20,7 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.ListAdapter;
+import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +34,6 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private Retrofit retrofit;
     private ListAdapter adapter;
 
     @Override
@@ -52,11 +52,6 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MainActivity.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -68,7 +63,7 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
     }
 
     public void getData(){
-        ApiService.ThemesCategoryService service = retrofit.create(ApiService.ThemesCategoryService.class);
+        ApiService.ThemesCategoryService service = ApiClient.getClient().create(ApiService.ThemesCategoryService.class);
         Call<ArrayList<String>> responseCall = service.getThemesCategories();
 
         responseCall.enqueue(new Callback<ArrayList<String>>() {
@@ -80,6 +75,7 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
                         mSwipeRefreshLayout.setRefreshing(false);
                         mProgressBar.setVisibility(View.GONE);
                         mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                        adapter.updateData(apiResponse);
                         Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
                     } else {
                         mSwipeRefreshLayout.setRefreshing(false);

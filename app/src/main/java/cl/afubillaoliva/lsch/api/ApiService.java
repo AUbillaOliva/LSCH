@@ -7,7 +7,6 @@ import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.models.Word;
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public class ApiService {
@@ -25,11 +24,6 @@ public class ApiService {
     public interface WordsService {
         @GET("words")
         Call<ArrayList<Word>> getWords();
-    }
-
-    public interface ExpressionsService {
-        @GET("expressions")
-        Call<ArrayList<Expressions>> getExpressions();
     }
 
     public interface ExpressionsServiceCategories {

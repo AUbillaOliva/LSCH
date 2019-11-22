@@ -22,19 +22,17 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.ExpressionsListAdapter;
+import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ExpressionsListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
     private ExpressionsListAdapter adapter;
-    private Retrofit retrofit;
     private Intent intent;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
@@ -64,11 +62,6 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MainActivity.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         String title = intent.getStringExtra("expression");
         title = title.substring(0,1).toUpperCase() + title.substring(1);
         mToolbar.setTitle(title);
@@ -88,7 +81,7 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     }
 
     public void getData(){
-        ApiService.ExpressionsServiceCategories service = retrofit.create(ApiService.ExpressionsServiceCategories.class);
+        ApiService.ExpressionsServiceCategories service = ApiClient.getClient().create(ApiService.ExpressionsServiceCategories.class);
         Log.i(MainActivity.TAG, intent.getStringExtra("expression"));
         Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(intent.getStringExtra("expression"));
 

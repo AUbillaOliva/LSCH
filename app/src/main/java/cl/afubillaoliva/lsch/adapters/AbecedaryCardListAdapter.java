@@ -87,7 +87,7 @@ public class AbecedaryCardListAdapter extends RecyclerView.Adapter<AbecedaryCard
         @Override
         public void onClick(View v) {
             if(mRecyclerViewOnClickListenerHack != null)
-                mRecyclerViewOnClickListenerHack.onClickListener(v, getPosition());
+                mRecyclerViewOnClickListenerHack.onClickListener(v, getLayoutPosition());
         }
     }
 }

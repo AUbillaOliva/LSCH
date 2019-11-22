@@ -22,6 +22,7 @@ import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.activities.ExpressionsListActivity;
 import cl.afubillaoliva.lsch.adapters.ListAdapter;
+import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +36,6 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private Retrofit retrofit;
     private ListAdapter adapter;
 
     @Override
@@ -54,11 +54,6 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        retrofit = new Retrofit.Builder()
-                .baseUrl(MainActivity.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -71,7 +66,7 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
     }
 
     public void getData(){
-        ApiService.ExpressionsCategoryService service = retrofit.create(ApiService.ExpressionsCategoryService.class);
+        ApiService.ExpressionsCategoryService service = ApiClient.getClient().create(ApiService.ExpressionsCategoryService.class);
         Call<ArrayList<String>> responseCall = service.getExpressionsCategories();
 
         responseCall.enqueue(new Callback<ArrayList<String>>() {
@@ -84,6 +79,7 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                         mSwipeRefreshLayout.setRefreshing(false);
                         mProgressBar.setVisibility(View.GONE);
                         mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                        adapter.updateData(apiResponse);
                         Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
                     } else {
                         mSwipeRefreshLayout.setRefreshing(false);
