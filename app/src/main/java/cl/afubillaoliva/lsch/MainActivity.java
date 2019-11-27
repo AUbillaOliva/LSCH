@@ -1,23 +1,41 @@
 package cl.afubillaoliva.lsch;
 
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import java.io.IOException;
+
+import cl.afubillaoliva.lsch.activities.FavoriteListActivity;
 import cl.afubillaoliva.lsch.activities.SearchActivity;
 import cl.afubillaoliva.lsch.activities.SettingsActivity;
 import cl.afubillaoliva.lsch.adapters.TabsAdapter;
 import cl.afubillaoliva.lsch.extras.SlidingTabsLayout;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
     public static final String TAG = "API_RESPONSE";
+    public static int cacheSize = 10 * 1024 * 1024; // 10 MiB
 
     SharedPreference mSharedPreferences;
     public SlidingTabsLayout mSlidingTabLayout;
@@ -75,10 +93,17 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
                 break;
             case R.id.action_search:
                 startActivity(new Intent(MainActivity.this, SearchActivity.class));
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+                break;
+            case R.id.favorites:
+                startActivity(new Intent(MainActivity.this, FavoriteListActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);

@@ -15,7 +15,7 @@ import cl.afubillaoliva.lsch.models.Word;
 
 public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.MyViewHolder> implements RecyclerViewOnClickListenerHack {
 
-    private ArrayList<Word> dataset;
+    public ArrayList<Word> dataset;
     private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
     public WordListAdapter(){

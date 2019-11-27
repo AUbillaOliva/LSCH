@@ -29,7 +29,7 @@ public class WordElementsListAdapter extends RecyclerView.Adapter<WordElementsLi
     @Override
     public void onBindViewHolder(@NonNull WordElementsListAdapter.MyViewHolder myViewHolder, int position) {
         String content = dataset.get(position);
-        content = content.substring(0,1).toUpperCase() + content.substring(1);
+        //content = content.substring(0,1).toUpperCase() + content.substring(1);
         myViewHolder.listText.setText(content);
         myViewHolder.listNumber.setText(String.valueOf(position + 1));
     }

@@ -3,8 +3,12 @@ package cl.afubillaoliva.lsch.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+
+import java.util.Objects;
 
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
@@ -21,7 +25,10 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
         android.support.v7.widget.Toolbar mToolbar = findViewById(R.id.toolbar);
+        mToolbar.setTitle(R.string.configurations);
         setSupportActionBar(mToolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
         Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
         if(mSharedPreferences.loadNightModeState()){
             mSwitch.setChecked(true);
@@ -44,6 +51,23 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch(id){
+            case android.R.id.home:
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

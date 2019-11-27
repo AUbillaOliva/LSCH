@@ -1,8 +1,13 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.util.ArrayList;
@@ -21,17 +27,24 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
+import cl.afubillaoliva.lsch.adapters.WordListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.utils.FavoriteContract;
+import cl.afubillaoliva.lsch.utils.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class WordDetailActivity extends AppCompatActivity {
 
     Word word;
+    private WordListAdapter adapter;
+    private SharedPreference mSharedPreferences;
+    private FavoriteDatabaseHelper favoriteDatabaseHelper;
+    private SQLiteDatabase mDb;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        SharedPreference mSharedPreferences = new SharedPreference(this);
+        mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
@@ -42,6 +55,9 @@ public class WordDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
 
+        FavoriteDatabaseHelper dbHelper = new FavoriteDatabaseHelper(this);
+        mDb = dbHelper.getWritableDatabase();
+
         Toolbar mToolbar = findViewById(R.id.toolbar);
         mToolbar.setTitle(word.getTitle());
         setSupportActionBar(mToolbar);
@@ -49,33 +65,35 @@ public class WordDetailActivity extends AppCompatActivity {
 
         RecyclerView defintionList = findViewById(R.id.definitions_list);
         defintionList.setNestedScrollingEnabled(true);
+        defintionList.setHasFixedSize(true);
         RecyclerView sinList = findViewById(R.id.sin_list);
         sinList.setNestedScrollingEnabled(true);
+        sinList.setHasFixedSize(true);
         RecyclerView antList = findViewById(R.id.ant_list);
-        antList.setNestedScrollingEnabled(true);
+        antList.setHasFixedSize(true);
 
         final VideoView videoView = findViewById(R.id.video);
-        Uri uri = Uri.parse(word.getImages()[0]);
+        ArrayList<String> images = word.getImages();
+        Uri uri = Uri.parse(images.get(0));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
+        }
         videoView.setVideoURI(uri);
-        videoView.start();
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 mp.setLooping(true);
+                mp.setVolume(0f,0f);
             }
         });
+        videoView.start();
         videoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(videoView.isPlaying()){
-                    videoView.pause();
-                } else {
-                    videoView.start();
-                }
+                if(videoView.isPlaying()) videoView.pause();
+                else videoView.start();
             }
         });
-
-
 
         TextView description = findViewById(R.id.text_description);
         if(word.getDescription().size() == 0){
@@ -87,6 +105,7 @@ public class WordDetailActivity extends AppCompatActivity {
             WordElementsListAdapter adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(descriptions);
+            adapter.notifyDataSetChanged();
             defintionList.setAdapter(adapter);
             defintionList.setLayoutManager(linearLayoutManager);
         }
@@ -100,6 +119,7 @@ public class WordDetailActivity extends AppCompatActivity {
             WordElementsListAdapter adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(synonyms);
+            adapter.notifyDataSetChanged();
             sinList.setAdapter(adapter);
             sinList.setLayoutManager(linearLayoutManager);
         }
@@ -113,6 +133,7 @@ public class WordDetailActivity extends AppCompatActivity {
             WordElementsListAdapter adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(antonyms);
+            adapter.notifyDataSetChanged();
             antList.setAdapter(adapter);
             antList.setLayoutManager(linearLayoutManager);
         }
@@ -125,10 +146,65 @@ public class WordDetailActivity extends AppCompatActivity {
         }*/
     }
 
+    public boolean exists(String searchItem) {
+
+        String[] projection = {
+                FavoriteContract.FavoriteEntry._ID,
+                FavoriteContract.FavoriteEntry.COLUMN_WORD_ID,
+                FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE,
+                FavoriteContract.FavoriteEntry.COLUMN_WORD_DESCRIPTIONS,
+                FavoriteContract.FavoriteEntry.COLUMN_ANTONYMS,
+                FavoriteContract.FavoriteEntry.COLUMN_SYNONYMS,
+                FavoriteContract.FavoriteEntry.COLUMN_CATEGORY,
+                FavoriteContract.FavoriteEntry.COLUMN_WORD_IMAGES
+
+        };
+        String selection = FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE + " =?";
+        String[] selectionArgs = { ""+searchItem };
+        String limit = "1";
+
+        Cursor cursor = mDb.query(FavoriteContract.FavoriteEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
+        boolean exists = (cursor.getCount() > 0);
+        cursor.close();
+        return exists;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_word, menu);
+        MenuItem item = menu.findItem(R.id.favorite);
+        if(exists(word.getTitle())){
+            item.setIcon(R.drawable.ic_favorite_black_24dp);
+            mSharedPreferences.setFavorite(true);
+        } else {
+            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+            mSharedPreferences.setFavorite(false);
+        }
+
+        item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                setFavorite(item);
+                return false;
+            }
+        });
         return true;
+    }
+
+    public void setFavorite(MenuItem item){
+        int id = getIntent().getExtras().getInt("id");
+        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
+        if(mSharedPreferences.isFavorite()){
+            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+            favoriteDatabaseHelper.deleteFavorite(id);
+            mSharedPreferences.setFavorite(false);
+            Log.d(MainActivity.TAG, "DELETED: " + id);
+        }else{
+            saveFavorite(id);
+            item.setIcon(R.drawable.ic_favorite_black_24dp);
+            mSharedPreferences.setFavorite(true);
+            Log.d(MainActivity.TAG, "ADDED: " + id);
+        }
     }
 
     @Override
@@ -163,6 +239,20 @@ public class WordDetailActivity extends AppCompatActivity {
         super.onBackPressed();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
+    }
+
+    public void saveFavorite(int position){
+        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
+        Word favorite = new Word();
+
+        favorite.setTitle(word.getTitle());
+        favorite.setDescription(word.getDescription());
+        favorite.setSin(word.getSin());
+        favorite.setAnt(word.getAnt());
+        favorite.setCategory(word.getCategory());
+        favorite.setImages(word.getImages());
+
+        favoriteDatabaseHelper.addFavorite(favorite, position);
     }
 
 }

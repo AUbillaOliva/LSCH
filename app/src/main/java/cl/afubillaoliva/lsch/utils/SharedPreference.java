@@ -13,7 +13,17 @@ public class SharedPreference {
         editor.putBoolean("NightMode",state);
         editor.apply();
     }
+
+    public void setFavorite(Boolean state){
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean("Favorite", state);
+        editor.apply();
+    }
+
     public Boolean loadNightModeState(){
         return mSharedPreferences.getBoolean("NightMode",false);
+    }
+    public Boolean isFavorite(){
+            return mSharedPreferences.getBoolean("Favorite", false);
     }
 }

@@ -7,8 +7,7 @@ import java.util.ArrayList;
 public class Word implements Serializable {
 
     private String title;
-    private String[] images, category;
-    private ArrayList<String> description, sin, ant;
+    private ArrayList<String> description, sin, ant, images, category;
 
     public String getTitle() {
         return title;
@@ -43,19 +42,19 @@ public class Word implements Serializable {
         this.description = description;
     }
 
-    public String[] getImages() {
+    public ArrayList<String> getImages() {
         return images;
     }
 
-    public void setImages(String[] images) {
+    public void setImages(ArrayList<String> images) {
         this.images = images;
     }
 
-    public String[] getCategory() {
+    public ArrayList<String> getCategory() {
         return category;
     }
 
-    public void setCategory(String[] category) {
+    public void setCategory(ArrayList<String> category) {
         this.category = category;
     }
 }

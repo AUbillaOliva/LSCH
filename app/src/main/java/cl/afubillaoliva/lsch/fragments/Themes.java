@@ -1,5 +1,8 @@
 package cl.afubillaoliva.lsch.fragments;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -14,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
@@ -22,6 +27,10 @@ import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.ListAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,6 +47,7 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup viewGroup, Bundle savedInstanceState){
+        setRetainInstance(true);
 
         View view = inflater.inflate(R.layout.fragment_layout, viewGroup, false);
         RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
@@ -62,45 +72,79 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
         return view;
     }
 
-    public void getData(){
-        ApiService.ThemesCategoryService service = ApiClient.getClient().create(ApiService.ThemesCategoryService.class);
-        Call<ArrayList<String>> responseCall = service.getThemesCategories();
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
-        responseCall.enqueue(new Callback<ArrayList<String>>() {
-            @Override
-            public void onResponse(@NonNull Call<ArrayList<String>> call, @NonNull Response<ArrayList<String>> response) {
-                if(response.isSuccessful()){
-                    ArrayList<String> apiResponse = response.body();
-                    if(adapter.getItemCount() != 0){
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.updateData(apiResponse);
-                        Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
+    public void getData(){
+        try {
+            Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
+
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .cache(cache)
+                    .addInterceptor(new Interceptor() {
+                        @Override
+                        public okhttp3.Response intercept(Interceptor.Chain chain)
+                                throws IOException {
+                            Request request = chain.request();
+                            if (!isNetworkAvailable()) {
+                                int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale \
+                                request = request
+                                        .newBuilder()
+                                        .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                        .build();
+                            }
+                            return chain.proceed(request);
+                        }
+                    })
+                    .build();
+
+            ApiService.ThemesCategoryService service = ApiClient.getClient(okHttpClient).create(ApiService.ThemesCategoryService.class);
+            Call<ArrayList<String>> responseCall = service.getThemesCategories();
+
+            responseCall.enqueue(new Callback<ArrayList<String>>() {
+                @Override
+                public void onResponse(@NonNull Call<ArrayList<String>> call, @NonNull Response<ArrayList<String>> response) {
+                    if(response.isSuccessful()){
+                        ArrayList<String> apiResponse = response.body();
+                        if(adapter.getItemCount() != 0){
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mProgressBar.setVisibility(View.GONE);
+                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                            adapter.updateData(apiResponse);
+                            Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
+                        } else {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mProgressBar.setVisibility(View.GONE);
+                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                            adapter.addData(apiResponse);
+                        }
                     } else {
+                        Log.e(TAG, "onResponse: " + response.errorBody());
                         mSwipeRefreshLayout.setRefreshing(false);
                         mProgressBar.setVisibility(View.GONE);
                         mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.addData(apiResponse);
+                        Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Log.e(TAG, "onResponse: " + response.errorBody());
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ArrayList<String>> call, @NonNull Throwable t) {
+                    Log.i(TAG, "onFailure: " + t.getMessage());
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
                 }
-            }
+            });
 
-            @Override
-            public void onFailure(@NonNull Call<ArrayList<String>> call, @NonNull Throwable t) {
-                Log.i(TAG, "onFailure: " + t.getMessage());
-                mSwipeRefreshLayout.setRefreshing(false);
-                mProgressBar.setVisibility(View.GONE);
-                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } catch (Exception e){
+            Log.d(MainActivity.TAG + "Error", e.getMessage());
+
+        }
     }
 
     @Override

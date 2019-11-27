@@ -14,4 +14,6 @@
     <color name="dividerDark">#5c5c5c</color>
     <color name="dividerLight">#1f848484</color>
 
+    <color name="textColorSecondary">#5F6368</color>
+
 </resources>

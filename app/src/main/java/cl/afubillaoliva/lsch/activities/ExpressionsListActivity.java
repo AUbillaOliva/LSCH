@@ -1,6 +1,9 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,6 +18,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -26,6 +30,10 @@ import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import okhttp3.Cache;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,48 +88,80 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         getData();
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     public void getData(){
-        ApiService.ExpressionsServiceCategories service = ApiClient.getClient().create(ApiService.ExpressionsServiceCategories.class);
-        Log.i(MainActivity.TAG, intent.getStringExtra("expression"));
-        Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(intent.getStringExtra("expression"));
+        try {
+            Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
-        responseCall.enqueue(new Callback<ArrayList<Expressions>>() {
-            @Override
-            public void onResponse(@NonNull Call<ArrayList<Expressions>> call, @NonNull Response<ArrayList<Expressions>> response) {
-                if (response.isSuccessful()) {
-                    ArrayList<Expressions> apiResponse = response.body();
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .cache(cache)
+                    .addInterceptor(new Interceptor() {
+                        @NonNull
+                        @Override
+                        public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
+                                throws IOException {
+                            Request request = chain.request();
+                            if(!isNetworkAvailable()) {
+                                int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale \
+                                request = request
+                                        .newBuilder()
+                                        .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                        .build();
+                            }
+                            return chain.proceed(request);
+                        }
+                    })
+                    .build();
+            ApiService.ExpressionsServiceCategories service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsServiceCategories.class);
+            Log.i(MainActivity.TAG, intent.getStringExtra("expression"));
+            Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(intent.getStringExtra("expression"));
 
-                    if (adapter.getItemCount() != 0) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.updateData(apiResponse);
-                        Toast.makeText(ExpressionsListActivity.this, "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
+            responseCall.enqueue(new Callback<ArrayList<Expressions>>() {
+                @Override
+                public void onResponse(@NonNull Call<ArrayList<Expressions>> call, @NonNull Response<ArrayList<Expressions>> response) {
+                    if (response.isSuccessful()) {
+                        ArrayList<Expressions> apiResponse = response.body();
+
+                        if (adapter.getItemCount() != 0) {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mProgressBar.setVisibility(View.GONE);
+                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                            adapter.updateData(apiResponse);
+                            Toast.makeText(ExpressionsListActivity.this, "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
+                        } else {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            mProgressBar.setVisibility(View.GONE);
+                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                            adapter.addData(apiResponse);
+                            adapter.notifyDataSetChanged();
+                        }
                     } else {
                         mSwipeRefreshLayout.setRefreshing(false);
                         mProgressBar.setVisibility(View.GONE);
                         mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.addData(apiResponse);
-                        adapter.notifyDataSetChanged();
+                        Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                        Toast.makeText(ExpressionsListActivity.this, "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
                     }
-                } else {
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ArrayList<Expressions>> call, @NonNull Throwable t) {
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                    Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
                     Toast.makeText(ExpressionsListActivity.this, "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
                 }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ArrayList<Expressions>> call, @NonNull Throwable t) {
-                mSwipeRefreshLayout.setRefreshing(false);
-                mProgressBar.setVisibility(View.GONE);
-                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(ExpressionsListActivity.this, "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
-            }
-        });
+            });
+        } catch (Exception e){
+            Log.d(MainActivity.TAG + "Error", e.getMessage());
+        }
     }
 
     @Override
@@ -138,6 +178,7 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_list,menu);
         return true;
     }
 
@@ -146,9 +187,11 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         int id = item.getItemId();
         switch(id){
             case android.R.id.home:
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            finish();
-            break;
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+                break;
+            case R.id.report:
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
