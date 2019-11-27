@@ -44,6 +44,7 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     private Intent intent;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
+    private Context context;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -89,10 +90,14 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if(context == null){
+            return false;
+        } else {
+            ConnectivityManager connectivityManager
+                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
     }
 
     public void getData(){

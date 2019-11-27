@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
     public static final String TAG = "API_RESPONSE";
+    public static final String FAV = "FAVORITE_RESPONSE";
     public static int cacheSize = 10 * 1024 * 1024; // 10 MiB
 
     SharedPreference mSharedPreferences;

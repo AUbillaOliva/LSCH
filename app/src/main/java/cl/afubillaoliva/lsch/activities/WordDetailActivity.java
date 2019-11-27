@@ -35,11 +35,11 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class WordDetailActivity extends AppCompatActivity {
 
-    Word word;
-    private WordListAdapter adapter;
+    private WordElementsListAdapter adapter;
     private SharedPreference mSharedPreferences;
     private FavoriteDatabaseHelper favoriteDatabaseHelper;
     private SQLiteDatabase mDb;
+    private Word word;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -52,6 +52,7 @@ public class WordDetailActivity extends AppCompatActivity {
         }
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         setContentView(R.layout.word_detail_layout);
+
         Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
 
@@ -102,7 +103,7 @@ public class WordDetailActivity extends AppCompatActivity {
         } else {
             ArrayList<String> descriptions = word.getDescription();
             Log.i(MainActivity.TAG, String.valueOf(descriptions));
-            WordElementsListAdapter adapter = new WordElementsListAdapter();
+            adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(descriptions);
             adapter.notifyDataSetChanged();
@@ -116,7 +117,7 @@ public class WordDetailActivity extends AppCompatActivity {
             sin.setVisibility(View.GONE);
         } else {
             ArrayList<String> synonyms = word.getSin();
-            WordElementsListAdapter adapter = new WordElementsListAdapter();
+            adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(synonyms);
             adapter.notifyDataSetChanged();
@@ -130,7 +131,7 @@ public class WordDetailActivity extends AppCompatActivity {
             antList.setVisibility(View.GONE);
         } else {
             ArrayList<String> antonyms = word.getAnt();
-            WordElementsListAdapter adapter = new WordElementsListAdapter();
+            adapter = new WordElementsListAdapter();
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(antonyms);
             adapter.notifyDataSetChanged();
@@ -159,8 +160,8 @@ public class WordDetailActivity extends AppCompatActivity {
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_IMAGES
 
         };
-        String selection = FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE + " =?";
-        String[] selectionArgs = { ""+searchItem };
+        String selection = FavoriteContract.FavoriteEntry.COLUMN_WORD_ID + " =?";
+        String[] selectionArgs = { searchItem };
         String limit = "1";
 
         Cursor cursor = mDb.query(FavoriteContract.FavoriteEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
@@ -175,21 +176,19 @@ public class WordDetailActivity extends AppCompatActivity {
         MenuItem item = menu.findItem(R.id.favorite);
         if(!mSharedPreferences.loadNightModeState()){
             if(exists(word.getTitle())){
-
+                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_black_24dp);
-                mSharedPreferences.setFavorite(true);
             } else {
+                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-                mSharedPreferences.setFavorite(false);
             }
         } else {
             if(exists(word.getTitle())){
-
+                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_white_24dp);
-                mSharedPreferences.setFavorite(true);
             } else {
+                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_border_white_24dp);
-                mSharedPreferences.setFavorite(false);
             }
         }
 
@@ -204,31 +203,26 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     public void setFavorite(MenuItem item){
-        int id = getIntent().getExtras().getInt("id");
         favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
         if(!mSharedPreferences.loadNightModeState()){
-            if(mSharedPreferences.isFavorite()){
+            if(exists(word.getTitle())){
                 item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-                favoriteDatabaseHelper.deleteFavorite(id);
-                mSharedPreferences.setFavorite(false);
-                Log.d(MainActivity.TAG, "DELETED: " + id);
+                favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                Log.d(MainActivity.TAG, "DELETED: " + word.getTitle());
             }else{
-                saveFavorite(id);
                 item.setIcon(R.drawable.ic_favorite_black_24dp);
-                mSharedPreferences.setFavorite(true);
-                Log.d(MainActivity.TAG, "ADDED: " + id);
+                favoriteDatabaseHelper.addFavorite(word);
+                Log.d(MainActivity.TAG, "ADDED: " + word.getTitle());
             }
         } else {
             if(mSharedPreferences.isFavorite()){
                 item.setIcon(R.drawable.ic_favorite_border_white_24dp);
-                favoriteDatabaseHelper.deleteFavorite(id);
-                mSharedPreferences.setFavorite(false);
-                Log.d(MainActivity.TAG, "DELETED: " + id);
+                favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                Log.d(MainActivity.TAG, "DELETED: " + word.getTitle());
             }else{
-                saveFavorite(id);
                 item.setIcon(R.drawable.ic_favorite_white_24dp);
-                mSharedPreferences.setFavorite(true);
-                Log.d(MainActivity.TAG, "ADDED: " + id);
+                favoriteDatabaseHelper.addFavorite(word);
+                Log.d(MainActivity.TAG, "ADDED: " + word.getTitle());
             }
         }
 
@@ -268,7 +262,7 @@ public class WordDetailActivity extends AppCompatActivity {
         finish();
     }
 
-    public void saveFavorite(int position){
+    public void saveFavorite(int id){
         favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
         Word favorite = new Word();
 
@@ -279,7 +273,7 @@ public class WordDetailActivity extends AppCompatActivity {
         favorite.setCategory(word.getCategory());
         favorite.setImages(word.getImages());
 
-        favoriteDatabaseHelper.addFavorite(favorite, position);
+        favoriteDatabaseHelper.addFavorite(favorite);
     }
 
 }

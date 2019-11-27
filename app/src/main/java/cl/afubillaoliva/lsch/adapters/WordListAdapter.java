@@ -40,6 +40,11 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.MyView
         return dataset.size();
     }
 
+    public void clear(){
+        dataset.clear();
+        notifyDataSetChanged();
+    }
+
     public void addData(ArrayList<Word> list){
         dataset.addAll(list);
         notifyDataSetChanged();

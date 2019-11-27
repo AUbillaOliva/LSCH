@@ -15,6 +15,8 @@ import java.util.Collections;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.models.Word;
 
+import static java.lang.Integer.parseInt;
+
 public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "favorite.db";
@@ -45,7 +47,7 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
         final String SQL_CREATE_FAVORITE_TABLE = "CREATE TABLE " + FavoriteContract.FavoriteEntry.TABLE_NAME + " (" +
                 FavoriteContract.FavoriteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                FavoriteContract.FavoriteEntry.COLUMN_WORD_ID + " INTEGER, " +
+                FavoriteContract.FavoriteEntry.COLUMN_WORD_ID + " TEXT, " +
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE + " TEXT NOT NULL, " +
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_DESCRIPTIONS + " TEXT, " +
                 FavoriteContract.FavoriteEntry.COLUMN_SYNONYMS + " TEXT, " +
@@ -91,7 +93,7 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public void addFavorite(Word word, int position){
+    public void addFavorite(Word word){
         SQLiteDatabase db = this.getWritableDatabase();
 
         /*COLUMN_WORD_TITLE,
@@ -105,7 +107,7 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE, word.getTitle());
-        values.put(FavoriteContract.FavoriteEntry.COLUMN_WORD_ID, position);
+        values.put(FavoriteContract.FavoriteEntry.COLUMN_WORD_ID, word.getTitle());
 
         String descriptions = convertArrayToString(word.getDescription());
         if(descriptions.length() != 0)
@@ -130,11 +132,13 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
         db.insert(FavoriteContract.FavoriteEntry.TABLE_NAME, null, values);
         db.close();
+        Log.d(MainActivity.FAV, "addFavorite: " + word.getTitle());
     }
 
-    public void deleteFavorite(int id){
+    public void deleteFavorite(String title){
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(FavoriteContract.FavoriteEntry.TABLE_NAME, FavoriteContract.FavoriteEntry.COLUMN_WORD_ID+ "=" + id, null);
+        db.delete(FavoriteContract.FavoriteEntry.TABLE_NAME, FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE+ "='" + title + "'", null);
+        Log.d(MainActivity.FAV, "deleteFavorite: " + title);
     }
 
     public ArrayList<Word> getAllFavorite(){
