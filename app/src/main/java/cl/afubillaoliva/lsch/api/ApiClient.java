@@ -11,7 +11,7 @@ public class ApiClient {
      * MORE INFO ABOUT THE API ON https://github.com/AUbillaOliva/LSCH-Api/blob/master/README.md
      * LICENCE GPL-3.0
      */
-    
+
     private static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
     private static Retrofit retrofit;
 

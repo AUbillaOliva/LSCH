@@ -173,12 +173,24 @@ public class WordDetailActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_word, menu);
         MenuItem item = menu.findItem(R.id.favorite);
-        if(exists(word.getTitle())){
-            item.setIcon(R.drawable.ic_favorite_black_24dp);
-            mSharedPreferences.setFavorite(true);
+        if(!mSharedPreferences.loadNightModeState()){
+            if(exists(word.getTitle())){
+
+                item.setIcon(R.drawable.ic_favorite_black_24dp);
+                mSharedPreferences.setFavorite(true);
+            } else {
+                item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                mSharedPreferences.setFavorite(false);
+            }
         } else {
-            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-            mSharedPreferences.setFavorite(false);
+            if(exists(word.getTitle())){
+
+                item.setIcon(R.drawable.ic_favorite_white_24dp);
+                mSharedPreferences.setFavorite(true);
+            } else {
+                item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                mSharedPreferences.setFavorite(false);
+            }
         }
 
         item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -194,17 +206,32 @@ public class WordDetailActivity extends AppCompatActivity {
     public void setFavorite(MenuItem item){
         int id = getIntent().getExtras().getInt("id");
         favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
-        if(mSharedPreferences.isFavorite()){
-            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-            favoriteDatabaseHelper.deleteFavorite(id);
-            mSharedPreferences.setFavorite(false);
-            Log.d(MainActivity.TAG, "DELETED: " + id);
-        }else{
-            saveFavorite(id);
-            item.setIcon(R.drawable.ic_favorite_black_24dp);
-            mSharedPreferences.setFavorite(true);
-            Log.d(MainActivity.TAG, "ADDED: " + id);
+        if(!mSharedPreferences.loadNightModeState()){
+            if(mSharedPreferences.isFavorite()){
+                item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                favoriteDatabaseHelper.deleteFavorite(id);
+                mSharedPreferences.setFavorite(false);
+                Log.d(MainActivity.TAG, "DELETED: " + id);
+            }else{
+                saveFavorite(id);
+                item.setIcon(R.drawable.ic_favorite_black_24dp);
+                mSharedPreferences.setFavorite(true);
+                Log.d(MainActivity.TAG, "ADDED: " + id);
+            }
+        } else {
+            if(mSharedPreferences.isFavorite()){
+                item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                favoriteDatabaseHelper.deleteFavorite(id);
+                mSharedPreferences.setFavorite(false);
+                Log.d(MainActivity.TAG, "DELETED: " + id);
+            }else{
+                saveFavorite(id);
+                item.setIcon(R.drawable.ic_favorite_white_24dp);
+                mSharedPreferences.setFavorite(true);
+                Log.d(MainActivity.TAG, "ADDED: " + id);
+            }
         }
+
     }
 
     @Override

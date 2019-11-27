@@ -23,19 +23,20 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 public class FavoriteListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
     private WordListAdapter adapter;
+    private SharedPreference mSharedPreferences;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.favorite_activity_layout);
-
-        SharedPreference mSharedPreferences = new SharedPreference(this);
-        if (mSharedPreferences.loadNightModeState()){
+        mSharedPreferences = new SharedPreference(this);
+        if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
+
+        setContentView(R.layout.favorite_activity_layout);
 
         FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
 
