@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    app:cardElevation="10dp"
-    android:background="?attr/backgroundColor"
+    app:cardElevation="1dp"
+    app:cardBackgroundColor="?attr/colorPrimary"
     android:layout_marginBottom="10dp"
     android:layout_marginTop="10dp"
     android:layout_marginLeft="8dp"
@@ -21,7 +21,7 @@
         tools:ignore="UseCompoundDrawables">
 
         <ImageView
-            android:contentDescription="@string/app_name"
+            android:contentDescription="@string/letter"
             android:id="@+id/abecedary_img"
             android:layout_width="150dp"
             android:layout_height="150dp"

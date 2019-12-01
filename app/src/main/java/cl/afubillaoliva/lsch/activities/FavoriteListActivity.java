@@ -6,12 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
@@ -29,6 +27,7 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         SharedPreference mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
@@ -37,8 +36,6 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
         }
 
         setContentView(R.layout.favorite_activity_layout);
-
-        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
 
         RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         Toolbar mToolbar = findViewById(R.id.toolbar);
@@ -50,18 +47,19 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
         adapter = new WordListAdapter();
+
+        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
+
         adapter.addData(favoriteDatabaseHelper.getAllFavorite());
-        mRecyclerView.setAdapter(adapter);
-        adapter.setRecyclerViewOnClickListenerHack(this);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
+        adapter.setRecyclerViewOnClickListenerHack(this);
+        mRecyclerView.setAdapter(adapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        // REFRESH LIST
         if(adapter.getItemCount() != favoriteDatabaseHelper.getAllFavorite().size()){
             if(adapter.dataset.size() > favoriteDatabaseHelper.getAllFavorite().size()){
                 adapter.clear();
@@ -73,9 +71,6 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
             }
         }
     }
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

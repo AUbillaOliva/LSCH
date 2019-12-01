@@ -45,10 +45,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
         notifyDataSetChanged();
     }
 
-    public void addItem(String s){
-        dataset.add(s);
-    }
-
     public void updateData(ArrayList<String> list){
         dataset.clear();
         addData(list);

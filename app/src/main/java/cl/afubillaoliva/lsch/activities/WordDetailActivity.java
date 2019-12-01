@@ -1,6 +1,5 @@
 package cl.afubillaoliva.lsch.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,7 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import java.util.ArrayList;
@@ -27,7 +25,6 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
-import cl.afubillaoliva.lsch.adapters.WordListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.FavoriteContract;
 import cl.afubillaoliva.lsch.utils.FavoriteDatabaseHelper;
@@ -35,23 +32,22 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class WordDetailActivity extends AppCompatActivity {
 
-    private WordElementsListAdapter adapter;
     private SharedPreference mSharedPreferences;
-    private FavoriteDatabaseHelper favoriteDatabaseHelper;
     private SQLiteDatabase mDb;
     private Word word;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         setContentView(R.layout.word_detail_layout);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
@@ -95,8 +91,10 @@ public class WordDetailActivity extends AppCompatActivity {
                 else videoView.start();
             }
         });
+        Log.d(MainActivity.TAG, word.getImages().get(0));
 
         TextView description = findViewById(R.id.text_description);
+        WordElementsListAdapter adapter;
         if(word.getDescription().size() == 0){
             defintionList.setVisibility(View.GONE);
             description.setVisibility(View.GONE);
@@ -203,7 +201,7 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     public void setFavorite(MenuItem item){
-        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
+        FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
         if(!mSharedPreferences.loadNightModeState()){
             if(exists(word.getTitle())){
                 item.setIcon(R.drawable.ic_favorite_border_black_24dp);
@@ -261,19 +259,4 @@ public class WordDetailActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
     }
-
-    public void saveFavorite(int id){
-        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
-        Word favorite = new Word();
-
-        favorite.setTitle(word.getTitle());
-        favorite.setDescription(word.getDescription());
-        favorite.setSin(word.getSin());
-        favorite.setAnt(word.getAnt());
-        favorite.setCategory(word.getCategory());
-        favorite.setImages(word.getImages());
-
-        favoriteDatabaseHelper.addFavorite(favorite);
-    }
-
 }

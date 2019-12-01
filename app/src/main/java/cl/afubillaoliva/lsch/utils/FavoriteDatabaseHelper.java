@@ -5,17 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
-import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.models.Word;
 
-import static java.lang.Integer.parseInt;
 
 public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
@@ -23,22 +18,19 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-    public static final String LOGTAG = "FAVORITE";
 
-    SQLiteOpenHelper dbhandler;
-    SQLiteDatabase db;
+    private SQLiteOpenHelper dbhandler;
+    private SQLiteDatabase db;
 
     public FavoriteDatabaseHelper(Context context){
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     public void open(){
-        Log.i(LOGTAG, "Database Opened");
         db = dbhandler.getWritableDatabase();
     }
 
     public void close(){
-        Log.i(LOGTAG, "Database Closed");
         dbhandler.close();
     }
 
@@ -70,15 +62,15 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
     private static String strSeparator = "__,__";
 
     private static String convertArrayToString(ArrayList<String> array){
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for (int i = 0;i< array.size(); i++) {
-            str = str+array.get(i);
+            str.append(array.get(i));
             // Do not append comma at the end of last element
             if(i<array.size()-1){
-                str = str+strSeparator;
+                str.append(strSeparator);
             }
         }
-        return str;
+        return str.toString();
     }
 
     private static ArrayList<String> convertStringToArray(String str){
@@ -132,13 +124,11 @@ public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
         db.insert(FavoriteContract.FavoriteEntry.TABLE_NAME, null, values);
         db.close();
-        Log.d(MainActivity.FAV, "addFavorite: " + word.getTitle());
     }
 
     public void deleteFavorite(String title){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(FavoriteContract.FavoriteEntry.TABLE_NAME, FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE+ "='" + title + "'", null);
-        Log.d(MainActivity.FAV, "deleteFavorite: " + title);
     }
 
     public ArrayList<Word> getAllFavorite(){

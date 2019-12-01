@@ -16,14 +16,9 @@ public class ApiService {
         Call<ArrayList<Abecedary>> getAbecedary();
     }
 
-    public interface WordsOfLetterService {
-        @GET("words")
-        Call<ArrayList<Word>> getWords(@Query("letter") String letter);
-    }
-
     public interface WordsService {
         @GET("words")
-        Call<ArrayList<Word>> getWords();
+        Call<ArrayList<Word>> getWords(@Query("letter") String letter, @Query("category") String category);
     }
 
     public interface ExpressionsServiceCategories {

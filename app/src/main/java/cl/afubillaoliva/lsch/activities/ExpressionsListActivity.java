@@ -44,11 +44,12 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     private Intent intent;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private Context context;
+    private Context context = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         SharedPreference mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
@@ -56,12 +57,20 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
             setTheme(R.style.AppTheme);
         }
         setContentView(R.layout.list_activity);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
         intent = getIntent();
 
         Toolbar mToolbar = findViewById(R.id.toolbar);
         RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         mSwipeRefreshLayout = findViewById(R.id.swipe_layout);
         mProgressBar = findViewById(R.id.progress_circular);
+
+        String title = intent.getStringExtra("expression");
+        title = title.substring(0,1).toUpperCase() + title.substring(1);
+        mToolbar.setTitle(title);
+        setSupportActionBar(mToolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
@@ -70,14 +79,6 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         mRecyclerView.setAdapter(adapter);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-
-        String title = intent.getStringExtra("expression");
-        title = title.substring(0,1).toUpperCase() + title.substring(1);
-        mToolbar.setTitle(title);
-        setSupportActionBar(mToolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -170,18 +171,6 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     }
 
     @Override
-    public void onClickListener(View view, int position) {
-        Intent intent = new Intent(ExpressionsListActivity.this, ExpressionsDetailActivity.class);
-        intent.putExtra("position", adapter.getItem(position));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_list,menu);
         return true;
@@ -201,11 +190,22 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
+    }
+
+    @Override
+    public void onClickListener(View view, int position) {
+        Intent intent = new Intent(ExpressionsListActivity.this, ExpressionsDetailActivity.class);
+        intent.putExtra("position", adapter.getItem(position));
+        startActivity(intent);
+    }
+
+    @Override
+    public void onLongPressClickListener(View view, int position) {
+
     }
 }

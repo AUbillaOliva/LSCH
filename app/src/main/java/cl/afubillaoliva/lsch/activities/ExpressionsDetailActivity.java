@@ -11,24 +11,28 @@ import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.models.Expressions;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
+//TODO: DESIGN LAYOUT
+
 public class ExpressionsDetailActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         SharedPreference mSharedPreferences = new SharedPreference(this);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else setTheme(R.style.AppTheme);
         setContentView(R.layout.expression_detail_activity);
-
-        Toolbar mToolbar = findViewById(R.id.toolbar);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         Intent intent = getIntent();
         Expressions expression = (Expressions) intent.getSerializableExtra("position");
 
+        Toolbar mToolbar = findViewById(R.id.toolbar);
         mToolbar.setTitle(expression.getTitle());
         setSupportActionBar(mToolbar);
+
     }
 
     @Override

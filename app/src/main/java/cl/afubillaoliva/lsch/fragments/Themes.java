@@ -1,11 +1,14 @@
 package cl.afubillaoliva.lsch.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +27,7 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
+import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
 import cl.afubillaoliva.lsch.adapters.ListAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
@@ -34,8 +38,6 @@ import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Themes extends Fragment implements RecyclerViewOnClickListenerHack {
 
@@ -53,6 +55,21 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
         RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
         mProgressBar = view.findViewById(R.id.progress_circular);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.nested);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    int initialscrollY = 0;
+                    if (scrollY > initialscrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(8);
+                    } else if(scrollY < oldScrollY - scrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(2);
+                    }
+                }
+            });
+        }
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
@@ -86,8 +103,9 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .cache(cache)
                     .addInterceptor(new Interceptor() {
+                        @NonNull
                         @Override
-                        public okhttp3.Response intercept(Interceptor.Chain chain)
+                        public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
                                 throws IOException {
                             Request request = chain.request();
                             if (!isNetworkAvailable()) {
@@ -160,7 +178,9 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
 
     @Override
     public void onClickListener(View view, int position) {
-        Toast.makeText(getContext(), adapter.getCategory(position), Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
+        intent.putExtra("theme", adapter.getCategory(position));
+        startActivity(intent);
     }
 
     @Override

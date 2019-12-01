@@ -40,30 +40,40 @@ import retrofit2.Response;
 
 public class AbecedaryListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
-    private Intent intent;
     private WordListAdapter adapter;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private Context context;
+    private Context context = this;
+    private String letter, category;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         SharedPreference mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         setContentView(R.layout.list_activity);
-        intent = getIntent();
+
+        Intent intent = getIntent();
 
         RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         Toolbar mToolbar = findViewById(R.id.toolbar);
         mProgressBar = findViewById(R.id.progress_circular);
         mSwipeRefreshLayout = findViewById(R.id.swipe_layout);
 
-        mToolbar.setTitle(intent.getStringExtra("letter"));
+        letter = intent.getStringExtra("letter");
+        category = intent.getStringExtra("theme");
+
+        if(letter != null)
+            mToolbar.setTitle(letter.substring(0,1).toUpperCase() + letter.substring(1));
+        if(category != null)
+            mToolbar.setTitle(category.substring(0,1).toUpperCase() + category.substring(1));
+
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -82,19 +92,17 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
             }
         });
 
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-
         getData();
     }
 
     private boolean isNetworkAvailable() {
         if(context == null){
-            return false;
+            return true;
         } else {
             ConnectivityManager connectivityManager
                     = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            return activeNetworkInfo == null || !activeNetworkInfo.isConnected();
         }
     }
 
@@ -110,7 +118,7 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
                         public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
                                 throws IOException {
                             Request request = chain.request();
-                            if (!isNetworkAvailable()) {
+                            if (isNetworkAvailable()) {
                                 int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale \
                                 request = request
                                         .newBuilder()
@@ -122,8 +130,22 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
                     })
                     .build();
 
-            ApiService.WordsOfLetterService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsOfLetterService.class);
-            Call<ArrayList<Word>> responseCall = service.getWords(intent.getStringExtra("letter"));
+            ApiService.WordsService service;
+            if(isNetworkAvailable()){
+                service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
+            } else {
+                service = ApiClient.getClient().create(ApiService.WordsService.class);
+            }
+
+            Call<ArrayList<Word>> responseCall;
+
+            if(letter != null && category == null){
+                responseCall = service.getWords(letter, null);
+            } else if(category != null && letter == null){
+                responseCall = service.getWords(null, category);
+            } else {
+                responseCall = service.getWords(null, null);
+            }
 
             responseCall.enqueue(new Callback<ArrayList<Word>>() {
                 @Override

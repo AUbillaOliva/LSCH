@@ -5,30 +5,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="?attr/backgroundColor">
+    android:background="?attr/colorPrimaryDark">
 
     <android.support.design.widget.AppBarLayout
+        android:id="@+id/main_appbar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary">
+        android:background="?attr/colorPrimaryDark"
+        android:elevation="2dp">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
-            />
-        <cl.afubillaoliva.lsch.extras.SlidingTabsLayout
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginVertical="10dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="2dp"
+            tools:targetApi="o">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary" />
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.design.widget.TabLayout
             android:id="@+id/stl_tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"/>
+            android:minHeight="?attr/actionBarSize"
+            app:tabGravity="fill"
+            app:tabTextAppearance="@style/ToolbarTypefaceDark"
+            app:tabTextColor="?attr/textColor"
+            app:tabIndicator="@drawable/indicator"
+            app:tabIndicatorFullWidth="false"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabIndicatorHeight="4dp"
+            app:tabBackground="?attr/colorPrimaryDark"
+            app:tabMode="scrollable">
+        </android.support.design.widget.TabLayout>
 
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
-        android:background="?attr/backgroundColor"
+        android:background="?attr/colorPrimary"
         android:id="@+id/vp_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

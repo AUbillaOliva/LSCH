@@ -1,89 +1,102 @@
 package cl.afubillaoliva.lsch;
 
-import android.app.Service;
-import android.content.Context;
+import android.animation.ObjectAnimator;
+import android.animation.StateListAnimator;
+import android.annotation.TargetApi;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
-
-import java.io.IOException;
 
 import cl.afubillaoliva.lsch.activities.FavoriteListActivity;
 import cl.afubillaoliva.lsch.activities.SearchActivity;
 import cl.afubillaoliva.lsch.activities.SettingsActivity;
 import cl.afubillaoliva.lsch.adapters.TabsAdapter;
-import cl.afubillaoliva.lsch.extras.SlidingTabsLayout;
+import cl.afubillaoliva.lsch.fragments.Abecedary;
+import cl.afubillaoliva.lsch.fragments.Expressions;
+import cl.afubillaoliva.lsch.fragments.Themes;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
-import okhttp3.Cache;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
     public static final String TAG = "API_RESPONSE";
     public static final String FAV = "FAVORITE_RESPONSE";
+    public static final String UI = "INTERFACE";
     public static int cacheSize = 10 * 1024 * 1024; // 10 MiB
 
     SharedPreference mSharedPreferences;
-    public SlidingTabsLayout mSlidingTabLayout;
+    public TabLayout mSlidingTabLayout;
     public ViewPager mViewPager;
+    public Toolbar mToolbar;
+    AppBarLayout appBarLayout;
 
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        appBarLayout = findViewById(R.id.main_appbar_layout);
+
+        StateListAnimator stateListAnimator = new StateListAnimator();
+        stateListAnimator.addState(new int[0], ObjectAnimator.ofFloat(appBarLayout, "elevation", 2));
+        appBarLayout.setStateListAnimator(stateListAnimator);
+
+        mToolbar = findViewById(R.id.toolbar);
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceLight);
+        setSupportActionBar(mToolbar);
+
         mViewPager = findViewById(R.id.vp_tabs);
-        mViewPager.setAdapter(new TabsAdapter(getSupportFragmentManager()));
+
+        TabsAdapter adapter = new TabsAdapter(getSupportFragmentManager(), this);
+        adapter.addFragment(new Abecedary(), "Abecedario");
+        adapter.addFragment(new Expressions(), "Orden temático");
+        adapter.addFragment(new Themes(), "Expresiones de uso cotidiano");
+        mViewPager.setAdapter(adapter);
+
         mSlidingTabLayout = findViewById(R.id.stl_tabs);
+        mSlidingTabLayout.setElevation(0);
         if (mSharedPreferences.loadNightModeState())
-            mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark)); //NIGHT MODE
-        else mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorPrimaryLight)); //DAY MODE
-        mSlidingTabLayout.setSelectedIndicatorColors(getResources().getColor(R.color.colorAccent));
-        mSlidingTabLayout.setCustomTabView(R.layout.tab_view,R.id.tv_tab);
-        mSlidingTabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
-            @Override
-            public void onPageSelected(int position) {
+            mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorSecondaryDark)); //NIGHT MODE
+        else mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorSecondaryLight)); //DAY MODE
+
+        mSlidingTabLayout.setupWithViewPager(mViewPager);
+
+        for (int i = 0; i < mSlidingTabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = mSlidingTabLayout.getTabAt(i);
+            if (tab != null) {
+                tab.setCustomView(adapter.getTabView(i));
             }
-            @Override
-            public void onPageScrollStateChanged(int state) {}
-        });
-        mSlidingTabLayout.setViewPager(mViewPager);
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (!mSharedPreferences.loadNightModeState()){
-            getMenuInflater().inflate(R.menu.menu_main_light, menu);
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_main_light, menu);
         } else {
-            getMenuInflater().inflate(R.menu.menu_main_dark, menu);
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_main_dark, menu);
         }
-
         return true;
     }
 
@@ -114,5 +127,9 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    public AppBarLayout getAppBarLayout(){
+        return appBarLayout;
     }
 }

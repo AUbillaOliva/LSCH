@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,8 +38,6 @@ import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Expressions extends Fragment implements RecyclerViewOnClickListenerHack {
 
@@ -50,10 +50,27 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup viewGroup, Bundle savedInstanceState){
         setRetainInstance(true);
+
         View view = inflater.inflate(R.layout.fragment_layout, viewGroup, false);
+
         RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
         mProgressBar = view.findViewById(R.id.progress_circular);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.nested);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    int initialscrollY = 0;
+                    if (scrollY > initialscrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(8);
+                    } else if(scrollY < oldScrollY - scrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(2);
+                    }
+                }
+            });
+        }
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
@@ -71,6 +88,7 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
         });
 
         getData();
+
         return view;
     }
 
@@ -88,8 +106,9 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
                     .cache(cache)
                     .addInterceptor(new Interceptor() {
+                        @NonNull
                         @Override
-                        public okhttp3.Response intercept(Interceptor.Chain chain)
+                        public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
                                 throws IOException {
                             Request request = chain.request();
                             if (!isNetworkAvailable()) {

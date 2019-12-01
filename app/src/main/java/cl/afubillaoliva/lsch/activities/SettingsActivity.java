@@ -3,6 +3,7 @@ package cl.afubillaoliva.lsch.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -15,24 +16,34 @@ import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class SettingsActivity extends AppCompatActivity {
-    SharedPreference mSharedPreferences;
+
+    private SharedPreference mSharedPreferences;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+
         mSharedPreferences = new SharedPreference(this);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else setTheme(R.style.AppTheme);
-        super.onCreate(savedInstanceState);
+
         setContentView(R.layout.settings_activity);
-        android.support.v7.widget.Toolbar mToolbar = findViewById(R.id.toolbar);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
+        Toolbar mToolbar = findViewById(R.id.toolbar);
+        Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
+
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceLight);
         mToolbar.setTitle(R.string.configurations);
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
-        if(mSharedPreferences.loadNightModeState()){
+        if(mSharedPreferences.loadNightModeState())
             mSwitch.setChecked(true);
-        }
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -63,7 +74,7 @@ public class SettingsActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch(id){
             case android.R.id.home:
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                startActivity(new Intent(SettingsActivity.this, MainActivity.class));
                 finish();
                 break;
         }
@@ -72,9 +83,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        super.onBackPressed();
+        startActivity(new Intent(SettingsActivity.this, MainActivity.class));
         finish();
     }
 }

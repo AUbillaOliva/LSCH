@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -48,9 +51,25 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setRetainInstance(true);
         View view = inflater.inflate(R.layout.fragment_layout, container,false);
+
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
         RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
         mProgressBar = view.findViewById(R.id.progress_circular);
+        NestedScrollView nestedScrollView = view.findViewById(R.id.nested);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    int initialscrollY = 0;
+                    if (scrollY > initialscrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(8);
+                    } else if(scrollY < oldScrollY - scrollY){
+                        ((MainActivity) Objects.requireNonNull(getActivity())).getAppBarLayout().setElevation(2);
+                    }
+                }
+            });
+        }
 
         mRecyclerView.setHasFixedSize(true);
         abecedaryListAdapter = new AbecedaryCardListAdapter(getContext());
@@ -59,10 +78,11 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
         abecedaryListAdapter.setRecyclerViewOnClickListenerHack(this);
-        //getData();
+
+        getData();
+
         return view;
     }
-
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -73,6 +93,12 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                 getData();
             }
         });
+        getData();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         getData();
     }
 
@@ -124,7 +150,6 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                             mProgressBar.setVisibility(View.GONE);
                             mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                             abecedaryListAdapter.updateData(apiResponse);
-                            Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
                         } else {
                             mSwipeRefreshLayout.setRefreshing(false);
                             mProgressBar.setVisibility(View.GONE);
@@ -161,6 +186,7 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
         } else {
             Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
             intent.putExtra("letter", abecedaryListAdapter.getLetter(position));
+            Log.d(MainActivity.TAG, "letter: " + abecedaryListAdapter.getLetter(position));
             startActivity(intent);
         }
     }
