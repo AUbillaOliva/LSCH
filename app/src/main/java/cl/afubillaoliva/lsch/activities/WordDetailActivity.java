@@ -1,5 +1,6 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,7 +33,10 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class WordDetailActivity extends AppCompatActivity {
 
+    private final Context context = this;
+
     private SharedPreference mSharedPreferences;
+    private final FavoriteDatabaseHelper dbHelper = new FavoriteDatabaseHelper(context);
     private SQLiteDatabase mDb;
     private Word word;
 
@@ -40,38 +44,39 @@ public class WordDetailActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        mSharedPreferences = new SharedPreference(this);
+        mSharedPreferences = new SharedPreference(context);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
         setContentView(R.layout.word_detail_layout);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
 
-        FavoriteDatabaseHelper dbHelper = new FavoriteDatabaseHelper(this);
         mDb = dbHelper.getWritableDatabase();
 
-        Toolbar mToolbar = findViewById(R.id.toolbar);
+        final Toolbar mToolbar = findViewById(R.id.toolbar);
         mToolbar.setTitle(word.getTitle());
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        RecyclerView defintionList = findViewById(R.id.definitions_list);
+        final RecyclerView defintionList = findViewById(R.id.definitions_list);
         defintionList.setNestedScrollingEnabled(true);
         defintionList.setHasFixedSize(true);
-        RecyclerView sinList = findViewById(R.id.sin_list);
+
+        final RecyclerView sinList = findViewById(R.id.sin_list);
         sinList.setNestedScrollingEnabled(true);
         sinList.setHasFixedSize(true);
-        RecyclerView antList = findViewById(R.id.ant_list);
+
+        final RecyclerView antList = findViewById(R.id.ant_list);
+        antList.setNestedScrollingEnabled(true);
         antList.setHasFixedSize(true);
 
         final VideoView videoView = findViewById(R.id.video);
-        ArrayList<String> images = word.getImages();
-        Uri uri = Uri.parse(images.get(0));
+        final ArrayList<String> images = word.getImages();
+        final Uri uri = Uri.parse(images.get(0));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
         }
@@ -93,47 +98,47 @@ public class WordDetailActivity extends AppCompatActivity {
         });
         Log.d(MainActivity.TAG, word.getImages().get(0));
 
-        TextView description = findViewById(R.id.text_description);
+        final TextView description = findViewById(R.id.text_description);
         WordElementsListAdapter adapter;
         if(word.getDescription().size() == 0){
             defintionList.setVisibility(View.GONE);
             description.setVisibility(View.GONE);
         } else {
-            ArrayList<String> descriptions = word.getDescription();
+            final ArrayList<String> descriptions = word.getDescription();
             Log.i(MainActivity.TAG, String.valueOf(descriptions));
             adapter = new WordElementsListAdapter();
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(descriptions);
             adapter.notifyDataSetChanged();
             defintionList.setAdapter(adapter);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             defintionList.setLayoutManager(linearLayoutManager);
         }
 
-        TextView sin = findViewById(R.id.text_synonyms);
+        final TextView sin = findViewById(R.id.text_synonyms);
         if(word.getSin().size() == 0){
             sinList.setVisibility(View.GONE);
             sin.setVisibility(View.GONE);
         } else {
-            ArrayList<String> synonyms = word.getSin();
+            final ArrayList<String> synonyms = word.getSin();
             adapter = new WordElementsListAdapter();
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(synonyms);
             adapter.notifyDataSetChanged();
             sinList.setAdapter(adapter);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             sinList.setLayoutManager(linearLayoutManager);
         }
 
-        TextView ant = findViewById(R.id.text_antonyms);
+        final TextView ant = findViewById(R.id.text_antonyms);
         if(word.getAnt().size() == 0){
             ant.setVisibility(View.GONE);
             antList.setVisibility(View.GONE);
         } else {
-            ArrayList<String> antonyms = word.getAnt();
+            final ArrayList<String> antonyms = word.getAnt();
             adapter = new WordElementsListAdapter();
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             adapter.addData(antonyms);
             adapter.notifyDataSetChanged();
             antList.setAdapter(adapter);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             antList.setLayoutManager(linearLayoutManager);
         }
 
@@ -147,7 +152,7 @@ public class WordDetailActivity extends AppCompatActivity {
 
     public boolean exists(String searchItem) {
 
-        String[] projection = {
+        final String[] projection = {
                 FavoriteContract.FavoriteEntry._ID,
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_ID,
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_TITLE,
@@ -158,12 +163,12 @@ public class WordDetailActivity extends AppCompatActivity {
                 FavoriteContract.FavoriteEntry.COLUMN_WORD_IMAGES
 
         };
-        String selection = FavoriteContract.FavoriteEntry.COLUMN_WORD_ID + " =?";
-        String[] selectionArgs = { searchItem };
-        String limit = "1";
+        final String selection = FavoriteContract.FavoriteEntry.COLUMN_WORD_ID + " =?";
+        final String[] selectionArgs = { searchItem };
+        final String limit = "1";
 
-        Cursor cursor = mDb.query(FavoriteContract.FavoriteEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
-        boolean exists = (cursor.getCount() > 0);
+        final Cursor cursor = mDb.query(FavoriteContract.FavoriteEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
+        final boolean exists = (cursor.getCount() > 0);
         cursor.close();
         return exists;
     }
@@ -171,21 +176,22 @@ public class WordDetailActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_word, menu);
-        MenuItem item = menu.findItem(R.id.favorite);
+
+        final MenuItem item = menu.findItem(R.id.favorite);
         if(!mSharedPreferences.loadNightModeState()){
             if(exists(word.getTitle())){
-                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
+                Log.d(MainActivity.FAV, "onOptionsMenu, already added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_black_24dp);
             } else {
-                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
+                Log.d(MainActivity.FAV, "onOptionsMenu, is not added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_border_black_24dp);
             }
         } else {
             if(exists(word.getTitle())){
-                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
+                Log.d(MainActivity.FAV, "onOptionsMenu, already added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_white_24dp);
             } else {
-                Log.d(MainActivity.FAV, "onOptionsMenu, added: " + word.getTitle());
+                Log.d(MainActivity.FAV, "onOptionsMenu, is not added: " + word.getTitle());
                 item.setIcon(R.drawable.ic_favorite_border_white_24dp);
             }
         }
@@ -201,48 +207,46 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     public void setFavorite(MenuItem item){
-        FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
+        final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
         if(!mSharedPreferences.loadNightModeState()){
             if(exists(word.getTitle())){
-                item.setIcon(R.drawable.ic_favorite_border_black_24dp);
                 favoriteDatabaseHelper.deleteFavorite(word.getTitle());
-                Log.d(MainActivity.TAG, "DELETED: " + word.getTitle());
+                Log.d(MainActivity.FAV, "DELETED: " + word.getTitle());
+                item.setIcon(R.drawable.ic_favorite_border_black_24dp);
             }else{
-                item.setIcon(R.drawable.ic_favorite_black_24dp);
                 favoriteDatabaseHelper.addFavorite(word);
-                Log.d(MainActivity.TAG, "ADDED: " + word.getTitle());
+                Log.d(MainActivity.FAV, "ADDED: " + word.getTitle());
+                item.setIcon(R.drawable.ic_favorite_black_24dp);
             }
         } else {
-            if(mSharedPreferences.isFavorite()){
-                item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+            if(exists(word.getTitle())){
                 favoriteDatabaseHelper.deleteFavorite(word.getTitle());
-                Log.d(MainActivity.TAG, "DELETED: " + word.getTitle());
+                Log.d(MainActivity.FAV, "DELETED: " + word.getTitle());
+                item.setIcon(R.drawable.ic_favorite_border_white_24dp);
             }else{
-                item.setIcon(R.drawable.ic_favorite_white_24dp);
                 favoriteDatabaseHelper.addFavorite(word);
-                Log.d(MainActivity.TAG, "ADDED: " + word.getTitle());
+                Log.d(MainActivity.FAV, "ADDED: " + word.getTitle());
+                item.setIcon(R.drawable.ic_favorite_white_24dp);
             }
         }
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch(id){
+        switch(item.getItemId()){
             case android.R.id.home:
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.report:
-                Intent report = new Intent(this, ReportActivity.class);
+                final Intent report = new Intent(context, ReportActivity.class);
                 report.putExtra("element", word);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 startActivity(report);
                 break;
             case R.id.send:
                 //TODO: IMPROVE TEXT
-                Intent send = new Intent();
+                final Intent send = new Intent();
                 send.setAction(Intent.ACTION_SEND);
                 send.putExtra(Intent.EXTRA_TEXT, word.getTitle() + "\n" + word.getDescription() + "\n" + word
                 .getSin() + "\n" + word.getAnt());
@@ -255,8 +259,7 @@ public class WordDetailActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

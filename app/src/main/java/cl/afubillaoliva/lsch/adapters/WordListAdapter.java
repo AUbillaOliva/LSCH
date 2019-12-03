@@ -56,10 +56,6 @@ public class WordListAdapter extends RecyclerView.Adapter<WordListAdapter.MyView
         notifyDataSetChanged();
     }
 
-    public String getTitle(int position){
-        return dataset.get(position).getTitle();
-    }
-
     public Word getItem(int position){
         return dataset.get(position);
     }

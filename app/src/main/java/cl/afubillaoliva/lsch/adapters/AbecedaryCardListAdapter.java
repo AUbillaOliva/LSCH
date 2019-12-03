@@ -48,11 +48,6 @@ public class AbecedaryCardListAdapter extends RecyclerView.Adapter<AbecedaryCard
                 .into(myViewHolder.imageView);
     }
 
-    public void clear(){
-        dataset.clear();
-        notifyDataSetChanged();
-    }
-
     @Override
     public int getItemCount() {
         return dataset.size();

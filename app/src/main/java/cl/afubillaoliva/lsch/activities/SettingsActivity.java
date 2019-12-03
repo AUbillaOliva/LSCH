@@ -1,5 +1,6 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import java.util.Objects;
 
@@ -17,30 +19,27 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private SharedPreference mSharedPreferences;
+    private final Context context = this;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        mSharedPreferences = new SharedPreference(this);
+        final SharedPreference mSharedPreferences = new SharedPreference(context);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else setTheme(R.style.AppTheme);
-
         setContentView(R.layout.settings_activity);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
-        Toolbar mToolbar = findViewById(R.id.toolbar);
-        Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
+        final Toolbar mToolbar = findViewById(R.id.toolbar);
+        final TextView toolbarTitle = mToolbar.findViewById(R.id.toolbar_title);
+        final Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
 
-        if(mSharedPreferences.loadNightModeState())
-            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceDark);
-        else
-            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceLight);
-        mToolbar.setTitle(R.string.configurations);
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        toolbarTitle.setText(R.string.action_settings);
 
         if(mSharedPreferences.loadNightModeState())
             mSwitch.setChecked(true);
@@ -49,16 +48,14 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(!isChecked){
                     mSharedPreferences.setNightMode(false);
-                    Intent intent = new Intent(SettingsActivity.this, SettingsActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    startActivity(new Intent(context, SettingsActivity.class));
                     finish();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 } else {
                     mSharedPreferences.setNightMode(true);
-                    Intent intent = new Intent(SettingsActivity.this, SettingsActivity.class);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    startActivity(new Intent(context, SettingsActivity.class));
                     finish();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 }
             }
         });
@@ -71,11 +68,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch(id){
+        switch(item.getItemId()){
             case android.R.id.home:
-                startActivity(new Intent(SettingsActivity.this, MainActivity.class));
+                startActivity(new Intent(context, MainActivity.class));
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -83,8 +80,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed(){
-        super.onBackPressed();
-        startActivity(new Intent(SettingsActivity.this, MainActivity.class));
+        startActivity(new Intent(context, MainActivity.class));
         finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 }

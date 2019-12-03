@@ -19,6 +19,7 @@
         tools:targetApi="m"
         tools:ignore="GoogleAppIndexingWarning">
         <!--TODO: INVESTIGATE GOOGLE APP INDEXING-->
+
         <activity
             android:screenOrientation="portrait"
             android:name=".MainActivity">
@@ -30,18 +31,25 @@
         </activity>
         <activity android:name=".activities.SettingsActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.ExpressionsListActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.ExpressionsDetailActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.AbecedaryListActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.WordDetailActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.ReportActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.FavoriteListActivity"
             android:screenOrientation="portrait"/>
+
         <activity android:name=".activities.SearchActivity"
             android:screenOrientation="portrait"/>
 

@@ -1,5 +1,6 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,42 +20,42 @@ import cl.afubillaoliva.lsch.adapters.WordListAdapter;
 import cl.afubillaoliva.lsch.utils.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
+// TODO: IF ARE NOT FAVORITES YET, SHOW LAYOUT
+
 public class FavoriteListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
-    private WordListAdapter adapter;
-    private FavoriteDatabaseHelper favoriteDatabaseHelper;
+    private final Context context = this;
+
+    private final WordListAdapter adapter = new WordListAdapter();
+    private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        SharedPreference mSharedPreferences = new SharedPreference(this);
+        final SharedPreference mSharedPreferences = new SharedPreference(context);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
         } else {
             setTheme(R.style.AppTheme);
         }
-
         setContentView(R.layout.favorite_activity_layout);
 
-        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
-        Toolbar mToolbar = findViewById(R.id.toolbar);
+        final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
+        final Toolbar mToolbar = findViewById(R.id.toolbar);
 
-        mToolbar.setTitle("Favoritos");
+        mToolbar.setTitle(context.getString(R.string.favorites));
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new WordListAdapter();
-
-        favoriteDatabaseHelper = new FavoriteDatabaseHelper(this);
-
         adapter.addData(favoriteDatabaseHelper.getAllFavorite());
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         adapter.setRecyclerViewOnClickListenerHack(this);
         mRecyclerView.setAdapter(adapter);
+
     }
 
     @Override
@@ -74,17 +75,22 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_list, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch(id){
+        switch(item.getItemId()){
             case android.R.id.home:
-                startActivity(new Intent(FavoriteListActivity.this, MainActivity.class));
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                startActivity(new Intent(context, MainActivity.class));
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+            case R.id.report:
+                startActivity(new Intent(context, ReportActivity.class));
+                finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -92,15 +98,14 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
 
     @Override
     public void onBackPressed(){
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(new Intent(context, MainActivity.class));
         finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override
     public void onClickListener(View view, int position) {
-        Intent intent = new Intent(this, WordDetailActivity.class);
+        Intent intent = new Intent(context, WordDetailActivity.class);
         intent.putExtra("position", adapter.getItem(position));
         startActivity(intent);
     }

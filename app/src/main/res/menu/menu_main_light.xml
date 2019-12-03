@@ -9,11 +9,11 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
 
-    <item
+    <!--item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_black_24dp"
         android:title="Buscar"
-        app:showAsAction="always"/>
+        app:showAsAction="always"/-->
 
     <item
         android:id="@+id/favorites"

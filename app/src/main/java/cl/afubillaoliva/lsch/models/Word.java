@@ -32,10 +32,7 @@ public class Word implements Serializable {
         this.ant = ant;
     }
 
-    public ArrayList<String> getDescription() {
-        return description;
-
-    }
+    public ArrayList<String> getDescription() { return description; }
 
     public void setDescription(ArrayList<String> description) {
         this.description = description;

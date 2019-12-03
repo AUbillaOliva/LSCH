@@ -20,14 +20,33 @@
             android:layout_marginHorizontal="15dp"
             android:layout_marginVertical="10dp"
             app:cardCornerRadius="5dp"
-            app:cardElevation="2dp"
+            app:cardElevation="4dp"
             tools:targetApi="o">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary" />
+                android:layout_height="48dp"
+                android:background="?attr/colorPrimary"
+                android:transitionName="toolbar">
+
+                <ImageView
+                    android:id="@+id/toolbar_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:src="@drawable/ic_search_black_24dp" />
+
+                <TextView
+                    android:id="@+id/toolbar_title"
+                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:fontFamily="@font/product_sans"
+                    android:textColor="?attr/textColor" />
+
+            </android.support.v7.widget.Toolbar>
 
         </android.support.v7.widget.CardView>
 
@@ -46,6 +65,12 @@
             app:tabBackground="?attr/colorPrimaryDark"
             app:tabMode="scrollable">
         </android.support.design.widget.TabLayout>
+
+        <View
+            android:id="@+id/divider"
+            android:background="#19ffffff"
+            android:layout_width="match_parent"
+            android:layout_height="0.1dp"/>
 
     </android.support.design.widget.AppBarLayout>
 

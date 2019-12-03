@@ -90,79 +90,84 @@ public class Themes extends Fragment implements RecyclerViewOnClickListenerHack 
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) Objects.requireNonNull(getActivity()).getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        boolean isConnected = false;
+        if(getActivity() != null){
+            ConnectivityManager connectivityManager = (ConnectivityManager) Objects.requireNonNull(getContext()).getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            if(networkInfo != null && networkInfo.isConnected()){
+                isConnected = true;
+            }
+        }
+        return isConnected;
     }
 
     public void getData(){
-        try {
-            Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
+        Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
 
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                    .cache(cache)
-                    .addInterceptor(new Interceptor() {
-                        @NonNull
-                        @Override
-                        public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
-                                throws IOException {
-                            Request request = chain.request();
-                            if (!isNetworkAvailable()) {
-                                int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale \
-                                request = request
-                                        .newBuilder()
-                                        .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                        .build();
-                            }
-                            return chain.proceed(request);
-                        }
-                    })
-                    .build();
-
-            ApiService.ThemesCategoryService service = ApiClient.getClient(okHttpClient).create(ApiService.ThemesCategoryService.class);
-            Call<ArrayList<String>> responseCall = service.getThemesCategories();
-
-            responseCall.enqueue(new Callback<ArrayList<String>>() {
-                @Override
-                public void onResponse(@NonNull Call<ArrayList<String>> call, @NonNull Response<ArrayList<String>> response) {
-                    if(response.isSuccessful()){
-                        ArrayList<String> apiResponse = response.body();
-                        if(adapter.getItemCount() != 0){
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            mProgressBar.setVisibility(View.GONE);
-                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                            adapter.updateData(apiResponse);
-                            Toast.makeText(getContext(), "Abecedario Actualizado", Toast.LENGTH_SHORT).show();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .cache(cache)
+                .addInterceptor(new Interceptor() {
+                    @NonNull
+                    @Override
+                    public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
+                            throws IOException {
+                        Request request = chain.request();
+                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
+                        if (isNetworkAvailable()) {
+                            request = request
+                                    .newBuilder()
+                                    .header("Cache-Control", "public, max-age=" + 5)
+                                    .build();
+                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
                         } else {
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            mProgressBar.setVisibility(View.GONE);
-                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                            adapter.addData(apiResponse);
+                            request = request
+                                    .newBuilder()
+                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                    .build();
+                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
                         }
-                    } else {
-                        Log.e(TAG, "onResponse: " + response.errorBody());
+                        return chain.proceed(request);
+                    }
+                })
+                .build();
+
+        ApiService.ThemesCategoryService service  = ApiClient.getClient(okHttpClient).create(ApiService.ThemesCategoryService.class);
+        Call<ArrayList<String>> responseCall = service.getThemesCategories();
+
+        responseCall.enqueue(new Callback<ArrayList<String>>() {
+            @Override
+            public void onResponse(@NonNull Call<ArrayList<String>> call, @NonNull Response<ArrayList<String>> response) {
+                if(response.isSuccessful()){
+                    ArrayList<String> apiResponse = response.body();
+                    if(adapter.getItemCount() != 0){
                         mSwipeRefreshLayout.setRefreshing(false);
                         mProgressBar.setVisibility(View.GONE);
                         mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
+                        adapter.updateData(apiResponse);
+                    } else {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                        mProgressBar.setVisibility(View.GONE);
+                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                        adapter.addData(apiResponse);
                     }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ArrayList<String>> call, @NonNull Throwable t) {
-                    Log.i(TAG, "onFailure: " + t.getMessage());
+                } else {
+                    Log.e(TAG, "onResponse: " + response.errorBody());
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), "No se pudo actualizar el Feed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
 
-        } catch (Exception e){
-            Log.d(MainActivity.TAG + "Error", e.getMessage());
-
-        }
+            @Override
+            public void onFailure(@NonNull Call<ArrayList<String>> call, @NonNull Throwable t) {
+                Log.i(TAG, "onFailure: " + t.getMessage());
+                mSwipeRefreshLayout.setRefreshing(false);
+                mProgressBar.setVisibility(View.GONE);
+                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                Toast.makeText(getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

@@ -15,9 +15,7 @@ import cl.afubillaoliva.lsch.models.Word;
 public class FavoriteDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "favorite.db";
-
     private static final int DATABASE_VERSION = 1;
-
 
     private SQLiteOpenHelper dbhandler;
     private SQLiteDatabase db;

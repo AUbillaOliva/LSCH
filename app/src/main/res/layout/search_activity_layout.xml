@@ -1,9 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="?attr/backgroundColor">
+    android:background="?attr/colorPrimary">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:theme="@style/ToolbarThemeLight"
+        app:contentInsetStartWithNavigation="0dp"
+        android:elevation="1dp">
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            app:theme="@style/SearchViewThemeLight"
+            app:searchIcon="@null"
+            app:queryHint="@string/search"
+            app:iconifiedByDefault="false" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <View
+        android:id="@+id/divider"
+        android:background="#19ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="0.1dp"/>
+
+    <View
+        android:id="@+id/anchor_dropdown"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

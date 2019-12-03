@@ -14,6 +14,7 @@ import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.models.Expressions;
 
 public class ExpressionsListAdapter extends RecyclerView.Adapter<ExpressionsListAdapter.MyViewHolder> implements RecyclerViewOnClickListenerHack{
+
     private ArrayList<Expressions> dataset;
     private RecyclerViewOnClickListenerHack mRecyclerViewOnClickListenerHack;
 
