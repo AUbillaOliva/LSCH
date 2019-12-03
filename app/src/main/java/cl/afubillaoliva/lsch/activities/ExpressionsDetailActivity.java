@@ -32,6 +32,7 @@ public class ExpressionsDetailActivity extends AppCompatActivity implements Recy
             setTheme(R.style.AppThemeDark);
         else setTheme(R.style.AppTheme);
         setContentView(R.layout.expression_detail_activity);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         final Intent intent = getIntent();
         final Expressions expression = (Expressions) intent.getSerializableExtra("position");

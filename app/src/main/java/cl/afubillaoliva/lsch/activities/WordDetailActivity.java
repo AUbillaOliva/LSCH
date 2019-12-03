@@ -51,6 +51,7 @@ public class WordDetailActivity extends AppCompatActivity {
             setTheme(R.style.AppTheme);
         }
         setContentView(R.layout.word_detail_layout);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
