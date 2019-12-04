@@ -1,0 +1,56 @@
+.landing {
+  height: 100%;
+  width: 100%;
+  background: url("../../assets/images/background.png") no-repeat center;
+  background-size: 100% 100%;
+  padding: 5% 0;
+}
+
+@media screen and (max-width: 1024px) {
+  .landing {
+    background-size: cover;
+  }
+}
+
+.landing .container {
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding-inline: 25px;
+  width: 100%;
+  margin: 10% 0;
+}
+
+@media screen and (max-width: 1024px) {
+  .landing .container {
+    margin: 20% 0;
+  }
+}
+
+.landing .container .landing-title {
+  color: white;
+  margin-bottom: 10px;
+}
+
+.landing .container .landing-des {
+  color: white;
+  font-family: "Roboto";
+  margin-bottom: 20px;
+}
+
+.landing .container img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 35%;
+}
+
+@media (min-width: 320px) and (max-width: 479px) {
+  .landing .container img {
+    width: 100%;
+  }
+}
+/*# sourceMappingURL=Landing.css.map */

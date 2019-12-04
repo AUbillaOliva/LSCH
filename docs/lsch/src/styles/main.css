@@ -1,0 +1,40 @@
+h1 {
+  font-size: 6rem;
+  letter-spacing: -0.015625;
+  font-weight: 300;
+}
+
+h2 {
+  font-size: 3.75rem;
+  letter-spacing: -0.0083;
+  font-weight: 300;
+}
+
+h3 {
+  font-size: 3rem;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+h4 {
+  font-size: 2.125rem;
+  letter-spacing: 0.00735;
+  font-weight: 400;
+}
+
+h5 {
+  font-size: 1.5rem;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+h6 {
+  font-size: 400;
+  letter-spacing: 0.03125;
+  font-weight: 500;
+}
+
+html, body, #root {
+  height: 100%;
+}
+/*# sourceMappingURL=main.css.map */
