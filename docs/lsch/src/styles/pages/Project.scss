@@ -2,5 +2,56 @@
     height: 100%;
     width: 100%;
     background: white;
-    display: block;
+    
+
+    .carousel {
+        height: 80%;
+        width: 100%;
+
+        .carousel-inner {
+            height: 100%;
+            width: 100%;
+            background: white;    
+            display: flex;        
+            justify-content: center;
+            margin: 5% 0;
+
+            .active {                
+                padding: 0;
+                margin: 0 0;
+                display: block;
+                margin-top: auto;
+                margin-bottom: auto;
+
+                .container {
+                    display: block;
+                    margin: auto;
+
+                    .project-title {
+                        font-weight: bold;
+                        font-size: 30px;
+                    }
+                
+                    .project-des {
+                        font-family: "Roboto";
+                    }
+    
+                    .project-img {
+                        display: block;
+                        margin: auto;
+                        width: 40%;
+                    }
+
+                }
+
+                .avatar {
+                    width: 50%;
+                    margin: 0 30%;
+                    border-radius: 100%;
+                }
+            }
+
+        }
+
+    }
 }

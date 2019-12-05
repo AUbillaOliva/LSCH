@@ -2,6 +2,57 @@
   height: 100%;
   width: 100%;
   background: white;
+}
+
+.project .carousel {
+  height: 80%;
+  width: 100%;
+}
+
+.project .carousel .carousel-inner {
+  height: 100%;
+  width: 100%;
+  background: white;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  margin: 5% 0;
+}
+
+.project .carousel .carousel-inner .active {
+  padding: 0;
+  margin: 0 0;
   display: block;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.project .carousel .carousel-inner .active .container {
+  display: block;
+  margin: auto;
+}
+
+.project .carousel .carousel-inner .active .container .project-title {
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.project .carousel .carousel-inner .active .container .project-des {
+  font-family: "Roboto";
+}
+
+.project .carousel .carousel-inner .active .container .project-img {
+  display: block;
+  margin: auto;
+  width: 40%;
+}
+
+.project .carousel .carousel-inner .active .avatar {
+  width: 50%;
+  margin: 0 30%;
+  border-radius: 100%;
 }
 /*# sourceMappingURL=Project.css.map */
