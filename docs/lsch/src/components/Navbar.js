@@ -17,17 +17,19 @@ class Navbar extends Component {
                                 return(
                                     <Fragment>
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/about">Acerca de</NavLink>
+                                        {/*<NavLink className="nav-link" setactiveclassname={'active'} to="/case-studies">Estudios de caso</NavLink>*/}
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/download">Descargar</NavLink>
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/contact">Contacto</NavLink>
                                     </Fragment>
                                 )
                             }}
                             />
-                            <Route path="/(about|download|contact|login|dashboard)" render= { () => {
+                            <Route path="/(about|download|contact|case-studies)" render= { () => {
                                 return(
                                     <Fragment>
-                                        <NavLink className="nav-link" setactiveclassname={'active'} to="/" exact>Inicio</NavLink>
+                                        <NavLink className="nav-link" setactiveclassname={'active'} to="/#" exact>Inicio</NavLink>
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/about">Acerca de</NavLink>
+                                        {/*<NavLink className="nav-link" setactiveclassname={'active'} to="/case-studies">Estudios de caso</NavLink>*/}
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/download">Descargar</NavLink>
                                         <NavLink className="nav-link" setactiveclassname={'active'} to="/contact">Contacto</NavLink>
                                     </Fragment>

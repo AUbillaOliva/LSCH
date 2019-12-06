@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Landing from '../layouts/Landing';
-import Project from '../layouts/Project';
+import Landing from '../layouts/Home/Landing';
+import Project from '../layouts/Home/Project';
 
 import '../styles/Home.css'
 

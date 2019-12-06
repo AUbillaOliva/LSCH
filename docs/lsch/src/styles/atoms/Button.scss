@@ -45,9 +45,7 @@ $subtitle-font-weight: 500;
         margin: 0px;
     }
 
-    @media (min-width: $mobile-min) and (max-width: $tablet-max-size){
-        
-        margin: 0px;
-        padding: 0px;
+    @media (min-width: $mobile-min) and (max-width: $tablet-max-size) {
+        width: 100%;
     }
 }

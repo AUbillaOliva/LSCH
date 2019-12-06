@@ -6,13 +6,18 @@
   padding: 5% 0;
 }
 
-@media screen and (max-width: 1024px) {
+@media (min-width: 320px) and (max-width: 1024px) {
   .landing {
-    background-size: cover;
+    background-position: top;
+    background-size: 200% 80%;
+    padding: 5% 0 0 0;
   }
 }
 
 .landing .container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
@@ -24,9 +29,17 @@
   margin: 10% 0;
 }
 
-@media screen and (max-width: 1024px) {
+@media (min-width: 320px) and (max-width: 1024px) {
   .landing .container {
-    margin: 20% 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    margin: 20% auto;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-line-pack: center;
+        align-content: center;
   }
 }
 
@@ -41,16 +54,66 @@
   margin-bottom: 20px;
 }
 
-.landing .container img {
+.landing .container .landing-img {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 35%;
+  width: 50%;
 }
 
-@media (min-width: 320px) and (max-width: 479px) {
-  .landing .container img {
+@media (min-width: 320px) and (max-width: 1024px) {
+  .landing .container .landing-img {
+    width: 70%;
+  }
+}
+
+.landing .container .landing-btn {
+  width: 50%;
+}
+
+.landing .container .links {
+  width: 100%;
+  margin: 10px auto;
+  position: relative;
+  right: 15px;
+}
+
+@media (min-width: 320px) and (max-width: 1024px) {
+  .landing .container .links {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -ms-flex-line-pack: center;
+        align-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
     width: 100%;
+  }
+}
+
+.landing .container .links .google-play-btn {
+  width: 40%;
+}
+
+@media (min-width: 320px) and (max-width: 1024px) {
+  .landing .container .links .google-play-btn {
+    width: 100%;
+    margin: auto;
+  }
+}
+
+.landing .container .links .app-store-btn {
+  width: 40%;
+}
+
+@media (min-width: 320px) and (max-width: 1024px) {
+  .landing .container .links .app-store-btn {
+    width: 100%;
+    margin: auto;
   }
 }
 /*# sourceMappingURL=Landing.css.map */

@@ -4,55 +4,48 @@
   background: white;
 }
 
-.project .carousel {
-  height: 80%;
-  width: 100%;
-}
-
-.project .carousel .carousel-inner {
-  height: 100%;
-  width: 100%;
-  background: white;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  margin: 5% 0;
-}
-
-.project .carousel .carousel-inner .active {
-  padding: 0;
-  margin: 0 0;
+.project .container {
   display: block;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin: auto 0;
 }
 
-.project .carousel .carousel-inner .active .container {
+.project .container .content-container {
   display: block;
-  margin: auto;
+  margin: 0 auto;
 }
 
-.project .carousel .carousel-inner .active .container .project-title {
+.project .container .content-container .project-title {
   font-weight: bold;
-  font-size: 30px;
+  font-family: 'product_sansbold';
+  font-size: 34px;
+  letter-spacing: 0.25;
 }
 
-.project .carousel .carousel-inner .active .container .project-des {
-  font-family: "Roboto";
+.project .container .content-container .project-des {
+  margin: 20px 0;
+  font-family: 'Roboto';
+  font-size: 1rem;
+  letter-spacing: 0.03125;
 }
 
-.project .carousel .carousel-inner .active .container .project-img {
-  display: block;
-  margin: auto;
+.project .container .project-img {
   width: 40%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.project .carousel .carousel-inner .active .avatar {
-  width: 50%;
-  margin: 0 30%;
+@media (min-width: 320px) and (max-width: 1024px) {
+  .project .container .project-img {
+    display: none;
+  }
+}
+
+.project .container .avatar {
   border-radius: 100%;
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 /*# sourceMappingURL=Project.css.map */

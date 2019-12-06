@@ -1,57 +1,81 @@
+$primary-color: #fff;
+$secondary-color: #fefefe;
+$text-color: #202124;
+
+// Dimens
+$desktop-size: 1281px;
+
+$desktop-min-size: 1025px;
+$desktop-max-size: 1280px;
+
+$tablet-min-size: 768px;
+$tablet-max-size: 1024px;
+
+$tablet-low-res-min: 480px;
+$tablet-low-res-max: 767px;
+
+$mobile-min: 320px;
+$mobile-max: 479px;
+
+$title-text-size: 34px;
+$title-letter-spacing: 0.25;
+$title-font-weight: bold;
+
+$body-text-size: 1rem;
+$body-letter-spacing: 0.03125;
+$body-font-weight: 500;
+
+$subtitle-text-size: 1rem;
+$subtitle-letter-spacing: 0.009375;
+$subtitle-font-weight: 500;
+
 .project {
     height: 100%;
     width: 100%;
     background: white;
-    
 
-    .carousel {
-        height: 80%;
-        width: 100%;
+        .container {
+            display: block;
+            margin: auto 0;
 
-        .carousel-inner {
-            height: 100%;
-            width: 100%;
-            background: white;    
-            display: flex;        
-            justify-content: center;
-            margin: 5% 0;
-
-            .active {                
-                padding: 0;
-                margin: 0 0;
+            .content-container{
                 display: block;
-                margin-top: auto;
-                margin-bottom: auto;
+                margin: 0 auto;
 
-                .container {
-                    display: block;
-                    margin: auto;
-
-                    .project-title {
-                        font-weight: bold;
-                        font-size: 30px;
-                    }
-                
-                    .project-des {
-                        font-family: "Roboto";
-                    }
-    
-                    .project-img {
-                        display: block;
-                        margin: auto;
-                        width: 40%;
-                    }
-
+                .project-title{
+                    font-weight: bold;
+                    font-family: 'product_sansbold';
+                    font-size: $title-text-size;
+                    letter-spacing: $title-letter-spacing;
                 }
 
-                .avatar {
-                    width: 50%;
-                    margin: 0 30%;
-                    border-radius: 100%;
-                }
+                .project-des {
+                    margin: 20px 0;
+                    font-family: 'Roboto';
+                    font-size: $body-text-size;
+                    letter-spacing: $body-letter-spacing;
+                }   
             }
 
+            .project-img {
+                width: 40%;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+
+                @media (min-width: $mobile-min) and (max-width: $tablet-max-size){
+                    display: none;
+                }
+
+            }
+
+            .avatar {
+                border-radius: 100%;
+                width: 50%;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
 
-    }
 }

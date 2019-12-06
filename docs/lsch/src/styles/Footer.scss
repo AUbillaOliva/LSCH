@@ -1,8 +1,12 @@
 .footer {
-    
-    height: 50%;
+    height: auto;
     margin-top: 10%;
     display: inline-block;
     background: #242729;
     width: 100%;
+    color: white;
+
+    a {
+        font-family: 'Roboto';
+    }
 }

@@ -32,20 +32,26 @@ $subtitle-font-weight: 500;
     background-size: 100% 100%;
     padding: 5% 0;
 
-    @media screen and (max-width: $tablet-max-size){
-        background-size: cover;
+    @media (min-width: $mobile-min) and (max-width: $tablet-max-size){
+        background-position: top;
+        background-size: 200% 80%;
+        padding: 5% 0 0 0 ;
     }
 
 
     .container {
+        display: flex;
         justify-content: center;
         align-items: center;   
         padding-inline: 25px;
         width: 100%;
         margin: 10% 0;
 
-        @media screen and (max-width: $tablet-max-size){
-            margin: 20% 0;
+        @media (min-width: $mobile-min) and (max-width: $tablet-max-size){
+            display: flex;
+            margin: 20% auto;
+            justify-content: center;
+            align-content: center;
         }
 
         .landing-title{
@@ -59,14 +65,55 @@ $subtitle-font-weight: 500;
             margin-bottom: 20px;
         }
 
-        img {
+        .landing-img {
             display: block;
             margin-left: auto;
             margin-right: auto;
-            width: 35%;
+            width: 50%;
 
-            @media (min-width: $mobile-min) and (max-width: $mobile-max) {
-                width: 100%;
+            @media (min-width: $mobile-min) and (max-width: $tablet-max-size) {
+                width: 70%;
+            }
+
+        }
+
+        .landing-btn {
+            width: 50%;
+
+        }
+
+        .links {
+            width: 100%;
+            margin: 10px auto;
+            position: relative;
+            right: 15px;
+
+            @media (min-width: $mobile-min) and (max-width: $tablet-max-size) {
+                display: flex;
+                justify-content: center;
+                align-content: center;
+                align-items: center;
+                width: 100%;                
+            }
+
+            .google-play-btn {
+                width: 40%;
+
+                @media (min-width: $mobile-min) and (max-width: $tablet-max-size) {
+                    width: 100%;
+                    margin: auto;
+                }
+
+            }
+
+            .app-store-btn {
+                width: 40%;
+
+                @media (min-width: $mobile-min) and (max-width: $tablet-max-size) {
+                    width: 100%;
+                    margin: auto;
+                }
+
             }
 
         }
