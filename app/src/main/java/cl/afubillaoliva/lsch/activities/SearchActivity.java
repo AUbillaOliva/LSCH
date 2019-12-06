@@ -249,6 +249,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
     @Override
     public void onClickListener(View view, int position) {
+        databaseHelper.addHistory(adapter.get(position).getTitle());
         Intent intent = new Intent(context, WordDetailActivity.class);
         intent.putExtra("position", adapter.get(position));
         intent.putExtra("id", position);

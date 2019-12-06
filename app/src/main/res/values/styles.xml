@@ -10,7 +10,6 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="dividerColor">@color/dividerLight</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceLight</item>
-        <item name="searchViewStyle">@style/SearchViewThemeLight</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -23,8 +22,6 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="dividerColor">@color/dividerDark</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceDark</item>
-        <item name="closeIcon">@drawable/ic_close_white_24dp</item>
-        <item name="searchViewStyle">@style/SearchViewThemeDark</item>
     </style>
 
     <style name="ToolbarTypefaceLight" >
@@ -39,7 +36,7 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="SearchViewThemeLight" parent="Widget.AppCompat.SearchView.ActionBar">
+    <style name="SearchViewTheme" parent="Widget.AppCompat.SearchView.ActionBar">
         <item name="commitIcon">@drawable/ic_search_commit_white</item>
         <item name="colorControlNormal">@color/material_light_active_icon</item>
         <item name="colorControlHighlight">@color/material_ripple_light</item>
@@ -48,19 +45,7 @@
         <item name="defaultQueryHint">@string/search</item>
         <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewTextAppearance</item>
         <item name="android:layout_marginStart">2dp</item>
-        <item name="closeIcon">@drawable/ic_close_white_24dp</item>
-    </style>
-
-    <style name="SearchViewThemeDark" parent="Widget.AppCompat.SearchView.ActionBar">
-        <item name="commitIcon">@drawable/ic_search_commit_black</item>
-        <item name="colorControlNormal">@color/material_light_active_icon</item>
-        <item name="colorControlHighlight">@color/material_ripple_dark</item>
-        <item name="android:maxWidth">9999dp</item>
-        <item name="android:textSize">20sp</item>
-        <item name="defaultQueryHint">@string/search</item>
-        <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewTextAppearance</item>
-        <item name="android:layout_marginStart">2dp</item>
-        <item name="closeIcon">@drawable/ic_close_black_24dp</item>
+        <item name="closeIcon">@drawable/ic_close_24dp</item>
     </style>
 
     <style name="AutoCompleteTextView" parent="Widget.AppCompat.Light.AutoCompleteTextView">
@@ -72,7 +57,7 @@
     </style>
 
     <style name="ToolbarThemeLight">
-        <item name="searchViewStyle">@style/SearchViewThemeLight</item>
+        <item name="searchViewStyle">@style/SearchViewTheme</item>
     </style>
 
 </resources>
