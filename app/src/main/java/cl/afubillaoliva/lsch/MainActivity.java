@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "API_RESPONSE";
     public static final String FAV = "FAVORITE_RESPONSE";
     public static final String UI = "INTERFACE";
+    public static final String HIS = "HISTORY";
 
     public static final int cacheSize = 10 * 1024 * 1024; // 10 MiB
 
@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         else mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorSecondaryLight)); //DAY MODE
 
         mSlidingTabLayout.setupWithViewPager(mViewPager);
+        mSlidingTabLayout.setUnboundedRipple(true);
 
         for (int i = 0; i < mSlidingTabLayout.getTabCount(); i++) {
             TabLayout.Tab tab = mSlidingTabLayout.getTabAt(i);

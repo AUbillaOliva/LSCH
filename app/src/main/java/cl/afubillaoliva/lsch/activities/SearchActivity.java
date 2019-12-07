@@ -70,6 +70,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         }
         setContentView(R.layout.search_activity_layout);
 
+        getData();
+
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         final SearchView searchView = mToolbar.findViewById(R.id.search_view);
@@ -143,8 +145,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         mRecyclerViewHistory.setLayoutManager(linearLayoutManager2);
         historyAdapter.addData(databaseHelper.getHistory());
         mRecyclerViewHistory.setAdapter(historyAdapter);
-
-        getData();
     }
 
     public boolean exists(String searchItem) {
@@ -249,7 +249,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
     @Override
     public void onClickListener(View view, int position) {
-        databaseHelper.addHistory(adapter.get(position).getTitle());
+        if(!exists(adapter.get(position).getTitle()))
+            databaseHelper.addHistory(adapter.get(position).getTitle());
         Intent intent = new Intent(context, WordDetailActivity.class);
         intent.putExtra("position", adapter.get(position));
         intent.putExtra("id", position);
