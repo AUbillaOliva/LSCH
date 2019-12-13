@@ -10,6 +10,7 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
         <item name="dividerColor">@color/dividerLight</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceLight</item>
+        <item name="subtitleTextColor">@color/subtitleTextColorLight</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -22,6 +23,7 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="dividerColor">@color/dividerDark</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceDark</item>
+        <item name="subtitleTextColor">@color/subtitleTextColorDark</item>
     </style>
 
     <style name="ToolbarTypefaceLight" >

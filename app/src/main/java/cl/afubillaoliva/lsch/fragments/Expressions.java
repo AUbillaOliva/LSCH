@@ -41,8 +41,6 @@ import retrofit2.Response;
 
 public class Expressions extends Fragment implements RecyclerViewOnClickListenerHack {
 
-    private static final String TAG = "API_RESPONSE";
-
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
     private ListAdapter adapter;
@@ -118,15 +116,15 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                         if (isNetworkAvailable()) {
                             request = request
                                     .newBuilder()
-                                    .header("Cache-Control", "public, max-age=" + 5)
+                                    .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                     .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
+                            Log.d(MainActivity.TAG, "EXPRESSIONS: using cache that was stored 5 minutes ago");
                         } else {
                             request = request
                                     .newBuilder()
                                     .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                     .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
+                            Log.d(MainActivity.TAG, "EXPRESSIONS: using cache that was stored 7 days ago");
                         }
                         return chain.proceed(request);
                     }
@@ -139,31 +137,24 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
         responseCall.enqueue(new Callback<ArrayList<String>>() {
                 @Override
                 public void onResponse(@NonNull Call<ArrayList<String>> call, @NonNull Response<ArrayList<String>> response) {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mProgressBar.setVisibility(View.GONE);
+                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     if(response.isSuccessful()){
                         ArrayList<String> apiResponse = response.body();
-                        if(adapter.getItemCount() != 0){
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            mProgressBar.setVisibility(View.GONE);
-                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                        if(adapter.getItemCount() != 0)
                             adapter.updateData(apiResponse);
-                        } else {
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            mProgressBar.setVisibility(View.GONE);
-                            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                        else
                             adapter.addData(apiResponse);
-                        }
                     } else {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        Log.e(TAG, "onResponse: " + response.errorBody());
+                        Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                         Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<ArrayList<String>> call, @NonNull Throwable t) {
-                    Log.i(TAG, "onFailure: " + t.getMessage());
+                    Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);

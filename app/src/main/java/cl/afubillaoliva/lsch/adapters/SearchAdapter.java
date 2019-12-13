@@ -118,9 +118,9 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                     wordListFiltered = dataset;
                 } else {
                     ArrayList<Word> filteredList = new ArrayList<>();
-                    for (Word movie : dataset) {
-                        if (movie.getTitle().toLowerCase().contains(charString.toLowerCase())) {
-                            filteredList.add(movie);
+                    for (Word word : dataset) {
+                        if (word.getTitle().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(word);
                         }
                     }
                     wordListFiltered = filteredList;

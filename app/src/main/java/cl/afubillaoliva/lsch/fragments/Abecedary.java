@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -72,6 +74,7 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
             });
         }
 
+
         mRecyclerView.setHasFixedSize(true);
         abecedaryListAdapter = new AbecedaryCardListAdapter(getContext());
         mRecyclerView.setAdapter(abecedaryListAdapter);
@@ -110,7 +113,7 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
     private void getData(){
         Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -118,19 +121,19 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                     public okhttp3.Response intercept(@NonNull Chain chain)
                             throws IOException {
                         Request request = chain.request();
-                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
+                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale
                         if (isNetworkAvailable()) {
                             request = request
                                     .newBuilder()
-                                    .header("Cache-Control", "public, max-age=" + 5)
+                                    .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                     .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
+                            Log.d(MainActivity.TAG, "ABECEDARY: using cache that was stored 5 minutes ago");
                         } else {
                             request = request
                                     .newBuilder()
                                     .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                     .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
+                            Log.d(MainActivity.TAG, "ABECEDARY: using cache that was stored 7 days ago");
                         }
                         return chain.proceed(request);
                     }
@@ -143,23 +146,16 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
         responseCall.enqueue(new Callback<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>>() {
             @Override
             public void onResponse(@NonNull Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> call, @NonNull Response<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> response) {
+                mSwipeRefreshLayout.setRefreshing(false);
+                mProgressBar.setVisibility(View.GONE);
+                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if(response.isSuccessful()){
                     ArrayList<cl.afubillaoliva.lsch.models.Abecedary> apiResponse = response.body();
-                    if(abecedaryListAdapter.getItemCount() != 0){
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                    if(abecedaryListAdapter.getItemCount() != 0)
                         abecedaryListAdapter.updateData(apiResponse);
-                    } else {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                    else
                         abecedaryListAdapter.addData(apiResponse);
-                    }
                 } else {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    mProgressBar.setVisibility(View.GONE);
-                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }

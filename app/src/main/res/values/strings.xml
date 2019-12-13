@@ -13,4 +13,13 @@
     <string name="favorite">Favorito</string>
     <string name="favorites">Favoritos</string>
     <string name="letter">Letra</string>
+    <string name="search_icon">Search Icon</string>
+    <string name="offline_mode">Modo offline</string>
+    <string name="offline_mode_text">Utiliza la app cuando no tengas conexión a internet, pero la app consumirá más almacenamiento.</string>
+    <string name="settings_about_label">Acerca de</string>
+    <string name="version_title">Version</string>
+    <string name="version_number">app version</string>
+    <string name="third_party_libraries_title">Librerias de Terceros</string>
+    <string name="third_party_libraries_subtitle">Gracias a la ayuda de esta libreria!</string>
+    <string name="search_section">Búsqueda</string>
 </resources>

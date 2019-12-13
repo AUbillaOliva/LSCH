@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int cacheSize = 10 * 1024 * 1024; // 10 MiB
 
     private final Context context = this;
+    private static MainActivity instance;
     private SharedPreference mSharedPreferences;
 
     public Toolbar mToolbar;
@@ -76,15 +77,15 @@ public class MainActivity extends AppCompatActivity {
         appBarLayout.setStateListAnimator(stateListAnimator);
 
         if(mSharedPreferences.loadNightModeState())
-            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceDark);
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
         else
-            mToolbar.setTitleTextAppearance(this, R.style.ToolbarTypefaceLight);
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(false);
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SearchActivity.class));
+                startActivity(new Intent(context, SearchActivity.class));
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             }
@@ -98,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         llp.gravity = Gravity.CENTER;
         toolbarTitle.setLayoutParams(llp);
 
-        final TabsAdapter adapter = new TabsAdapter(getSupportFragmentManager(), this);
+        final TabsAdapter adapter = new TabsAdapter(getSupportFragmentManager(), context);
         adapter.addFragment(new Abecedary(), "Abecedario");
         adapter.addFragment(new Themes(), "Orden temático");
         adapter.addFragment(new Expressions(), "Expresiones de uso cotidiano");
@@ -135,12 +136,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_settings:
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                startActivity(new Intent(context, SettingsActivity.class));
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.favorites:
-                startActivity(new Intent(MainActivity.this, FavoriteListActivity.class));
+                startActivity(new Intent(context, FavoriteListActivity.class));
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
@@ -154,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    public static MainActivity getInstance(){
+        return instance;
+    }
+
     public AppBarLayout getAppBarLayout(){ return appBarLayout; }
 
     public View getAppBarLayoutShadow(){ return appBarLayoutShadow; }
@@ -163,48 +168,48 @@ public class MainActivity extends AppCompatActivity {
 
         if (view instanceof TextView) {
             new android.os.Handler().postDelayed(
-                    new Runnable() {
-                        public void run() {
-                            AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
-                            fadeOut.setDuration(250);
-                            fadeOut.setAnimationListener(new Animation.AnimationListener() {
-                                @Override
-                                public void onAnimationStart(Animation animation) {
+                new Runnable() {
+                    public void run() {
+                        AlphaAnimation fadeOut = new AlphaAnimation(1f, 0f);
+                        fadeOut.setDuration(250);
+                        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
 
-                                }
+                            }
 
-                                @Override
-                                public void onAnimationEnd(Animation animation) {
-                                    toolbarTitle.setText(newTitle);
-                                    toolbarTitle.setTextSize(16);
-                                    toolbarTitle.setTextColor(Color.GRAY);
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                toolbarTitle.setText(newTitle);
+                                toolbarTitle.setTextSize(16);
+                                toolbarTitle.setTextColor(Color.GRAY);
 
-                                    if(mSharedPreferences.loadNightModeState())
-                                        toolbarIcon.setImageResource(R.drawable.ic_search_white_24dp);
-                                    else
-                                        toolbarIcon.setImageResource(R.drawable.ic_search_black_24dp);
+                                if(mSharedPreferences.loadNightModeState())
+                                    toolbarIcon.setImageResource(R.drawable.ic_search_white_24dp);
+                                else
+                                    toolbarIcon.setImageResource(R.drawable.ic_search_black_24dp);
 
-                                    toolbarIcon.setVisibility(View.VISIBLE);
+                                toolbarIcon.setVisibility(View.VISIBLE);
 
 
-                                    llp.gravity = Gravity.START;
-                                    toolbarTitle.setLayoutParams(llp);
+                                llp.gravity = Gravity.START;
+                                toolbarTitle.setLayoutParams(llp);
 
-                                    AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
-                                    fadeIn.setDuration(250);
-                                    view.startAnimation(fadeIn);
-                                }
+                                AlphaAnimation fadeIn = new AlphaAnimation(0f, 1f);
+                                fadeIn.setDuration(250);
+                                view.startAnimation(fadeIn);
+                            }
 
-                                @Override
-                                public void onAnimationRepeat(Animation animation) {
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
 
-                                }
-                            });
-                            view.startAnimation(fadeOut);
-                        }
+                            }
+                        });
+                        view.startAnimation(fadeOut);
+                    }
 
-                    },
-                    3500);
+                }, 3500
+            );
         }
     }
 

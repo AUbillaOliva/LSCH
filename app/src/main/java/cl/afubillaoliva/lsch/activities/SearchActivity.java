@@ -93,8 +93,9 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             public boolean onQueryTextSubmit(String s) {
                 //TODO: IF WORD EXISTS, START ACTIVITY
                 searchView.clearFocus();
-                if(!exists(s))
+                if(!exists(s)) //IF EXISTS IN HISTORY DB
                     databaseHelper.addHistory(s);
+                Log.d(MainActivity.HIS, "ADDED: " + s);
                 historyAdapter.clear();
                 return false;
             }
@@ -127,12 +128,14 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
             @Override
             public void onClickListener(View view, int position) {
+                //TODO: IF ITEM EXIST, GO DIRECTLY TO ACTIVITY
                 searchView.setQuery(historyAdapter.get(position), false);
             }
 
             @Override
             public void onLongPressClickListener(View view, int position) {
                 Toast.makeText(context, "Eliminado del historial", Toast.LENGTH_SHORT).show();
+                Log.d(MainActivity.HIS, "DELETED: " + historyAdapter.get(position));
                 databaseHelper.deleteHistory(historyAdapter.get(position));
                 historyAdapter.clear();
                 historyAdapter.addData(databaseHelper.getHistory());

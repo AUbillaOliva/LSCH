@@ -14,7 +14,8 @@
     <color name="dividerDark">#5c5c5c</color>
     <color name="dividerLight">#1f848484</color>
 
-    <color name="textColorSecondary">#919191</color>
+    <color name="subtitleTextColorDark">#ACACAC</color>
+    <color name="subtitleTextColorLight">#7c7c7c</color>
 
     <color name="material_light_primary_text">#DE000000</color>
     <color name="material_light_hint_text">#61000000</color>
