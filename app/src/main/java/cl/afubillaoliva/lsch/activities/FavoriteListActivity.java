@@ -7,26 +7,30 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.WordListAdapter;
-import cl.afubillaoliva.lsch.utils.FavoriteDatabaseHelper;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
+import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
+import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 // TODO: IF ARE NOT FAVORITES YET, SHOW LAYOUT
 
-public class FavoriteListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
+public class FavoriteListActivity extends AppCompatActivity {
 
     private final Context context = this;
-
-    private final WordListAdapter adapter = new WordListAdapter();
+    private GenericAdapter<Word> adapter;
     private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
 
     @Override
@@ -50,10 +54,39 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter.addData(favoriteDatabaseHelper.getAllFavorite());
+        adapter = new GenericAdapter<Word>(favoriteDatabaseHelper.getAllFavorite()) {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                final View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, Word val, int position) {
+                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final TextView title = viewHolder.get(R.id.list_item_text);
+                title.setText(val.getTitle());
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        Intent intent = new Intent(context, WordDetailActivity.class);
+                        intent.putExtra("position", adapter.getItem(position));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+
+                    }
+                };
+            }
+        };
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        adapter.setRecyclerViewOnClickListenerHack(this);
         mRecyclerView.setAdapter(adapter);
 
     }
@@ -62,12 +95,12 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
     protected void onResume() {
         super.onResume();
         if(adapter.getItemCount() != favoriteDatabaseHelper.getAllFavorite().size()){
-            if(adapter.dataset.size() > favoriteDatabaseHelper.getAllFavorite().size()){
+            if(adapter.getItemCount() > favoriteDatabaseHelper.getAllFavorite().size()){
                 adapter.clear();
-                adapter.addData(favoriteDatabaseHelper.getAllFavorite());
+                adapter.addItems(favoriteDatabaseHelper.getAllFavorite());
                 adapter.notifyDataSetChanged();
             } else {
-                adapter.addData(favoriteDatabaseHelper.getAllFavorite());
+                adapter.addItems(favoriteDatabaseHelper.getAllFavorite());
                 adapter.notifyDataSetChanged();
             }
         }
@@ -103,15 +136,4 @@ public class FavoriteListActivity extends AppCompatActivity implements RecyclerV
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
-    @Override
-    public void onClickListener(View view, int position) {
-        Intent intent = new Intent(context, WordDetailActivity.class);
-        intent.putExtra("position", adapter.getItem(position));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
-    }
 }

@@ -8,5 +8,6 @@
         <attr name="textSize" format="dimension"/>
         <attr name="dividerColor" format="color|reference"/>
         <attr name="subtitleTextColor" format="color|reference"/>
+        <attr name="textDisabled" format="color|reference"/>
     </declare-styleable>
 </resources>

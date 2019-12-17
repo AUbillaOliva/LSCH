@@ -1,6 +1,7 @@
 package cl.afubillaoliva.lsch.models;
 
 import java.io.Serializable;
+import java.text.Normalizer;
 import java.util.ArrayList;
 
 public class Word implements Serializable {
@@ -12,9 +13,7 @@ public class Word implements Serializable {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public void setTitle(String title) { this.title = title; }
 
     public ArrayList<String> getSin() {
         return sin;

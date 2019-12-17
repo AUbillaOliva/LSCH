@@ -28,17 +28,18 @@ import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.models.SettingsItem;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private final Context context = this;
+    private SharedPreference mSharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-
-        final SharedPreference mSharedPreferences = new SharedPreference(context);
+        mSharedPreferences = new SharedPreference(context);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else setTheme(R.style.AppTheme);
@@ -84,18 +85,21 @@ public class SettingsActivity extends AppCompatActivity {
         aboutList.setNestedScrollingEnabled(true);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         aboutList.setLayoutManager(linearLayoutManager);
-        GenericAdapter<SettingsItem> aboutAdapter = new GenericAdapter<SettingsItem>(context, aboutListItems()) {
+        final GenericAdapter<SettingsItem> aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()) {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
-                return new MyViewHolder(view, recyclerViewOnClickListenerHack);
+                //return new MyViewHolder(view, recyclerViewOnClickListenerHack);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val) {
-                MyViewHolder myViewHolder = (MyViewHolder) holder;
-                myViewHolder.title.setText(val.getTitle());
-                myViewHolder.subtitle.setText(val.getSubtitle());
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position) {
+                GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title.setText(val.getTitle());
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle.setText(val.getSubtitle());
             }
 
             @Override
@@ -103,7 +107,7 @@ public class SettingsActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
                     public void onClickListener(View view, int position) {
-
+                        Toast.makeText(context, "Hello World", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -135,18 +139,29 @@ public class SettingsActivity extends AppCompatActivity {
         searchList.setNestedScrollingEnabled(true);
         final LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(context);
         searchList.setLayoutManager(linearLayoutManager2);
-        GenericAdapter<SettingsItem> searchAdapter = new GenericAdapter<SettingsItem>(context, searchListItems()) {
+        GenericAdapter<SettingsItem> searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()) {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
-                return new MyViewHolder(view, recyclerViewOnClickListenerHack);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val) {
-                MyViewHolder myViewHolder = (MyViewHolder) holder;
-                myViewHolder.title.setText(val.getTitle());
-                myViewHolder.subtitle.setText(val.getSubtitle());
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position) {
+                GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title.setText(val.getTitle());
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle.setText(val.getSubtitle());
+                if(!context.getDatabasePath("history.db").exists()){
+                    if(mSharedPreferences.loadNightModeState()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                    } else {
+                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                    }
+                }
             }
 
             @Override
@@ -163,7 +178,6 @@ public class SettingsActivity extends AppCompatActivity {
                                 break;
                         }
                     }
-
                     @Override
                     public void onLongPressClickListener(View view, int position) {}
                 };
@@ -186,28 +200,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
         };
         searchList.setAdapter(searchAdapter);
-    }
-
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-
-        private TextView title, subtitle;
-        private RecyclerViewOnClickListenerHack rvoclh;
-
-        MyViewHolder(@NonNull View itemView, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-            super(itemView);
-            title = itemView.findViewById(R.id.list_item_title);
-            subtitle = itemView.findViewById(R.id.list_item_subtitle);
-            this.rvoclh = recyclerViewOnClickListenerHack;
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(rvoclh != null){
-                        rvoclh.onClickListener(v, getLayoutPosition());
-                    }
-                }
-            });
-        }
-
     }
 
     private ArrayList<SettingsItem> aboutListItems(){

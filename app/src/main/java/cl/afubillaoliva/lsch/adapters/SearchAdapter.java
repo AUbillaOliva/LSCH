@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,18 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.Collator;
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
+import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> implements Filterable, RecyclerViewOnClickListenerHack {
+public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHolder> implements Filterable{
 
     private ArrayList<Word> dataset;
     private ArrayList<Word> wordListFiltered;
@@ -108,6 +113,15 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         }
     }
 
+    private static final Pattern DIACRITICS
+            = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+
+    private static String stripDiacritics(String str) {
+        str = Normalizer.normalize(str, Normalizer.Form.NFD);
+        str = DIACRITICS.matcher(str).replaceAll("");
+        return str;
+    }
+
     @Override
     public Filter getFilter() {
         return new Filter() {
@@ -119,8 +133,12 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                 } else {
                     ArrayList<Word> filteredList = new ArrayList<>();
                     for (Word word : dataset) {
-                        if (word.getTitle().toLowerCase().contains(charString.toLowerCase())) {
-                            filteredList.add(word);
+                        String title = word.getTitle().toLowerCase();
+                        title = title.replace(" ", "");
+                        if(charString.length() < 4){
+                            if (stripDiacritics(title).startsWith(stripDiacritics(charString.toLowerCase()))) filteredList.add(word);
+                        } else {
+                            if (stripDiacritics(title).contains(stripDiacritics(charString.toLowerCase()))) filteredList.add(word);
                         }
                     }
                     wordListFiltered = filteredList;
@@ -137,16 +155,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                 notifyDataSetChanged();
             }
         };
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
     }
 
     public void setRecyclerViewOnClickListenerHack(RecyclerViewOnClickListenerHack rvoclh) {

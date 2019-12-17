@@ -10,10 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -23,10 +26,11 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.WordListAdapter;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
@@ -37,17 +41,17 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AbecedaryListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
+public class AbecedaryListActivity extends AppCompatActivity {
 
     private final Context context = this;
+    private Network network = new Network(this);
 
-
-    private WordListAdapter adapter;
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    private Network network = new Network(this);
     private String letter, theme;
+
+    private GenericAdapter<Word> adapter;
+    private ArrayList<Word> apiResponse;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -83,21 +87,47 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new WordListAdapter();
+        adapter = new GenericAdapter<Word>(apiResponse) {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                final View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, Word val, int position) {
+                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final TextView title = viewHolder.get(R.id.list_item_text);
+                title.setText(val.getTitle());
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        Intent intent = new Intent(context, WordDetailActivity.class);
+                        intent.putExtra("position", adapter.getItem(position));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+
+                    }
+                };
+            }
+        };
         mRecyclerView.setAdapter(adapter);
-        adapter.setRecyclerViewOnClickListenerHack(this);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 getData();
             }
         });
-
         getData();
-
     }
 
     private void getData(){
@@ -151,20 +181,13 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
             @Override
             public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response) {
                 if (response.isSuccessful()) {
-                    ArrayList<Word> apiResponse = response.body();
+                    assert response.body() != null;
+                    apiResponse = response.body();
 
-                    if (adapter.getItemCount() != 0) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.updateData(apiResponse);
-                    } else {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.addData(apiResponse);
-                        adapter.notifyDataSetChanged();
-                    }
+                    mSwipeRefreshLayout.setRefreshing(false);
+                    mProgressBar.setVisibility(View.GONE);
+                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                    adapter.addItems(apiResponse);
                 } else {
                     mSwipeRefreshLayout.setRefreshing(false);
                     mProgressBar.setVisibility(View.GONE);
@@ -206,17 +229,5 @@ public class AbecedaryListActivity extends AppCompatActivity implements Recycler
     public void onBackPressed() {
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-        Intent intent = new Intent(this, WordDetailActivity.class);
-        intent.putExtra("position", adapter.getItem(position));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
     }
 }

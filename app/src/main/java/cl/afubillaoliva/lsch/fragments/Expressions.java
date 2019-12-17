@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -28,9 +29,10 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.activities.ExpressionsListActivity;
-import cl.afubillaoliva.lsch.adapters.ListAdapter;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -39,22 +41,23 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class Expressions extends Fragment implements RecyclerViewOnClickListenerHack {
+public class Expressions extends Fragment {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private ListAdapter adapter;
+    private GenericAdapter<String> adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup viewGroup, Bundle savedInstanceState){
         setRetainInstance(true);
+        getData();
 
-        View view = inflater.inflate(R.layout.fragment_layout, viewGroup, false);
+        final View view = inflater.inflate(R.layout.fragment_layout, viewGroup, false);
 
-        RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
+        final RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
         mProgressBar = view.findViewById(R.id.progress_circular);
-        NestedScrollView nestedScrollView = view.findViewById(R.id.nested);
+        final NestedScrollView nestedScrollView = view.findViewById(R.id.nested);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             nestedScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
@@ -70,13 +73,43 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
             });
         }
 
+        adapter = new GenericAdapter<String>() {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                final View view = LayoutInflater.from(getContext()).inflate(R.layout.list_item, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, String val, int position) {
+                final GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final TextView title = viewHolder.get(R.id.list_item_text);
+                final String content = val.substring(0,1).toUpperCase() + val.substring(1).toLowerCase();
+                title.setText(content);
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        Intent intent = new Intent(getContext(), ExpressionsListActivity.class);
+                        intent.putExtra("expression", getItem(position));
+                        startActivityForResult(intent, getTargetRequestCode());
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+
+                    }
+                };
+            }
+        };
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new ListAdapter();
-        adapter.setRecyclerViewOnClickListenerHack(this);
-        mRecyclerView.setAdapter(adapter);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setAdapter(adapter);
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -84,8 +117,6 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                 getData();
             }
         });
-
-        getData();
 
         return view;
     }
@@ -103,8 +134,8 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
     }
 
     public void getData(){
-        Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -131,8 +162,8 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                 })
                 .build();
 
-        ApiService.ExpressionsCategoryService service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsCategoryService.class);
-        Call<ArrayList<String>> responseCall = service.getExpressionsCategories();
+        final ApiService.ExpressionsCategoryService service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsCategoryService.class);
+        final Call<ArrayList<String>> responseCall = service.getExpressionsCategories();
 
         responseCall.enqueue(new Callback<ArrayList<String>>() {
                 @Override
@@ -142,10 +173,7 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     if(response.isSuccessful()){
                         ArrayList<String> apiResponse = response.body();
-                        if(adapter.getItemCount() != 0)
-                            adapter.updateData(apiResponse);
-                        else
-                            adapter.addData(apiResponse);
+                        adapter.addItems(apiResponse);
                     } else {
                         Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                         Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
@@ -161,18 +189,6 @@ public class Expressions extends Fragment implements RecyclerViewOnClickListener
                     Toast.makeText(getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
                 }
             });
-
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-        Intent intent = new Intent(getContext(), ExpressionsListActivity.class);
-        intent.putExtra("expression", adapter.getCategory(position));
-        startActivityForResult(intent, getTargetRequestCode());
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
 
     }
 

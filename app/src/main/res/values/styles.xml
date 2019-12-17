@@ -11,6 +11,7 @@
         <item name="dividerColor">@color/dividerLight</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceLight</item>
         <item name="subtitleTextColor">@color/subtitleTextColorLight</item>
+        <item name="textDisabled">@color/textDisabledLight</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
@@ -24,6 +25,7 @@
         <item name="dividerColor">@color/dividerDark</item>
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceDark</item>
         <item name="subtitleTextColor">@color/subtitleTextColorDark</item>
+        <item name="textDisabled">@color/textDisabledDark</item>
     </style>
 
     <style name="ToolbarTypefaceLight" >

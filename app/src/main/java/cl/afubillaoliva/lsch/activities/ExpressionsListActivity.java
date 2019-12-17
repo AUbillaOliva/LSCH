@@ -2,8 +2,6 @@ package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,10 +10,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -25,11 +26,11 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.ExpressionsListAdapter;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Expressions;
-import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
@@ -40,12 +41,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ExpressionsListActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
+public class ExpressionsListActivity extends AppCompatActivity {
 
     private final Context context = this;
     private final Network network = new Network(context);
 
-    private ExpressionsListAdapter adapter;
+    private GenericAdapter<Expressions> adapter;
+    private ArrayList<Expressions> apiResponse;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
     private String category;
@@ -71,6 +74,10 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
         mSwipeRefreshLayout = findViewById(R.id.swipe_layout);
         mProgressBar = findViewById(R.id.progress_circular);
 
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
         final String title = category.substring(0,1).toUpperCase() + category.substring(1);
         mToolbar.setTitle(title);
         setSupportActionBar(mToolbar);
@@ -78,8 +85,37 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new ExpressionsListAdapter();
-        adapter.setRecyclerViewOnClickListenerHack(this);
+        adapter = new GenericAdapter<Expressions>(apiResponse) {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, Expressions val, int position) {
+                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final TextView title = viewHolder.get(R.id.list_item_text);
+                title.setText(val.getTitle());
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        Intent intent = new Intent(context, ExpressionsDetailActivity.class);
+                        intent.putExtra("position", adapter.getItem(position));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+
+                    }
+                };
+            }
+        };
         mRecyclerView.setAdapter(adapter);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
@@ -90,14 +126,13 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
                 getData();
             }
         });
-
         getData();
     }
 
     public void getData(){
-        Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
+        final Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -124,31 +159,20 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
                 })
                 .build();
 
-        ApiService.ExpressionsServiceCategories service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsServiceCategories.class);
-        Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(category);
+        final ApiService.ExpressionsServiceCategories service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsServiceCategories.class);
+        final Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(category);
 
         responseCall.enqueue(new Callback<ArrayList<Expressions>>() {
             @Override
             public void onResponse(@NonNull Call<ArrayList<Expressions>> call, @NonNull Response<ArrayList<Expressions>> response) {
+                mSwipeRefreshLayout.setRefreshing(false);
+                mProgressBar.setVisibility(View.GONE);
+                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if (response.isSuccessful()) {
-                    ArrayList<Expressions> apiResponse = response.body();
+                    apiResponse = response.body();
 
-                    if (adapter.getItemCount() != 0) {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.updateData(apiResponse);
-                    } else {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        mProgressBar.setVisibility(View.GONE);
-                        mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                        adapter.addData(apiResponse);
-                        adapter.notifyDataSetChanged();
-                    }
+                    adapter.addItems(apiResponse);
                 } else {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    mProgressBar.setVisibility(View.GONE);
-                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }
@@ -188,17 +212,5 @@ public class ExpressionsListActivity extends AppCompatActivity implements Recycl
     public void onBackPressed() {
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-        Intent intent = new Intent(ExpressionsListActivity.this, ExpressionsDetailActivity.class);
-        intent.putExtra("position", adapter.getItem(position));
-        startActivity(intent);
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-
     }
 }

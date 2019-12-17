@@ -4,10 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.service.media.MediaBrowserService;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,8 +18,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,9 +34,10 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
-import cl.afubillaoliva.lsch.adapters.AbecedaryCardListAdapter;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -42,16 +46,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHack {
+public class Abecedary extends Fragment {
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private AbecedaryCardListAdapter abecedaryListAdapter;
+    private GenericAdapter<cl.afubillaoliva.lsch.models.Abecedary> adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         setRetainInstance(true);
-        View view = inflater.inflate(R.layout.fragment_layout, container,false);
+        final View view = inflater.inflate(R.layout.fragment_layout, container,false);
 
         mSwipeRefreshLayout = view.findViewById(R.id.swipe_layout);
         RecyclerView mRecyclerView = view.findViewById(R.id.recycler_view);
@@ -76,12 +80,52 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
 
 
         mRecyclerView.setHasFixedSize(true);
-        abecedaryListAdapter = new AbecedaryCardListAdapter(getContext());
-        mRecyclerView.setAdapter(abecedaryListAdapter);
+        adapter = new GenericAdapter<cl.afubillaoliva.lsch.models.Abecedary>() {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                final View view = LayoutInflater.from(getContext()).inflate(R.layout.item_card, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, cl.afubillaoliva.lsch.models.Abecedary val, int position) {
+                final GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final TextView title = viewHolder.get(R.id.abecedary_letter);
+                title.setText(val.getLetter());
+                final ImageView image = viewHolder.get(R.id.abecedary_img);
+                Glide.with(Objects.requireNonNull(getContext()))
+                        .load(val.getImg())
+                        .centerCrop()
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(image);
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        if(position == 24){
+                            Toast.makeText(getContext(), "No hay palabras", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
+                            intent.putExtra("letter", getItem(position).getLetter());
+                            Log.d(MainActivity.TAG, "letter: " + getItem(position).getLetter());
+                            startActivity(intent);
+                        }
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+
+                    }
+                };
+            }
+        };
+        mRecyclerView.setAdapter(adapter);
         mRecyclerView.setNestedScrollingEnabled(false);
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         mRecyclerView.setLayoutManager(layoutManager);
-        abecedaryListAdapter.setRecyclerViewOnClickListenerHack(this);
 
         return view;
     }
@@ -111,7 +155,7 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
     }
 
     private void getData(){
-        Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
+        final Cache cache = new Cache(Objects.requireNonNull(getActivity()).getCacheDir(), MainActivity.cacheSize);
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
@@ -140,8 +184,8 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                 })
                 .build();
 
-        ApiService.AbecedaryService service = ApiClient.getClient(okHttpClient).create(ApiService.AbecedaryService.class);
-        Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> responseCall = service.getAbecedary();
+        final ApiService.AbecedaryService service = ApiClient.getClient(okHttpClient).create(ApiService.AbecedaryService.class);
+        final Call<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>> responseCall = service.getAbecedary();
 
         responseCall.enqueue(new Callback<ArrayList<cl.afubillaoliva.lsch.models.Abecedary>>() {
             @Override
@@ -150,11 +194,8 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if(response.isSuccessful()){
-                    ArrayList<cl.afubillaoliva.lsch.models.Abecedary> apiResponse = response.body();
-                    if(abecedaryListAdapter.getItemCount() != 0)
-                        abecedaryListAdapter.updateData(apiResponse);
-                    else
-                        abecedaryListAdapter.addData(apiResponse);
+                    final ArrayList<cl.afubillaoliva.lsch.models.Abecedary> apiResponse = response.body();
+                    adapter.addItems(apiResponse);
                 } else {
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
@@ -170,23 +211,6 @@ public class Abecedary extends Fragment implements RecyclerViewOnClickListenerHa
                 Toast.makeText(getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    public void onClickListener(View view, int position) {
-        if(position == 24){
-            Toast.makeText(getContext(), "No hay palabras", Toast.LENGTH_SHORT).show();
-        } else {
-            Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
-            intent.putExtra("letter", abecedaryListAdapter.getLetter(position));
-            Log.d(MainActivity.TAG, "letter: " + abecedaryListAdapter.getLetter(position));
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void onLongPressClickListener(View view, int position) {
-        Toast.makeText(getContext(), "Long", Toast.LENGTH_SHORT).show();
     }
 
     @Override

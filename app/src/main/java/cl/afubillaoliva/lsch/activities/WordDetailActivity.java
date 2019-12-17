@@ -37,8 +37,8 @@ import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
-import cl.afubillaoliva.lsch.utils.FavoriteContract;
-import cl.afubillaoliva.lsch.utils.FavoriteDatabaseHelper;
+import cl.afubillaoliva.lsch.utils.databases.FavoriteContract;
+import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
@@ -106,13 +106,16 @@ public class WordDetailActivity extends AppCompatActivity {
         if(file.exists())
             uri = Uri.parse(file.toString());
         else
-            uri = Uri.parse(word.getImages().get(0));
-
+            if(!word.getImages().isEmpty())
+                uri = Uri.parse(word.getImages().get(0));
+            else
+                uri = null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
         }
-        videoView.setVideoURI(uri);
+        if(uri != null)
+            videoView.setVideoURI(uri);
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -128,7 +131,6 @@ public class WordDetailActivity extends AppCompatActivity {
                 else videoView.start();
             }
         });
-        Log.d(MainActivity.TAG, word.getImages().get(0));
 
         final TextView description = findViewById(R.id.text_description);
         WordElementsListAdapter adapter;

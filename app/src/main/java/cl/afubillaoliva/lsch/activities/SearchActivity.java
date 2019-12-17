@@ -14,9 +14,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +30,14 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.adapters.HistoryAdapter;
+import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.adapters.SearchAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
-import cl.afubillaoliva.lsch.utils.HistoryContract;
-import cl.afubillaoliva.lsch.utils.HistoryDatabaseHelper;
+import cl.afubillaoliva.lsch.utils.GenericViewHolder;
+import cl.afubillaoliva.lsch.utils.databases.HistoryContract;
+import cl.afubillaoliva.lsch.utils.databases.HistoryDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
@@ -51,8 +55,10 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     private final Network network = new Network(context);
     private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
 
-    private final HistoryAdapter historyAdapter = new HistoryAdapter(context);
+    private GenericAdapter<String> historyAdapter;
     private SearchAdapter adapter;
+
+    private ArrayList<Word> apiResponse;
 
     private final LinearLayoutManager
             linearLayoutManager = new LinearLayoutManager(context),
@@ -70,8 +76,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         }
         setContentView(R.layout.search_activity_layout);
 
-        getData();
-
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         final SearchView searchView = mToolbar.findViewById(R.id.search_view);
@@ -87,7 +91,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         searchQueryText.setTypeface(tf);
         searchView.setFocusable(true);
         searchView.requestFocusFromTouch();
-
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
@@ -96,15 +99,13 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                 if(!exists(s)) //IF EXISTS IN HISTORY DB
                     databaseHelper.addHistory(s);
                 Log.d(MainActivity.HIS, "ADDED: " + s);
-                historyAdapter.clear();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
                 if(s.length() < 1){
-                    historyAdapter.clear();
-                    historyAdapter.addData(databaseHelper.getHistory());
+                    historyAdapter.addItems(databaseHelper.getHistory());
                     mRecyclerView.setVisibility(View.GONE);
                     mRecyclerViewHistory.setVisibility(View.VISIBLE);
                 } else {
@@ -116,38 +117,58 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             }
         });
 
-        adapter = new SearchAdapter(this);
-        adapter.setRecyclerViewOnClickListenerHack(this);
-
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
         mRecyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new SearchAdapter(context);
+        adapter.setRecyclerViewOnClickListenerHack(this);
         mRecyclerView.setAdapter(adapter);
-
-        historyAdapter.setRecyclerViewOnClickListenerHack(new RecyclerViewOnClickListenerHack() {
-
-            @Override
-            public void onClickListener(View view, int position) {
-                //TODO: IF ITEM EXIST, GO DIRECTLY TO ACTIVITY
-                searchView.setQuery(historyAdapter.get(position), false);
-            }
-
-            @Override
-            public void onLongPressClickListener(View view, int position) {
-                Toast.makeText(context, "Eliminado del historial", Toast.LENGTH_SHORT).show();
-                Log.d(MainActivity.HIS, "DELETED: " + historyAdapter.get(position));
-                databaseHelper.deleteHistory(historyAdapter.get(position));
-                historyAdapter.clear();
-                historyAdapter.addData(databaseHelper.getHistory());
-            }
-
-        });
 
         mRecyclerViewHistory.setHasFixedSize(true);
         mRecyclerViewHistory.setNestedScrollingEnabled(true);
         mRecyclerViewHistory.setLayoutManager(linearLayoutManager2);
-        historyAdapter.addData(databaseHelper.getHistory());
+        historyAdapter = new GenericAdapter<String>(databaseHelper.getHistory()) {
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
+                final View view = LayoutInflater.from(context).inflate(R.layout.search_list_item, parent, false);
+                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, String val, int position) {
+                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final ImageView imageView = viewHolder.get(R.id.search_suggest_type);
+                final TextView title = viewHolder.get(R.id.list_item_text);
+                if(mSharedPreferences.loadNightModeState())
+                    imageView.setImageResource(R.drawable.ic_access_time_white_24dp);
+                else
+                    imageView.setImageResource(R.drawable.ic_access_time_black_24dp);
+                title.setText(val);
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
+                    @Override
+                    public void onClickListener(View view, int position) {
+                        //TODO: IF ITEM EXIST, GO DIRECTLY TO ACTIVITY
+                        searchView.setQuery(historyAdapter.getItem(position), false);
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position) {
+                        Toast.makeText(context, "Eliminado del historial", Toast.LENGTH_SHORT).show();
+                        Log.d(MainActivity.HIS, "DELETED: " + historyAdapter.getItem(position));
+                        databaseHelper.deleteHistory(historyAdapter.getItem(position));
+                        historyAdapter.addItems(databaseHelper.getHistory());
+                    }
+                };
+            }
+        };
+        historyAdapter.addItems(databaseHelper.getHistory());
         mRecyclerViewHistory.setAdapter(historyAdapter);
+
+        getData();
     }
 
     public boolean exists(String searchItem) {
@@ -175,7 +196,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     private void getData(){
         Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -187,9 +208,9 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                         if (network.isNetworkAvailable()) {
                             request = request
                                     .newBuilder()
-                                    .header("Cache-Control", "public, max-age=" + 5)
+                                    .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                     .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
+                            Log.d(MainActivity.TAG, "using cache that was stored 5 minutes ago");
                         } else {
                             request = request
                                     .newBuilder()
@@ -209,11 +230,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             @Override
             public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response) {
                 if (response.isSuccessful()) {
-                    ArrayList<Word> apiResponse = response.body();
-                    if (adapter.getItemCount() != 0)
-                        adapter.update(getApplicationContext(), apiResponse);
-                    else
-                        adapter.setDataset(getApplicationContext(), apiResponse);
+                    apiResponse = response.body();
+                    adapter.setDataset(context,apiResponse);
                 } else
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
             }
@@ -261,6 +279,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     }
 
     @Override
-    public void onLongPressClickListener(View view, int position) {}
+    public void onLongPressClickListener(View view, int position) {
 
+    }
 }

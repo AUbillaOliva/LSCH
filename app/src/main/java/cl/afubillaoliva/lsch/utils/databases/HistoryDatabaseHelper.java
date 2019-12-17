@@ -1,15 +1,12 @@
-package cl.afubillaoliva.lsch.utils;
+package cl.afubillaoliva.lsch.utils.databases;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
-
-import cl.afubillaoliva.lsch.MainActivity;
 
 public class HistoryDatabaseHelper extends SQLiteOpenHelper {
 

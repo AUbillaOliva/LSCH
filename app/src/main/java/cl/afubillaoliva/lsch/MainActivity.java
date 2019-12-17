@@ -33,6 +33,10 @@ import cl.afubillaoliva.lsch.fragments.Expressions;
 import cl.afubillaoliva.lsch.fragments.Themes;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
+/*
+TODO'S: GENERIFY getData FUNCTION FOR ALL ACTIVITIES
+ */
+
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "API_RESPONSE";

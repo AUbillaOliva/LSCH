@@ -1,4 +1,4 @@
-package cl.afubillaoliva.lsch.utils;
+package cl.afubillaoliva.lsch.utils.databases;
 
 import android.content.ContentValues;
 import android.content.Context;
