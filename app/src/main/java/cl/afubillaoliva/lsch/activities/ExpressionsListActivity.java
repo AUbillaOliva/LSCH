@@ -170,7 +170,6 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if (response.isSuccessful()) {
                     apiResponse = response.body();
-
                     adapter.addItems(apiResponse);
                 } else {
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());

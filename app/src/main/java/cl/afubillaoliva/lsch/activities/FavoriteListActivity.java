@@ -48,6 +48,10 @@ public class FavoriteListActivity extends AppCompatActivity {
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         final Toolbar mToolbar = findViewById(R.id.toolbar);
 
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
         mToolbar.setTitle(context.getString(R.string.favorites));
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);

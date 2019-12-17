@@ -131,9 +131,9 @@ public class AbecedaryListActivity extends AppCompatActivity {
     }
 
     private void getData(){
-        Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
+        final Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -160,8 +160,8 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 })
                 .build();
 
-        ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
-        Call<ArrayList<Word>> responseCall;
+        final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
+        final Call<ArrayList<Word>> responseCall;
 
         if(letter == null && theme == null){
             responseCall = service.getWords(null, null);
@@ -180,18 +180,13 @@ public class AbecedaryListActivity extends AppCompatActivity {
         responseCall.enqueue(new Callback<ArrayList<Word>>() {
             @Override
             public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response) {
+                mSwipeRefreshLayout.setRefreshing(false);
+                mProgressBar.setVisibility(View.GONE);
+                mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if (response.isSuccessful()) {
-                    assert response.body() != null;
                     apiResponse = response.body();
-
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    mProgressBar.setVisibility(View.GONE);
-                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     adapter.addItems(apiResponse);
                 } else {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                    mProgressBar.setVisibility(View.GONE);
-                    mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }

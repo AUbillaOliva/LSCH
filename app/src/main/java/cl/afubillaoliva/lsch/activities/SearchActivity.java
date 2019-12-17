@@ -194,7 +194,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     }
 
     private void getData(){
-        Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
+        final Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
@@ -223,8 +223,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                 })
                 .build();
 
-        ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
-        Call<ArrayList<Word>> responseCall = service.getWords(null, null);
+        final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
+        final Call<ArrayList<Word>> responseCall = service.getWords(null, null);
 
         responseCall.enqueue(new Callback<ArrayList<Word>>() {
             @Override

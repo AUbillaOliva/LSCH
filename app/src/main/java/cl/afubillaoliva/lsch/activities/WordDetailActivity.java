@@ -79,6 +79,10 @@ public class WordDetailActivity extends AppCompatActivity {
         mDb = dbHelper.getWritableDatabase();
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
         mToolbar.setTitle(word.getTitle());
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -144,7 +148,7 @@ public class WordDetailActivity extends AppCompatActivity {
             adapter.addData(descriptions);
             adapter.notifyDataSetChanged();
             defintionList.setAdapter(adapter);
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             defintionList.setLayoutManager(linearLayoutManager);
         }
 
@@ -158,7 +162,7 @@ public class WordDetailActivity extends AppCompatActivity {
             adapter.addData(synonyms);
             adapter.notifyDataSetChanged();
             sinList.setAdapter(adapter);
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             sinList.setLayoutManager(linearLayoutManager);
         }
 
@@ -172,7 +176,7 @@ public class WordDetailActivity extends AppCompatActivity {
             adapter.addData(antonyms);
             adapter.notifyDataSetChanged();
             antList.setAdapter(adapter);
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+            final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             antList.setLayoutManager(linearLayoutManager);
         }
 
@@ -185,9 +189,9 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     private void getData(final Word url) {
-        Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
+        final Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
                 .addInterceptor(new Interceptor() {
                     @NonNull
@@ -214,8 +218,8 @@ public class WordDetailActivity extends AppCompatActivity {
                 })
                 .build();
 
-        ApiService.WordService service = ApiClient.getClient(okHttpClient).create(ApiService.WordService.class);
-        Call<ResponseBody> call = service.getVideo(url.getImages().get(0));
+        final ApiService.WordService service = ApiClient.getClient(okHttpClient).create(ApiService.WordService.class);
+        final Call<ResponseBody> call = service.getVideo(url.getImages().get(0));
 
         call.enqueue(new Callback<ResponseBody>() {
             @SuppressLint("StaticFieldLeak")
@@ -223,7 +227,6 @@ public class WordDetailActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<ResponseBody> call, @NonNull final Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     Log.d(MainActivity.TAG, "server contacted and has file");
-
                     new AsyncTask<Void, Void, Void>() {
                         @Override
                         protected Void doInBackground(Void... voids) {
@@ -251,7 +254,7 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     private void deleteVideo(String fileName){
-        File file = new File(getExternalFilesDir(null) + File.separator + fileName + ".mp4");
+        final File file = new File(getExternalFilesDir(null) + File.separator + fileName + ".mp4");
         if (file.exists()) {
             if(file.delete())
                 Log.d(MainActivity.TAG, "File deleted");
@@ -264,7 +267,7 @@ public class WordDetailActivity extends AppCompatActivity {
         if(fileName.contains("/")){
             fileName = fileName.replaceAll("[^a-zA-Z0-9]", "");
         }
-        File file = new File(getExternalFilesDir(null) + File.separator + fileName + ".mp4");
+        final File file = new File(getExternalFilesDir(null) + File.separator + fileName + ".mp4");
         long fileSizeDownloaded = 0;
         long fileSize = body.contentLength();
         byte[] fileReader = new byte[4096*1000];
