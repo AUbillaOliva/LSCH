@@ -22,4 +22,7 @@
     <string name="third_party_libraries_title">Librerias de Terceros</string>
     <string name="third_party_libraries_subtitle">Gracias a la ayuda de esta libreria!</string>
     <string name="search_section">Búsqueda</string>
+    <string name="search_check_text">Por favor, revisa que todo esté bien escrito o prueba con una palabra clave diferente.</string>
+    <string name="no_favorites">Aún no tienes favoritos?</string>
+    <string name="add_favorites">Agrega palabras a tus favoritos y las verás aquí, incluso sin internet.</string>
 </resources>

@@ -81,6 +81,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         return wordListFiltered.get(position);
     }
 
+    public boolean isFilterEmpty() {
+        return wordListFiltered.size() < 1;
+    }
+
+    public boolean isEmpty(){
+        return dataset.size() < 1;
+    }
+
     @NonNull
     @Override
     public SearchAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -134,7 +142,6 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                     ArrayList<Word> filteredList = new ArrayList<>();
                     for (Word word : dataset) {
                         String title = word.getTitle().toLowerCase();
-                        title = title.replace(" ", "");
                         if(charString.length() < 4){
                             if (stripDiacritics(title).startsWith(stripDiacritics(charString.toLowerCase()))) filteredList.add(word);
                         } else {

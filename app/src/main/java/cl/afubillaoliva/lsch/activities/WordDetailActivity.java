@@ -101,6 +101,10 @@ public class WordDetailActivity extends AppCompatActivity {
 
         final VideoView videoView = findViewById(R.id.video);
 
+        /*
+        * TODO: LOADING VIDEO, LOAD VIDEO WHEN IT'S NOT DISPLAYED ON IMAGE VIEW
+        * */
+
         String fileName = word.getTitle();
         if(fileName.contains("/")){
             fileName = fileName.replaceAll("[^a-zA-Z0-9]", "");
@@ -186,6 +190,14 @@ public class WordDetailActivity extends AppCompatActivity {
         } else {
             category.setText(word.getCategory()[0]);
         }*/
+    }
+
+    private ArrayList<String> errorOptions(){
+        ArrayList<String> options = new ArrayList<>();
+        options.add("Ortografía");
+        options.add("Contenido");
+        options.add("Video");
+        return options;
     }
 
     private void getData(final Word url) {
@@ -383,10 +395,11 @@ public class WordDetailActivity extends AppCompatActivity {
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.report:
-                final Intent report = new Intent(context, ReportActivity.class);
+                final Intent report = new Intent(context, ListActivity.class);
                 report.putExtra("element", word);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                report.putExtra("data", errorOptions());
                 startActivity(report);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.send:
                 //TODO: IMPROVE TEXT

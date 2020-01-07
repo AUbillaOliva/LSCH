@@ -87,7 +87,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new GenericAdapter<Word>(apiResponse) {
+        adapter = new GenericAdapter<Word>() {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 final View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
@@ -118,9 +118,9 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 };
             }
         };
-        mRecyclerView.setAdapter(adapter);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setAdapter(adapter);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {

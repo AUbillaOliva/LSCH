@@ -30,11 +30,17 @@ import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.models.SettingsItem;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import cl.afubillaoliva.lsch.utils.databases.HistoryDatabaseHelper;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
+
+    private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
+
+    private TextView title, subtitle;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -53,6 +59,11 @@ public class SettingsActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        if(mSharedPreferences.loadNightModeState())
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
+        else
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
 
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -89,7 +100,6 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
-                //return new MyViewHolder(view, recyclerViewOnClickListenerHack);
                 return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
             }
 
@@ -107,7 +117,15 @@ public class SettingsActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
                     public void onClickListener(View view, int position) {
-                        Toast.makeText(context, "Hello World", Toast.LENGTH_SHORT).show();
+                        switch (position){
+                            case 0:
+                                Intent intent = new Intent(context, ListActivity.class);
+                                intent.putExtra("activity", getItem(position).getTitle());
+                                intent.putExtra("data", libraries());
+                                startActivity(intent);
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
+                        }
                     }
 
                     @Override
@@ -139,7 +157,7 @@ public class SettingsActivity extends AppCompatActivity {
         searchList.setNestedScrollingEnabled(true);
         final LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(context);
         searchList.setLayoutManager(linearLayoutManager2);
-        GenericAdapter<SettingsItem> searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()) {
+        final GenericAdapter<SettingsItem> searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()) {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
@@ -149,9 +167,9 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position) {
                 GenericViewHolder myViewHolder = (GenericViewHolder) holder;
-                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
-                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle = myViewHolder.get(R.id.list_item_subtitle);
                 subtitle.setText(val.getSubtitle());
                 if(!context.getDatabasePath("history.db").exists()){
                     if(mSharedPreferences.loadNightModeState()){
@@ -173,7 +191,13 @@ public class SettingsActivity extends AppCompatActivity {
                             case 0:
                                 if(context.getDatabasePath("history.db").exists()) {
                                     context.deleteDatabase("history.db");
-                                    Toast.makeText(context, "Historial eliminado", Toast.LENGTH_SHORT).show();
+                                    if(mSharedPreferences.loadNightModeState()){
+                                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                                    } else {
+                                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                                    }
                                 }
                                 break;
                         }
@@ -198,10 +222,25 @@ public class SettingsActivity extends AppCompatActivity {
             public int getItemCount() {
                 return super.getItemCount();
             }
+
         };
         searchList.setAdapter(searchAdapter);
     }
 
+    public ArrayList<String> libraries(){
+        ArrayList<String> items = new ArrayList<>();
+        items.add("Retrofit");
+        items.add("Retrofit Converter Gson");
+        items.add("Glide");
+        items.add("Gson");
+        items.add("RecyclerView-v7");
+        items.add("CardView-v7");
+        items.add("Android AppCompat-v7");
+        items.add("Android Design Library");
+        items.add("Android Support Compat");
+        items.add("Android Support Library");
+        return items;
+    }
     private ArrayList<SettingsItem> aboutListItems(){
         ArrayList<SettingsItem> items = new ArrayList<>();
 

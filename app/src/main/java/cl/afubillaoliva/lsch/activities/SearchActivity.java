@@ -19,7 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,11 +57,18 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
     private final Context context = this;
 
+    private boolean loaded = false;
+
     private final Network network = new Network(context);
     private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
 
+
     private GenericAdapter<String> historyAdapter;
     private SearchAdapter adapter;
+    private RecyclerView mRecyclerView;
+    private ProgressBar mProgressBar;
+    private FrameLayout loadingFrame;
+    private LinearLayout connectionFrame;
 
     private ArrayList<Word> apiResponse;
 
@@ -77,13 +89,27 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         setContentView(R.layout.search_activity_layout);
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
-        final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView = findViewById(R.id.recycler_view);
         final SearchView searchView = mToolbar.findViewById(R.id.search_view);
         final RecyclerView mRecyclerViewHistory = findViewById(R.id.recycler_view_2);
+        mProgressBar = findViewById(R.id.progress_circular);
+        loadingFrame = findViewById(R.id.loading_frame);
+        connectionFrame = findViewById(R.id.connection_frame);
+        final TextView connectionText = findViewById(R.id.connection_search_result_text);
+        final ImageView searchCheckImage = findViewById(R.id.search_check_image);
 
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        if(mSharedPreferences.loadNightModeState()) {
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
+            searchCheckImage.setImageResource(R.drawable.ic_search_white_24dp);
+        }
+        else {
+            mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
+            searchCheckImage.setImageResource(R.drawable.ic_search_black_24dp);
+        }
 
         final TextView searchQueryText = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         final Typeface tf = ResourcesCompat.getFont(this,R.font.product_sans_regular);
@@ -94,7 +120,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                //TODO: IF WORD EXISTS, START ACTIVITY
                 searchView.clearFocus();
                 if(!exists(s)) //IF EXISTS IN HISTORY DB
                     databaseHelper.addHistory(s);
@@ -103,15 +128,29 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             }
 
             @Override
-            public boolean onQueryTextChange(String s) {
+            public boolean onQueryTextChange(final String s) {
+                Filter.FilterListener listener = new Filter.FilterListener() {
+                    @Override
+                    public void onFilterComplete(int count) {
+                        if(adapter.getItemCount() <= 0){
+                            Log.d(MainActivity.UI, "NO RESULTS " + s);
+                            connectionFrame.setVisibility(View.VISIBLE);
+                            connectionText.setText("No se encontraron resultados para \r\n" + '"' + s + '"');
+                        } else {
+                            connectionFrame.setVisibility(View.GONE);
+                            Log.d(MainActivity.UI, "RESULTS " + s);
+                        }
+                    }
+                };
                 if(s.length() < 1){
                     historyAdapter.addItems(databaseHelper.getHistory());
                     mRecyclerView.setVisibility(View.GONE);
                     mRecyclerViewHistory.setVisibility(View.VISIBLE);
+                    connectionFrame.setVisibility(View.GONE);
                 } else {
                     mRecyclerViewHistory.setVisibility(View.GONE);
                     mRecyclerView.setVisibility(View.VISIBLE);
-                    adapter.getFilter().filter(s);
+                    adapter.getFilter().filter(s, listener);
                 }
                 return false;
             }
@@ -122,7 +161,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         mRecyclerView.setLayoutManager(linearLayoutManager);
         adapter = new SearchAdapter(context);
         adapter.setRecyclerViewOnClickListenerHack(this);
-        mRecyclerView.setAdapter(adapter);
+
 
         mRecyclerViewHistory.setHasFixedSize(true);
         mRecyclerViewHistory.setNestedScrollingEnabled(true);
@@ -130,12 +169,12 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         historyAdapter = new GenericAdapter<String>(databaseHelper.getHistory()) {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.search_list_item, parent, false);
+                final View view = LayoutInflater.from(context).inflate(R.layout.history_list_item, parent, false);
                 return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, String val, int position) {
+            public void onBindData(RecyclerView.ViewHolder holder, final String val, int position) {
                 GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final ImageView imageView = viewHolder.get(R.id.search_suggest_type);
                 final TextView title = viewHolder.get(R.id.list_item_text);
@@ -143,6 +182,14 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                     imageView.setImageResource(R.drawable.ic_access_time_white_24dp);
                 else
                     imageView.setImageResource(R.drawable.ic_access_time_black_24dp);
+                final ImageView deleteImage = viewHolder.get(R.id.delete_item);
+                deleteImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        databaseHelper.deleteHistory(val);
+                        historyAdapter.addItems(databaseHelper.getHistory());
+                    }
+                });
                 title.setText(val);
             }
 
@@ -168,7 +215,12 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         historyAdapter.addItems(databaseHelper.getHistory());
         mRecyclerViewHistory.setAdapter(historyAdapter);
 
+
         getData();
+        if(loaded)
+            Log.d(MainActivity.TAG, "data loaded");
+        else
+            Log.d(MainActivity.TAG, "data not loaded");
     }
 
     public boolean exists(String searchItem) {
@@ -183,7 +235,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         };
 
         String selection = HistoryContract.HistoryEntry.COLUMN_HISTORY_ID + " =?";
-        String[] selectionArgs = { searchItem };
+        String[] selectionArgs = { searchItem.toLowerCase() };
         String limit = "1";
 
         Cursor cursor = database.query(HistoryContract.HistoryEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
@@ -232,13 +284,16 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                 if (response.isSuccessful()) {
                     apiResponse = response.body();
                     adapter.setDataset(context,apiResponse);
+                    mRecyclerView.setAdapter(adapter);
                 } else
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                loadingFrame.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(@NonNull Call<ArrayList<Word>> call, @NonNull Throwable t) {
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+                loadingFrame.setVisibility(View.GONE);
             }
         });
     }

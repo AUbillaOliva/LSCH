@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Objects;
@@ -25,13 +27,12 @@ import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
-// TODO: IF ARE NOT FAVORITES YET, SHOW LAYOUT
-
 public class FavoriteListActivity extends AppCompatActivity {
 
     private final Context context = this;
     private GenericAdapter<Word> adapter;
     private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
+    private LinearLayout placeHolderLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -47,11 +48,16 @@ public class FavoriteListActivity extends AppCompatActivity {
 
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         final Toolbar mToolbar = findViewById(R.id.toolbar);
+        placeHolderLayout = findViewById(R.id.empty_favs_frame);
+        final ImageView favImageHolder = findViewById(R.id.empty_fav_image);
 
-        if(mSharedPreferences.loadNightModeState())
+        if(mSharedPreferences.loadNightModeState()){
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
-        else
+            favImageHolder.setImageResource(R.drawable.ic_favorite_border_white_24dp);
+        } else {
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
+            favImageHolder.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+        }
         mToolbar.setTitle(context.getString(R.string.favorites));
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
@@ -93,6 +99,10 @@ public class FavoriteListActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setAdapter(adapter);
 
+        if(adapter.getItemCount() < 1){
+            placeHolderLayout.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
@@ -107,6 +117,9 @@ public class FavoriteListActivity extends AppCompatActivity {
                 adapter.addItems(favoriteDatabaseHelper.getAllFavorite());
                 adapter.notifyDataSetChanged();
             }
+        }
+        if(adapter.getItemCount() < 1){
+            placeHolderLayout.setVisibility(View.VISIBLE);
         }
     }
 
