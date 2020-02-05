@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_gravity="center"
+    android:background="?attr/backgroundColor"
+    android:layout_marginHorizontal="25dp"
+    app:cardCornerRadius="15dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="15dp">
+
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textColor="?attr/textColor"
+            android:textSize="@dimen/h6_size"
+            android:fontFamily="@font/product_sans"
+            android:textStyle="bold"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/dialog_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textColor="?attr/textColor"
+            android:textSize="@dimen/subtitle_1_size"
+            android:layout_gravity="center" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/confirm_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_gravity="center"
+            android:paddingStart="20dp"
+            android:textSize="12sp"
+            android:text=" ELIMINAR"
+            android:textAlignment="center"
+            android:isScrollContainer="false"
+            android:fontFamily="@font/product_sans"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@color/colorAccent"/>
+
+        <TextView
+            android:id="@+id/negative_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="?attr/textColor"
+            android:textSize="12sp"
+            android:fontFamily="@font/product_sans"
+            android:textStyle="bold"
+            android:layout_margin="10dp"/>
+
+
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

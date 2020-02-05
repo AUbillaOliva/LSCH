@@ -11,17 +11,17 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
-import android.widget.VideoView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,6 +37,7 @@ import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.tools.Player;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteContract;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.Network;
@@ -97,9 +98,10 @@ public class WordDetailActivity extends AppCompatActivity {
 
         final RecyclerView antList = findViewById(R.id.ant_list);
         antList.setNestedScrollingEnabled(true);
-        antList.setHasFixedSize(true);
+        antList.setHasFixedSize(false);
 
-        final VideoView videoView = findViewById(R.id.video);
+        final Player videoView = findViewById(R.id.player);
+        final ImageView errorThumb = findViewById(R.id.error_thumb);
 
         /*
         * TODO: LOADING VIDEO, LOAD VIDEO WHEN IT'S NOT DISPLAYED ON IMAGE VIEW
@@ -124,6 +126,11 @@ public class WordDetailActivity extends AppCompatActivity {
         }
         if(uri != null)
             videoView.setVideoURI(uri);
+        else {
+            videoView.setVisibility(View.GONE);
+            errorThumb.setVisibility(View.VISIBLE);
+        }
+
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -131,6 +138,7 @@ public class WordDetailActivity extends AppCompatActivity {
                 mp.setVolume(0f,0f);
             }
         });
+        videoView.changeVideoSize(544,360);
         videoView.start();
         videoView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,12 +148,11 @@ public class WordDetailActivity extends AppCompatActivity {
             }
         });
 
-        final TextView description = findViewById(R.id.text_description);
+        final LinearLayout description = findViewById(R.id.descriptions_frame);
         WordElementsListAdapter adapter;
-        if(word.getDescription().size() == 0){
-            defintionList.setVisibility(View.GONE);
+        if(word.getDescription().size() == 0)
             description.setVisibility(View.GONE);
-        } else {
+        else {
             final ArrayList<String> descriptions = word.getDescription();
             Log.i(MainActivity.TAG, String.valueOf(descriptions));
             adapter = new WordElementsListAdapter();
@@ -156,11 +163,10 @@ public class WordDetailActivity extends AppCompatActivity {
             defintionList.setLayoutManager(linearLayoutManager);
         }
 
-        final TextView sin = findViewById(R.id.text_synonyms);
-        if(word.getSin().size() == 0){
-            sinList.setVisibility(View.GONE);
+        final LinearLayout sin = findViewById(R.id.synonyms_frame);
+        if(word.getSin().size() == 0)
             sin.setVisibility(View.GONE);
-        } else {
+        else {
             final ArrayList<String> synonyms = word.getSin();
             adapter = new WordElementsListAdapter();
             adapter.addData(synonyms);
@@ -170,11 +176,10 @@ public class WordDetailActivity extends AppCompatActivity {
             sinList.setLayoutManager(linearLayoutManager);
         }
 
-        final TextView ant = findViewById(R.id.text_antonyms);
-        if(word.getAnt().size() == 0){
+        final LinearLayout ant = findViewById(R.id.antonyms_frame);
+        if(word.getAnt().size() == 0)
             ant.setVisibility(View.GONE);
-            antList.setVisibility(View.GONE);
-        } else {
+        else {
             final ArrayList<String> antonyms = word.getAnt();
             adapter = new WordElementsListAdapter();
             adapter.addData(antonyms);

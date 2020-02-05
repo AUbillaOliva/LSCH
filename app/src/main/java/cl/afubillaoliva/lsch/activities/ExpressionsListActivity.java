@@ -3,12 +3,12 @@ package cl.afubillaoliva.lsch.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -57,6 +57,10 @@ public class ExpressionsListActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        final Intent intent = getIntent();
+        category = intent.getStringExtra("expression");
+        getData();
+
         final SharedPreference mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
@@ -65,9 +69,6 @@ public class ExpressionsListActivity extends AppCompatActivity {
         }
         setContentView(R.layout.list_activity);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-
-        final Intent intent = getIntent();
-        category = intent.getStringExtra("expression");
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
@@ -85,7 +86,7 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new GenericAdapter<Expressions>(apiResponse) {
+        adapter = new GenericAdapter<Expressions>() {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
@@ -126,7 +127,6 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 getData();
             }
         });
-        getData();
     }
 
     public void getData(){

@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryLight</item>
         <item name="colorPrimaryDark">@color/colorSecondaryLight</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -14,7 +14,7 @@
         <item name="textDisabled">@color/textDisabledLight</item>
     </style>
 
-    <style name="AppThemeDark" parent="Theme.AppCompat.NoActionBar">
+    <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
         <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorSecondaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -38,6 +38,10 @@
         <item name="android:fontStyle" tools:targetApi="o">@font/product_sans_bold</item>
         <item name="android:textSize">@dimen/h6_size</item>
         <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+    <style name="FloatingActionButtonLight" >
+        <item name="android:background">@color/colorAccent</item>
     </style>
 
     <style name="SearchViewTheme" parent="Widget.AppCompat.SearchView.ActionBar">

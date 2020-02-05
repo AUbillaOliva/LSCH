@@ -25,4 +25,8 @@
     <string name="search_check_text">Por favor, revisa que todo esté bien escrito o prueba con una palabra clave diferente.</string>
     <string name="no_favorites">Aún no tienes favoritos?</string>
     <string name="add_favorites">Agrega palabras a tus favoritos y las verás aquí, incluso sin internet.</string>
+    <string name="positive_history_dialog_button">ELIMINAR</string>
+    <string name="negative_dialog_button">CANCELAR</string>
+    <string name="history_dialog_title">¿Eliminar historial?</string>
+    <string name="history_dialog_subtitle">Tu historial de busqueda será eliminado.</string>
 </resources>

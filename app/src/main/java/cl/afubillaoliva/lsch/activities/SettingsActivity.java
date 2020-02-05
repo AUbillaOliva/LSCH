@@ -1,15 +1,19 @@
 package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +22,8 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -189,16 +194,48 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onClickListener(View view, int position) {
                         switch (position){
                             case 0:
+                                //TODO: SHOW CONFIRMATION DIALOG
+
                                 if(context.getDatabasePath("history.db").exists()) {
-                                    context.deleteDatabase("history.db");
-                                    if(mSharedPreferences.loadNightModeState()){
-                                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
-                                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
-                                    } else {
-                                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
-                                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
-                                    }
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_history_dialog_button);
+                                    positiveButton.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            context.deleteDatabase("history.db");
+                                            if(mSharedPreferences.loadNightModeState()){
+                                                title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                                                subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                                            } else {
+                                                title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                                                subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                                            }
+                                            dialog.dismiss();
+                                        }
+                                    });
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.history_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.history_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+
                                 }
+
                                 break;
                         }
                     }

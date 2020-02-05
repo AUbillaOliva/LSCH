@@ -6,34 +6,42 @@
     android:orientation="vertical"
     android:background="?attr/backgroundColor">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"/>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
                 android:layout_marginBottom="20dp">
 
-                <VideoView
-                    android:id="@+id/video"
+                <ImageView
+                    android:id="@+id/error_thumb"
                     android:layout_width="match_parent"
-                    android:layout_height="283dp" />
+                    android:layout_height="273dp"
+                    android:src="@drawable/error_thumb"
+                    android:background="@android:color/black"
+                    android:visibility="gone"/>
 
-            </android.support.v7.widget.CardView>
+                <cl.afubillaoliva.lsch.tools.Player
+                    android:id="@+id/player"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp" />
+
+            </androidx.cardview.widget.CardView>
 
             <LinearLayout
                 android:paddingHorizontal="15dp"
@@ -42,34 +50,36 @@
                 android:layout_height="wrap_content"
                 tools:targetApi="o">
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/descriptions_frame"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:text="@string/descripcion"
-                    android:textColor="?attr/textColor"
-                    android:textSize="@dimen/h6_size"/>
+                    android:orientation="vertical"
+                    android:layout_marginBottom="20dp">
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/definitions_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    <TextView
+                        android:id="@+id/text_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:text="@string/descripcion"
+                        android:textColor="?attr/textColor"
+                        android:textSize="@dimen/h6_size"/>
 
-                <TextView
-                    android:id="@+id/text_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/textColor"
-                    android:textStyle="italic"
-                    android:textSize="@dimen/body_1_size"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/definitions_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
 
                 <LinearLayout
-                    android:layout_marginBottom="20dp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <LinearLayout
+                        android:id="@+id/synonyms_frame"
                         android:layout_marginEnd="60dp"
                         android:orientation="vertical"
                         android:gravity="start"
@@ -85,14 +95,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
-                        <android.support.v7.widget.RecyclerView
+                        <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/sin_list"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content" />
 
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/antonyms_frame"
                         android:orientation="vertical"
                         android:gravity="end"
                         android:layout_width="wrap_content"
@@ -107,7 +118,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
-                        <android.support.v7.widget.RecyclerView
+                        <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/ant_list"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
@@ -120,6 +131,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

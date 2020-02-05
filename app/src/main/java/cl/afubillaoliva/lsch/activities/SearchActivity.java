@@ -6,13 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,8 +23,6 @@ import android.widget.Filter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,8 +55,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
     private final Context context = this;
 
-    private boolean loaded = false;
-
     private final Network network = new Network(context);
     private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
 
@@ -66,7 +62,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     private GenericAdapter<String> historyAdapter;
     private SearchAdapter adapter;
     private RecyclerView mRecyclerView;
-    private ProgressBar mProgressBar;
     private FrameLayout loadingFrame;
     private LinearLayout connectionFrame;
 
@@ -80,6 +75,8 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        getData();
+
         final SharedPreference mSharedPreferences = new SharedPreference(this);
         if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
@@ -92,7 +89,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         mRecyclerView = findViewById(R.id.recycler_view);
         final SearchView searchView = mToolbar.findViewById(R.id.search_view);
         final RecyclerView mRecyclerViewHistory = findViewById(R.id.recycler_view_2);
-        mProgressBar = findViewById(R.id.progress_circular);
         loadingFrame = findViewById(R.id.loading_frame);
         connectionFrame = findViewById(R.id.connection_frame);
         final TextView connectionText = findViewById(R.id.connection_search_result_text);
@@ -111,7 +107,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             searchCheckImage.setImageResource(R.drawable.ic_search_black_24dp);
         }
 
-        final TextView searchQueryText = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        final TextView searchQueryText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         final Typeface tf = ResourcesCompat.getFont(this,R.font.product_sans_regular);
         searchQueryText.setTextSize(16);
         searchQueryText.setTypeface(tf);
@@ -121,7 +117,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             @Override
             public boolean onQueryTextSubmit(String s) {
                 searchView.clearFocus();
-                if(!exists(s)) //IF EXISTS IN HISTORY DB
+                if(exists(s)) //IF EXISTS IN HISTORY DB
                     databaseHelper.addHistory(s);
                 Log.d(MainActivity.HIS, "ADDED: " + s);
                 return false;
@@ -216,33 +212,27 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         mRecyclerViewHistory.setAdapter(historyAdapter);
 
 
-        getData();
-        if(loaded)
-            Log.d(MainActivity.TAG, "data loaded");
-        else
-            Log.d(MainActivity.TAG, "data not loaded");
     }
 
     public boolean exists(String searchItem) {
 
-        SQLiteDatabase database = databaseHelper.getReadableDatabase();
+        SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
-        String[] projection = {
+        final String[] projection = {
                 HistoryContract.HistoryEntry._ID,
                 HistoryContract.HistoryEntry.COLUMN_HISTORY_ID,
                 HistoryContract.HistoryEntry.COLUMN_HISTORY_TITLE
 
         };
 
-        String selection = HistoryContract.HistoryEntry.COLUMN_HISTORY_ID + " =?";
-        String[] selectionArgs = { searchItem.toLowerCase() };
-        String limit = "1";
+        final String selection = HistoryContract.HistoryEntry.COLUMN_HISTORY_ID + " =?";
+        final String[] selectionArgs = { searchItem };
+        final String limit = "1";
 
-        Cursor cursor = database.query(HistoryContract.HistoryEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
-        boolean exists = (cursor.getCount() > 0);
+        final Cursor cursor = database.query(HistoryContract.HistoryEntry.TABLE_NAME, projection, selection, selectionArgs, null, null, null, limit);
+        final boolean exists = (cursor.getCount() > 0);
         cursor.close();
-
-        return exists;
+        return !exists;
     }
 
     private void getData(){
@@ -325,7 +315,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
     @Override
     public void onClickListener(View view, int position) {
-        if(!exists(adapter.get(position).getTitle()))
+        if(exists(adapter.get(position).getTitle()))
             databaseHelper.addHistory(adapter.get(position).getTitle());
         Intent intent = new Intent(context, WordDetailActivity.class);
         intent.putExtra("position", adapter.get(position));

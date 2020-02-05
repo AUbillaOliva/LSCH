@@ -3,17 +3,7 @@ package cl.afubillaoliva.lsch.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.annotation.NonNull;
-import android.util.Log;
-
-import java.io.IOException;
-import java.util.Objects;
-
-import cl.afubillaoliva.lsch.MainActivity;
-import okhttp3.Cache;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import androidx.annotation.NonNull;
 
 public class Network {
 

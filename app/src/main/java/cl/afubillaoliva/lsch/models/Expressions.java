@@ -1,11 +1,12 @@
 package cl.afubillaoliva.lsch.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Expressions implements Serializable {
 
     private String title;
-    private String[] images, category;
+    private ArrayList<String> images, category;
 
     public String getTitle() {
         return title;
@@ -15,21 +16,19 @@ public class Expressions implements Serializable {
         this.title = title;
     }
 
-    public String[] getImages() {
+    public ArrayList<String> getImages() {
         return images;
     }
 
-    public void setImages(String[] images) {
+    public void setImages(ArrayList<String> images) {
         this.images = images;
     }
 
-    public String[] getCategory() {
+    public ArrayList<String> getCategory() {
         return category;
     }
 
-    public void setCategory(String[] category) {
+    public void setCategory(ArrayList<String> category) {
         this.category = category;
     }
-
-
 }
