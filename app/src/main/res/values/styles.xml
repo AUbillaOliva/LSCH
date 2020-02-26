@@ -12,6 +12,8 @@
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceLight</item>
         <item name="subtitleTextColor">@color/subtitleTextColorLight</item>
         <item name="textDisabled">@color/textDisabledLight</item>
+        <item name="editTextColor">@color/textDisabledLight</item>
+        <item name="boxStrokeColor">@color/textDisabledLight</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.MaterialComponents.NoActionBar">
@@ -26,6 +28,8 @@
         <item name="android:titleTextAppearance">@style/ToolbarTypefaceDark</item>
         <item name="subtitleTextColor">@color/subtitleTextColorDark</item>
         <item name="textDisabled">@color/textDisabledDark</item>
+        <item name="editTextColor">@color/textDisabledDark</item>
+        <item name="boxStrokeColor">@color/textDisabledDark</item>
     </style>
 
     <style name="ToolbarTypefaceLight" >
@@ -39,7 +43,7 @@
         <item name="android:textSize">@dimen/h6_size</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
-    
+
     <style name="FloatingActionButtonLight" >
         <item name="android:background">@color/colorAccent</item>
     </style>
