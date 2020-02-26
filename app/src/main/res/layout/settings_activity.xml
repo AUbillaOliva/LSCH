@@ -23,190 +23,261 @@
 
     </androidx.appcompat.widget.Toolbar>
 
-    <androidx.cardview.widget.CardView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:cardBackgroundColor="?attr/colorPrimary"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="1dp">
+        android:layout_height="wrap_content">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="15dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <!--GENERAL-->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_general_label"
-                android:textStyle="bold"
-                android:textSize="@dimen/body_1_size"
-                android:textColor="?attr/textColor"
-                android:fontFamily="@font/product_sans" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/setting_dark_theme_label"
-                    android:textSize="@dimen/subtitle_1_size"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/product_sans"/>
-
-                <Switch
-                    android:id="@+id/settings_dark_theme_switch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/AppTheme"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_marginTop="10dp"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/offline_mode"
-                    android:textSize="@dimen/subtitle_1_size"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/product_sans"/>
-
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:padding="15dp">
 
                     <TextView
-                        android:layout_width="250dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/offline_mode_text"
-                        android:layout_gravity="center"
-                        android:textColor="?attr/subtitleTextColor"/>
+                        android:text="@string/settings_general_label"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/body_1_size"
+                        android:textColor="?attr/textColor"
+                        android:fontFamily="@font/product_sans" />
 
-
-                    <Switch
-                        android:id="@+id/settings_offline_switch"
-                        android:layout_gravity="center"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:theme="@style/AppTheme"/>
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/setting_dark_theme_label"
+                            android:textSize="@dimen/subtitle_1_size"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/product_sans"/>
+
+                        <Switch
+                            android:id="@+id/settings_dark_theme_switch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:theme="@style/AppTheme"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_marginTop="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/autodownload_favorites"
+                            android:textSize="@dimen/subtitle_1_size"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/product_sans"/>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="250dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/autodownload_favorites_text"
+                                android:layout_gravity="center"
+                                android:textColor="?attr/subtitleTextColor"/>
+
+
+                            <Switch
+                                android:id="@+id/settings_offline_switch"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:theme="@style/AppTheme"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:cardBackgroundColor="?attr/colorPrimary"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="15dp">
-
-            <TextView
-                android:layout_width="wrap_content"
+            </androidx.cardview.widget.CardView>
+            <!--SEARCH-->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/search_section"
-                android:textStyle="bold"
-                android:textSize="@dimen/body_1_size"
-                android:textColor="?attr/textColor"
-                android:fontFamily="@font/product_sans" />
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_section"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/body_1_size"
+                        android:textColor="?attr/textColor"
+                        android:fontFamily="@font/product_sans" />
 
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/search_list"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/search_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+            <!--STORAGE-->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        app:cardBackgroundColor="?attr/colorPrimary"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="15dp">
-
-            <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_about_label"
-                android:textStyle="bold"
-                android:textSize="@dimen/body_1_size"
-                android:textColor="?attr/textColor"
-                android:fontFamily="@font/product_sans" />
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="1dp">
 
-            <LinearLayout
-                android:id="@+id/version_section"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:layout_marginTop="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/version_title"
-                    android:textSize="@dimen/subtitle_1_size"
-                    android:textColor="?attr/textColor"
-                    android:fontFamily="@font/product_sans"/>
+                    android:orientation="vertical"
+                    android:padding="15dp">
 
-                <TextView
-                    android:id="@+id/version_number"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/version_number"
-                    android:textColor="?attr/subtitleTextColor" />
 
-            </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/storage_section_title"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/body_1_size"
+                        android:textColor="?attr/textColor"
+                        android:fontFamily="@font/product_sans" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/about_list"
+                    <!--LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ubicación descargas"
+                            android:textSize="@dimen/body_1_size"/>
+
+                        <Spinner
+                            android:id="@+id/storage_spinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            />
+
+                    </LinearLayout-->
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/storage_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+            <!--ABOUT-->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="?attr/colorPrimary"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_about_label"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/body_1_size"
+                        android:textColor="?attr/textColor"
+                        android:fontFamily="@font/product_sans" />
+
+                    <LinearLayout
+                        android:id="@+id/version_section"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_marginTop="10dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/version_title"
+                            android:textSize="@dimen/subtitle_1_size"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/product_sans"/>
+
+                        <TextView
+                            android:id="@+id/version_number"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/version_number"
+                            android:textColor="?attr/subtitleTextColor" />
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/about_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
 
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
-
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

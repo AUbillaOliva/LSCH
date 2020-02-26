@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_height="wrap_content"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:paddingVertical="6dp"
     tools:targetApi="o">
 
     <TextView
         android:id="@+id/element_number"
+        android:layout_marginHorizontal="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
@@ -17,7 +18,7 @@
         android:textColor="?attr/textColor" />
 
     <TextView
-        android:paddingStart="16dp"
+        android:paddingHorizontal="16dp"
         android:id="@+id/element_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

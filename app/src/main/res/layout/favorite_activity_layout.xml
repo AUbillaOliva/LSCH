@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"/>
 
     <LinearLayout
-        android:id="@+id/empty_favs_frame"
+        android:id="@+id/empty_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
@@ -27,30 +27,32 @@
         android:gravity="center">
 
         <ImageView
-            android:id="@+id/empty_fav_image"
+            android:id="@+id/empty_image"
             android:alpha="0.7"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_favorite_border_white_24dp"
+            android:src="@drawable/ic_file_download_black_24dp"
             android:layout_gravity="center"/>
 
         <TextView
+            android:id="@+id/empty_title"
             android:textColor="?attr/subtitleTextColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/h6_size"
             android:fontFamily="@font/product_sans_regular"
             android:gravity="center"
-            android:text="@string/no_favorites"/>
+            android:text="@string/no_downloads"/>
 
         <TextView
+            android:id="@+id/empty_message"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:textColor="?attr/subtitleTextColor"
             android:textSize="@dimen/subtitle_2_size"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="@string/add_favorites"/>
+            android:text="@string/add_downloads"/>
 
     </LinearLayout>
 </LinearLayout>
