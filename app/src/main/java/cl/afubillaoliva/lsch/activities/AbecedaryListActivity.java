@@ -2,6 +2,7 @@ package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -15,11 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -33,8 +34,8 @@ import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -44,7 +45,9 @@ import retrofit2.Response;
 public class AbecedaryListActivity extends AppCompatActivity {
 
     private final Context context = this;
-    private Network network = new Network(this);
+    private final Network network = new Network(this);
+
+    private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
 
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -90,15 +93,19 @@ public class AbecedaryListActivity extends AppCompatActivity {
         adapter = new GenericAdapter<Word>() {
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
             public void onBindData(RecyclerView.ViewHolder holder, Word val, int position) {
-                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+                final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final TextView title = viewHolder.get(R.id.list_item_text);
                 title.setText(val.getTitle());
+                final ImageView downloadedIcon = viewHolder.get(R.id.downloaded_icon);
+                if(downloadDatabaseHelper.exists(val.getTitle()))
+                    downloadedIcon.setVisibility(View.VISIBLE);
+                else
+                    downloadedIcon.setVisibility(View.GONE);
             }
 
             @Override
@@ -106,7 +113,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
                     public void onClickListener(View view, int position) {
-                        Intent intent = new Intent(context, WordDetailActivity.class);
+                        final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
                         startActivity(intent);
                     }
@@ -121,12 +128,15 @@ public class AbecedaryListActivity extends AppCompatActivity {
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mRecyclerView.setAdapter(adapter);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getData();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::getData);
+
+        getData();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         getData();
     }
 
@@ -135,28 +145,23 @@ public class AbecedaryListActivity extends AppCompatActivity {
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
-                .addInterceptor(new Interceptor() {
-                    @NonNull
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
-                            throws IOException {
-                        Request request = chain.request();
-                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                        if (network.isNetworkAvailable()) {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, max-age=" + 5)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
-                        } else {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                        }
-                        return chain.proceed(request);
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
+                    if (network.isNetworkAvailable()) {
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, max-age=" + 5)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
+                    } else {
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
                     }
+                    return chain.proceed(request);
                 })
                 .build();
 
@@ -186,10 +191,8 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     apiResponse = response.body();
                     adapter.addItems(apiResponse);
-                } else {
-                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                } else
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
-                }
             }
 
             @Override
@@ -197,7 +200,6 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });
@@ -216,6 +218,11 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
+            case R.id.report:
+                startActivity(new Intent(context, ReportActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -224,5 +231,13 @@ public class AbecedaryListActivity extends AppCompatActivity {
     public void onBackPressed() {
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        final Configuration override = new Configuration(newBase.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        applyOverrideConfiguration(override);
     }
 }

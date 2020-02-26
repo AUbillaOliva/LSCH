@@ -1,7 +1,6 @@
 package cl.afubillaoliva.lsch.models;
 
 import java.io.Serializable;
-import java.text.Normalizer;
 import java.util.ArrayList;
 
 public class Word implements Serializable {

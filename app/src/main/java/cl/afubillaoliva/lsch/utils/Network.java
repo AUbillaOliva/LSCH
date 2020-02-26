@@ -3,7 +3,6 @@ package cl.afubillaoliva.lsch.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import androidx.annotation.NonNull;
 
 public class Network {
 
@@ -13,13 +12,13 @@ public class Network {
         this.context = context;
     }
 
-    public boolean isNetworkAvailable() {
+    public boolean isNetworkAvailable(){
         boolean isConnected = false;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo != null && networkInfo.isConnected()){
+        final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert connectivityManager != null;
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo != null && networkInfo.isConnected())
             isConnected = true;
-        }
         return isConnected;
     }
 }

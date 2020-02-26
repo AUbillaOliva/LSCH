@@ -16,6 +16,8 @@ public class ApiClient {
      */
 
     private static final String BASE_URL = "https://lsch-api.herokuapp.com/api/";
+    public final static String REPORT_URL = "https://lsch-api.herokuapp.com/support/report";
+    //public final static String REPORT_URL = "http://192.168.0.16:5000/support/report";
 
     public static Retrofit getClient(OkHttpClient client){
         return new Retrofit.Builder()

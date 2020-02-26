@@ -2,6 +2,7 @@ package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -19,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -29,12 +29,11 @@ import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
-import cl.afubillaoliva.lsch.models.Expressions;
+import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -46,8 +45,8 @@ public class ExpressionsListActivity extends AppCompatActivity {
     private final Context context = this;
     private final Network network = new Network(context);
 
-    private GenericAdapter<Expressions> adapter;
-    private ArrayList<Expressions> apiResponse;
+    private GenericAdapter<Word> adapter;
+    private ArrayList<Word> apiResponse;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
@@ -59,14 +58,12 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         final Intent intent = getIntent();
         category = intent.getStringExtra("expression");
-        getData();
 
         final SharedPreference mSharedPreferences = new SharedPreference(this);
-        if (mSharedPreferences.loadNightModeState()) {
+        if (mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
-        } else {
+        else
             setTheme(R.style.AppTheme);
-        }
         setContentView(R.layout.list_activity);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
@@ -86,34 +83,31 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new GenericAdapter<Expressions>() {
+        adapter = new GenericAdapter<Word>(){
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, Expressions val, int position) {
-                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+            public void onBindData(RecyclerView.ViewHolder holder, Word val, int position){
+                final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final TextView title = viewHolder.get(R.id.list_item_text);
                 title.setText(val.getTitle());
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
-                    public void onClickListener(View view, int position) {
-                        Intent intent = new Intent(context, ExpressionsDetailActivity.class);
+                    public void onClickListener(View view, int position){
+                        final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
                         startActivity(intent);
                     }
 
                     @Override
-                    public void onLongPressClickListener(View view, int position) {
-
-                    }
+                    public void onLongPressClickListener(View view, int position){}
                 };
             }
         };
@@ -121,12 +115,9 @@ public class ExpressionsListActivity extends AppCompatActivity {
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
 
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getData();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::getData);
+
+        getData();
     }
 
     public void getData(){
@@ -134,51 +125,44 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
-                .addInterceptor(new Interceptor() {
-                    @NonNull
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
-                            throws IOException {
-                        Request request = chain.request();
-                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                        if (network.isNetworkAvailable()) {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, max-age=" + 5)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
-                        } else {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                        }
-                        return chain.proceed(request);
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
+                    if (network.isNetworkAvailable()) {
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, max-age=" + 5)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
+                    } else {
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
                     }
+                    return chain.proceed(request);
                 })
                 .build();
 
         final ApiService.ExpressionsServiceCategories service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsServiceCategories.class);
-        final Call<ArrayList<Expressions>> responseCall = service.getExpressionsOfCategories(category);
+        final Call<ArrayList<Word>> responseCall = service.getExpressionsOfCategories(category);
 
-        responseCall.enqueue(new Callback<ArrayList<Expressions>>() {
+        responseCall.enqueue(new Callback<ArrayList<Word>>(){
             @Override
-            public void onResponse(@NonNull Call<ArrayList<Expressions>> call, @NonNull Response<ArrayList<Expressions>> response) {
+            public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response){
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful()){
                     apiResponse = response.body();
                     adapter.addItems(apiResponse);
-                } else {
-                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                } else
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
-                }
             }
 
             @Override
-            public void onFailure(@NonNull Call<ArrayList<Expressions>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ArrayList<Word>> call, @NonNull Throwable t){
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -189,27 +173,37 @@ public class ExpressionsListActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_list,menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case android.R.id.home:
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
             case R.id.report:
+                startActivity(new Intent(context, ReportActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase){
+        super.attachBaseContext(newBase);
+        final Configuration override = new Configuration(newBase.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        applyOverrideConfiguration(override);
     }
 }

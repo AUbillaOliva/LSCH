@@ -1,7 +1,9 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
@@ -26,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -44,7 +45,6 @@ import cl.afubillaoliva.lsch.utils.databases.HistoryDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -54,10 +54,10 @@ import retrofit2.Response;
 public class SearchActivity extends AppCompatActivity implements RecyclerViewOnClickListenerHack {
 
     private final Context context = this;
+    private SharedPreference mSharedPreferences;
 
     private final Network network = new Network(context);
     private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
-
 
     private GenericAdapter<String> historyAdapter;
     private SearchAdapter adapter;
@@ -77,32 +77,29 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
         getData();
 
-        final SharedPreference mSharedPreferences = new SharedPreference(this);
-        if (mSharedPreferences.loadNightModeState()) {
+        mSharedPreferences = new SharedPreference(this);
+        if (mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
-        } else {
+        else
             setTheme(R.style.AppTheme);
-        }
         setContentView(R.layout.search_activity_layout);
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
-        mRecyclerView = findViewById(R.id.recycler_view);
         final SearchView searchView = mToolbar.findViewById(R.id.search_view);
         final RecyclerView mRecyclerViewHistory = findViewById(R.id.recycler_view_2);
-        loadingFrame = findViewById(R.id.loading_frame);
-        connectionFrame = findViewById(R.id.connection_frame);
+        mRecyclerView = findViewById(R.id.recycler_view);
         final TextView connectionText = findViewById(R.id.connection_search_result_text);
         final ImageView searchCheckImage = findViewById(R.id.search_check_image);
+        loadingFrame = findViewById(R.id.loading_frame);
+        connectionFrame = findViewById(R.id.connection_frame);
 
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        if(mSharedPreferences.loadNightModeState()) {
+        if(mSharedPreferences.loadNightModeState()){
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
             searchCheckImage.setImageResource(R.drawable.ic_search_white_24dp);
-        }
-        else {
+        } else {
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
             searchCheckImage.setImageResource(R.drawable.ic_search_black_24dp);
         }
@@ -113,30 +110,24 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         searchQueryText.setTypeface(tf);
         searchView.setFocusable(true);
         searchView.requestFocusFromTouch();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
             @Override
-            public boolean onQueryTextSubmit(String s) {
+            public boolean onQueryTextSubmit(String s){
                 searchView.clearFocus();
-                if(exists(s)) //IF EXISTS IN HISTORY DB
+                if(exists(s))
                     databaseHelper.addHistory(s);
-                Log.d(MainActivity.HIS, "ADDED: " + s);
+                mSharedPreferences.setHistoryDisabled(false);
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(final String s) {
-                Filter.FilterListener listener = new Filter.FilterListener() {
-                    @Override
-                    public void onFilterComplete(int count) {
-                        if(adapter.getItemCount() <= 0){
-                            Log.d(MainActivity.UI, "NO RESULTS " + s);
-                            connectionFrame.setVisibility(View.VISIBLE);
-                            connectionText.setText("No se encontraron resultados para \r\n" + '"' + s + '"');
-                        } else {
-                            connectionFrame.setVisibility(View.GONE);
-                            Log.d(MainActivity.UI, "RESULTS " + s);
-                        }
-                    }
+            public boolean onQueryTextChange(String s){
+                @SuppressLint("SetTextI18n") Filter.FilterListener listener = count -> {
+                    if(adapter.getItemCount() <= 0){
+                        connectionFrame.setVisibility(View.VISIBLE);
+                        connectionText.setText("No se encontraron resultados para \r\n" + '"' + s + '"');
+                    } else
+                        connectionFrame.setVisibility(View.GONE);
                 };
                 if(s.length() < 1){
                     historyAdapter.addItems(databaseHelper.getHistory());
@@ -158,20 +149,18 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         adapter = new SearchAdapter(context);
         adapter.setRecyclerViewOnClickListenerHack(this);
 
-
         mRecyclerViewHistory.setHasFixedSize(true);
         mRecyclerViewHistory.setNestedScrollingEnabled(true);
         mRecyclerViewHistory.setLayoutManager(linearLayoutManager2);
-        historyAdapter = new GenericAdapter<String>(databaseHelper.getHistory()) {
+        historyAdapter = new GenericAdapter<String>(databaseHelper.getHistory()){
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.history_list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.history_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, final String val, int position) {
-                GenericViewHolder viewHolder = (GenericViewHolder) holder;
+            public void onBindData(RecyclerView.ViewHolder holder, String val, int position){
+                final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final ImageView imageView = viewHolder.get(R.id.search_suggest_type);
                 final TextView title = viewHolder.get(R.id.list_item_text);
                 if(mSharedPreferences.loadNightModeState())
@@ -179,27 +168,23 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                 else
                     imageView.setImageResource(R.drawable.ic_access_time_black_24dp);
                 final ImageView deleteImage = viewHolder.get(R.id.delete_item);
-                deleteImage.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        databaseHelper.deleteHistory(val);
-                        historyAdapter.addItems(databaseHelper.getHistory());
-                    }
+                deleteImage.setOnClickListener(v -> {
+                    databaseHelper.deleteHistory(val);
+                    historyAdapter.addItems(databaseHelper.getHistory());
                 });
                 title.setText(val);
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
-                return new RecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
                     @Override
-                    public void onClickListener(View view, int position) {
-                        //TODO: IF ITEM EXIST, GO DIRECTLY TO ACTIVITY
+                    public void onClickListener(View view, int position){
                         searchView.setQuery(historyAdapter.getItem(position), false);
                     }
 
                     @Override
-                    public void onLongPressClickListener(View view, int position) {
+                    public void onLongPressClickListener(View view, int position){
                         Toast.makeText(context, "Eliminado del historial", Toast.LENGTH_SHORT).show();
                         Log.d(MainActivity.HIS, "DELETED: " + historyAdapter.getItem(position));
                         databaseHelper.deleteHistory(historyAdapter.getItem(position));
@@ -211,12 +196,11 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
         historyAdapter.addItems(databaseHelper.getHistory());
         mRecyclerViewHistory.setAdapter(historyAdapter);
 
-
     }
 
     public boolean exists(String searchItem) {
 
-        SQLiteDatabase database = databaseHelper.getWritableDatabase();
+        final SQLiteDatabase database = databaseHelper.getWritableDatabase();
 
         final String[] projection = {
                 HistoryContract.HistoryEntry._ID,
@@ -240,38 +224,33 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .cache(cache)
-                .addInterceptor(new Interceptor() {
-                    @NonNull
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Interceptor.Chain chain)
-                            throws IOException {
-                        Request request = chain.request();
-                        int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                        if (network.isNetworkAvailable()) {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, max-stale=" + 60 * 5)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 5 minutes ago");
-                        } else {
-                            request = request
-                                    .newBuilder()
-                                    .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                    .build();
-                            Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                        }
-                        return chain.proceed(request);
+                .addInterceptor(chain -> {
+                    Request request = chain.request();
+                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
+                    if (network.isNetworkAvailable()){
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, max-stale=" + 60 * 5)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 5 minutes ago");
+                    } else {
+                        request = request
+                                .newBuilder()
+                                .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                .build();
+                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
                     }
+                    return chain.proceed(request);
                 })
                 .build();
 
         final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
         final Call<ArrayList<Word>> responseCall = service.getWords(null, null);
 
-        responseCall.enqueue(new Callback<ArrayList<Word>>() {
+        responseCall.enqueue(new Callback<ArrayList<Word>>(){
             @Override
-            public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response){
+                if (response.isSuccessful()){
                     apiResponse = response.body();
                     adapter.setDataset(context,apiResponse);
                     mRecyclerView.setAdapter(adapter);
@@ -281,7 +260,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             }
 
             @Override
-            public void onFailure(@NonNull Call<ArrayList<Word>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ArrayList<Word>> call, @NonNull Throwable t){
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
                 loadingFrame.setVisibility(View.GONE);
             }
@@ -289,17 +268,21 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_search,menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case android.R.id.home:
                 startActivity(new Intent(context, MainActivity.class));
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+            case R.id.report:
+                startActivity(new Intent(context, ReportActivity.class));
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
         }
@@ -314,17 +297,25 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
     }
 
     @Override
-    public void onClickListener(View view, int position) {
-        if(exists(adapter.get(position).getTitle()))
+    public void onClickListener(View view, int position){
+        if(exists(adapter.get(position).getTitle())){
             databaseHelper.addHistory(adapter.get(position).getTitle());
-        Intent intent = new Intent(context, WordDetailActivity.class);
+            mSharedPreferences.setHistoryDisabled(false);
+        }
+        final Intent intent = new Intent(context, WordDetailActivity.class);
         intent.putExtra("position", adapter.get(position));
         intent.putExtra("id", position);
         startActivity(intent);
     }
 
     @Override
-    public void onLongPressClickListener(View view, int position) {
+    public void onLongPressClickListener(View view, int position){}
 
+    @Override
+    protected void attachBaseContext(Context newBase){
+        super.attachBaseContext(newBase);
+        final Configuration override = new Configuration(newBase.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        applyOverrideConfiguration(override);
     }
 }

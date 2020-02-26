@@ -2,8 +2,8 @@ package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,7 +35,8 @@ public class ListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         final Intent intent = getIntent();
-        ArrayList<String> data = intent.getStringArrayListExtra("data");
+        final ArrayList<String> data = intent.getStringArrayListExtra("data");
+
         final SharedPreference mSharedPreferences = new SharedPreference(context);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
@@ -62,53 +63,45 @@ public class ListActivity extends AppCompatActivity {
         mRecyclerView.setNestedScrollingEnabled(true);
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        final GenericAdapter<String> aboutAdapter = new GenericAdapter<String>(data) {
+        final GenericAdapter<String> aboutAdapter = new GenericAdapter<String>(data){
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, String val, int position) {
-                GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+            public void onBindData(RecyclerView.ViewHolder holder, String val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_text);
                 title.setText(val);
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
-                return new RecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
                     @Override
-                    public void onClickListener(View view, int position) {
-                        switch (position){
-                            case 0:
-                                break;
-                        }
-                    }
+                    public void onClickListener(View view, int position){}
 
                     @Override
-                    public void onLongPressClickListener(View view, int position) {
-
-                    }
+                    public void onLongPressClickListener(View view, int position){}
                 };
             }
         };
         mRecyclerView.setAdapter(aboutAdapter);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> swipeRefreshLayout.setRefreshing(false));
+
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
             case android.R.id.home:
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+            case R.id.report:
+                startActivity(new Intent(context, ReportActivity.class));
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
         }
@@ -116,8 +109,16 @@ public class ListActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase){
+        super.attachBaseContext(newBase);
+        final Configuration override = new Configuration(newBase.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        applyOverrideConfiguration(override);
     }
 }

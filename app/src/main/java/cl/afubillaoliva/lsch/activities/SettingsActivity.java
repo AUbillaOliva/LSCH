@@ -1,30 +1,33 @@
 package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -35,82 +38,102 @@ import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.models.SettingsItem;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
+import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.HistoryDatabaseHelper;
+
+// TODO: ADD ONLY DOWNLOAD WITH WIFI
 
 public class SettingsActivity extends AppCompatActivity {
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
+    private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
+    private final HistoryDatabaseHelper historyDatabaseHelper = new HistoryDatabaseHelper(context);
+    private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
 
-    private final HistoryDatabaseHelper databaseHelper = new HistoryDatabaseHelper(context);
-
-    private TextView title, subtitle;
-
+    private RecyclerView storageList, searchList, aboutList;
+    private GenericAdapter<SettingsItem> storageAdapter, searchAdapter, aboutAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         mSharedPreferences = new SharedPreference(context);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
-        else setTheme(R.style.AppTheme);
+        else
+            setTheme(R.style.AppTheme);
         setContentView(R.layout.settings_activity);
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final TextView toolbarTitle = mToolbar.findViewById(R.id.toolbar_title), versionTitle = findViewById(R.id.version_number);
-        final Switch mSwitch = findViewById(R.id.settings_dark_theme_switch);
-        final RecyclerView aboutList = findViewById(R.id.about_list), searchList = findViewById(R.id.search_list);
+        final Switch mDarkSwitch = findViewById(R.id.settings_dark_theme_switch);
+        final Switch mOfflineSwitch = findViewById(R.id.settings_offline_switch);
+        aboutList = findViewById(R.id.about_list);
+        searchList = findViewById(R.id.search_list);
+        storageList = findViewById(R.id.storage_list);
+        //final Spinner storageSpinner = findViewById(R.id.storage_spinner);
 
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         if(mSharedPreferences.loadNightModeState())
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
         else
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
 
         try {
-            PackageInfo pInfo = context.getPackageManager().getPackageInfo(getPackageName(), 0);
+            final PackageInfo pInfo = context.getPackageManager().getPackageInfo(getPackageName(), 0);
             versionTitle.setText(pInfo.versionName);
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e){
             e.printStackTrace();
         }
         toolbarTitle.setText(R.string.action_settings);
 
         if(mSharedPreferences.loadNightModeState())
-            mSwitch.setChecked(true);
-        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(!isChecked){
-                    mSharedPreferences.setNightMode(false);
-                    startActivity(new Intent(context, SettingsActivity.class));
-                    finish();
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                } else {
-                    mSharedPreferences.setNightMode(true);
-                    startActivity(new Intent(context, SettingsActivity.class));
-                    finish();
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                }
+            mDarkSwitch.setChecked(true);
+        mDarkSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(!isChecked){
+                mSharedPreferences.setNightMode(false);
+                startActivity(new Intent(context, SettingsActivity.class));
+                finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            } else {
+                mSharedPreferences.setNightMode(true);
+                startActivity(new Intent(context, SettingsActivity.class));
+                finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
 
+        if(mSharedPreferences.loadAutoDownload())
+            mOfflineSwitch.setChecked(true);
+        mOfflineSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(!isChecked)
+                mSharedPreferences.setAutodownload(false);
+            else
+                mSharedPreferences.setAutodownload(true);
+        });
+
+        mSharedPreferences.setHistoryDisabled(mSharedPreferences.isHistoryDisabled());
+        mSharedPreferences.setFavoriteDisabled(mSharedPreferences.isFavoriteDisabled());
+        mSharedPreferences.setDownloadDisabled(mSharedPreferences.isDownloadDisabled());
+        mSharedPreferences.setCacheDisabled(mSharedPreferences.isCacheDisabled());
+
         aboutList.setHasFixedSize(true);
         aboutList.setNestedScrollingEnabled(true);
-        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-        aboutList.setLayoutManager(linearLayoutManager);
-        final GenericAdapter<SettingsItem> aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()) {
+        final LinearLayoutManager aboutLayoutManager = new LinearLayoutManager(context);
+        aboutList.setLayoutManager(aboutLayoutManager);
+        aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()){
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position) {
-                GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
                 final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
@@ -118,69 +141,50 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
-                    public void onClickListener(View view, int position) {
-                        switch (position){
-                            case 0:
-                                Intent intent = new Intent(context, ListActivity.class);
-                                intent.putExtra("activity", getItem(position).getTitle());
-                                intent.putExtra("data", libraries());
-                                startActivity(intent);
-                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                                break;
+                    public void onClickListener(View view, int position){
+                        if (position == 0){
+                            final Intent intent = new Intent(context, ListActivity.class);
+                            intent.putExtra("activity", getItem(position).getTitle());
+                            intent.putExtra("data", libraries());
+                            startActivity(intent);
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                         }
                     }
 
                     @Override
-                    public void onLongPressClickListener(View view, int position) {
-
-                    }
+                    public void onLongPressClickListener(View view, int position){}
                 };
-            }
-
-            @NonNull
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return super.onCreateViewHolder(parent, viewType);
-            }
-
-            @Override
-            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                super.onBindViewHolder(holder, position);
-            }
-
-            @Override
-            public int getItemCount() {
-                return super.getItemCount();
             }
         };
         aboutList.setAdapter(aboutAdapter);
 
         searchList.setHasFixedSize(true);
         searchList.setNestedScrollingEnabled(true);
-        final LinearLayoutManager linearLayoutManager2 = new LinearLayoutManager(context);
-        searchList.setLayoutManager(linearLayoutManager2);
-        final GenericAdapter<SettingsItem> searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()) {
+        final LinearLayoutManager searchLayoutManager = new LinearLayoutManager(context);
+        searchList.setLayoutManager(searchLayoutManager);
+        searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()){
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
-                final View view = LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false);
-                return new GenericViewHolder(view, recyclerViewOnClickListenerHack);
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position) {
-                GenericViewHolder myViewHolder = (GenericViewHolder) holder;
-                title = myViewHolder.get(R.id.list_item_title);
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
                 title.setText(val.getTitle());
-                subtitle = myViewHolder.get(R.id.list_item_subtitle);
                 subtitle.setText(val.getSubtitle());
-                if(!context.getDatabasePath("history.db").exists()){
-                    if(mSharedPreferences.loadNightModeState()){
+                if(mSharedPreferences.loadNightModeState()){
+                    if(getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledDark));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
-                    } else {
+                    }
+                } else {
+                    if(getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledLight));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
                     }
@@ -188,36 +192,27 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
-                return new RecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
                     @Override
-                    public void onClickListener(View view, int position) {
+                    public void onClickListener(final View view, final int position){
                         switch (position){
                             case 0:
-                                //TODO: SHOW CONFIRMATION DIALOG
-
-                                if(context.getDatabasePath("history.db").exists()) {
+                                if(historyDatabaseHelper.getHistory().size() > 0){
                                     final AlertDialog dialog = new AlertDialog.Builder(context)
                                             .setView(R.layout.confirmation_dialog_layout)
                                             .show();
                                     Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                                     final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
                                     assert positiveButton != null;
-                                    positiveButton.setText(R.string.positive_history_dialog_button);
-                                    positiveButton.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            context.deleteDatabase("history.db");
-                                            if(mSharedPreferences.loadNightModeState()){
-                                                title.setTextColor(getResources().getColor(R.color.textDisabledDark));
-                                                subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
-                                            } else {
-                                                title.setTextColor(getResources().getColor(R.color.textDisabledLight));
-                                                subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
-                                            }
-                                            dialog.dismiss();
-                                        }
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("history.db");
+                                        mSharedPreferences.setHistoryDisabled(true);
+                                        dialog.dismiss();
+                                        onRestart();
                                     });
+                                    mSharedPreferences.setHistoryDisabled(false);
                                     final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
                                     assert dialogTitle != null;
                                     dialogTitle.setText(R.string.history_dialog_title);
@@ -227,45 +222,458 @@ public class SettingsActivity extends AppCompatActivity {
                                     final TextView negative = dialog.findViewById(R.id.negative_button);
                                     assert negative != null;
                                     negative.setText(R.string.negative_dialog_button);
-                                    negative.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            dialog.dismiss();
-                                        }
+                                    negative.setOnClickListener(v -> dialog.dismiss());
+                                }
+                                break;
+                            case 1:
+                                if(favoriteDatabaseHelper.getAllFavorite().size() > 0){
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("favorite.db");
+                                        mSharedPreferences.setFavoriteDisabled(true);
+                                        notifyDataSetChanged();
+                                        dialog.dismiss();
+                                        onRestart();
                                     });
+                                    mSharedPreferences.setFavoriteDisabled(false);
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.favorite_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.favorite_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(v -> dialog.dismiss());
 
                                 }
-
                                 break;
                         }
                     }
                     @Override
-                    public void onLongPressClickListener(View view, int position) {}
+                    public void onLongPressClickListener(View view, int position){}
                 };
             }
-
-            @NonNull
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return super.onCreateViewHolder(parent, viewType);
-            }
-
-            @Override
-            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                super.onBindViewHolder(holder, position);
-            }
-
-            @Override
-            public int getItemCount() {
-                return super.getItemCount();
-            }
-
         };
         searchList.setAdapter(searchAdapter);
+
+        storageList.setHasFixedSize(true);
+        storageList.setNestedScrollingEnabled(true);
+        final LinearLayoutManager storageLayoutManager = new LinearLayoutManager(context);
+        storageList.setLayoutManager(storageLayoutManager);
+        storageAdapter = new GenericAdapter<SettingsItem>(storageListItems()){
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title.setText(val.getTitle());
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle.setText(val.getSubtitle());
+                if(mSharedPreferences.loadNightModeState()){
+                    if(getItem(position).isDisabled()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                    }
+                } else {
+                    if (getItem(position).isDisabled()) {
+                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                    }
+                }
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
+                    @Override
+                    public void onClickListener(View view, int position){
+                        switch (position){
+                            case 0:
+                                if(getCacheDir().length() > 0){
+                                    try {
+                                        final File cacheDir = context.getCacheDir();
+                                        final AlertDialog dialog = new AlertDialog.Builder(context)
+                                                .setView(R.layout.confirmation_dialog_layout)
+                                                .show();
+                                        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                        final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                        assert positiveButton != null;
+                                        positiveButton.setText(R.string.positive_delete_dialog_button);
+                                        positiveButton.setOnClickListener(v -> {
+                                            deleteDir(cacheDir);
+                                            mSharedPreferences.setCacheDisabled(true);
+                                            dialog.dismiss();
+                                        });
+                                        mSharedPreferences.setCacheDisabled(false);
+                                        final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                        assert dialogTitle != null;
+                                        dialogTitle.setText(R.string.cache_dialog_title);
+                                        final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                        assert dialogSubtitle != null;
+                                        dialogSubtitle.setText(R.string.cache_dialog_subtitle);
+                                        final TextView negative = dialog.findViewById(R.id.negative_button);
+                                        assert negative != null;
+                                        negative.setText(R.string.negative_dialog_button);
+                                        negative.setOnClickListener(v -> dialog.dismiss());
+                                    } catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                                break;
+                            case 1:
+                                if(downloadDatabaseHelper.getAllDownload().size() > 0 || Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() == null){
+                                    if(context.getDatabasePath("download.db").exists())
+                                        Log.d(MainActivity.TAG, "database exists!");
+                                    else if(Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() != null)
+                                        Log.d(MainActivity.TAG, "file folder has no items!");
+                                    else
+                                        Log.d(MainActivity.TAG, "none");
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("download.db");
+                                        final File dir = new File(Environment.getExternalStorageDirectory()+"/Android/data/cl.afubillaoliva.lsch/files");
+                                        if (dir.isDirectory()){
+                                            final String[] children = dir.list();
+                                            assert children != null;
+                                            for (String child : children){
+                                                new File(dir, child).delete();
+                                            }
+                                        }
+                                        dir.delete();
+                                        mSharedPreferences.setDownloadDisabled(true);
+                                        dialog.dismiss();
+                                        onRestart();
+                                    });
+                                    mSharedPreferences.setDownloadDisabled(false);
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.download_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.download_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(v -> dialog.dismiss());
+
+                                } else
+                                    mSharedPreferences.setDownloadDisabled(true);
+                                break;
+                            case 2:
+                                // TODO
+                                /*final Intent storageOptions = new Intent(context, StorageOptionsActivity.class);
+                                storageOptions.putExtra("activity", "Almacenamiento");
+                                startActivity(storageOptions);*/
+                                Toast.makeText(context, "Storage options", Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position){}
+                };
+            }
+        };
+        storageList.setAdapter(storageAdapter);
+
+        /*final ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(context, R.array.storage_options, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        storageSpinner.setAdapter(spinnerAdapter);*/
+
+    }
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+
+        aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()){
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title.setText(val.getTitle());
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle.setText(val.getSubtitle());
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
+                    @Override
+                    public void onClickListener(View view, int position){
+                        //replace with switch if has more items
+                        if (position == 0){
+                            final Intent intent = new Intent(context, ListActivity.class);
+                            intent.putExtra("activity", getItem(position).getTitle());
+                            intent.putExtra("data", libraries());
+                            startActivity(intent);
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        }
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position){}
+                };
+            }
+        };
+        aboutList.setAdapter(aboutAdapter);
+
+        searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()){
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                title.setText(val.getTitle());
+                subtitle.setText(val.getSubtitle());
+                if(mSharedPreferences.loadNightModeState())
+                    if(getItem(position).isDisabled()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                    }
+                else
+                    if(getItem(position).isDisabled()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                    }
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
+                    @Override
+                    public void onClickListener(final View view, final int position){
+                        switch (position){
+                            case 0:
+                                if(historyDatabaseHelper.getHistory().size() > 0){
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("history.db");
+                                        mSharedPreferences.setHistoryDisabled(true);
+                                        dialog.dismiss();
+                                        onRestart();
+                                    });
+                                    mSharedPreferences.setHistoryDisabled(false);
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.history_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.history_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(v -> dialog.dismiss());
+                                }
+                                break;
+                            case 1:
+                                if(favoriteDatabaseHelper.getAllFavorite().size() > 0){
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("favorite.db");
+                                        mSharedPreferences.setFavoriteDisabled(true);
+                                        notifyDataSetChanged();
+                                        dialog.dismiss();
+                                        onRestart();
+                                    });
+                                    mSharedPreferences.setFavoriteDisabled(false);
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.favorite_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.favorite_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(v -> dialog.dismiss());
+                                }
+                                break;
+                        }
+                    }
+                    @Override
+                    public void onLongPressClickListener(View view, int position){}
+                };
+            }
+        };
+        searchList.setAdapter(searchAdapter);
+
+        storageAdapter = new GenericAdapter<SettingsItem>(storageListItems()){
+            @Override
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+                return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
+            }
+
+            @Override
+            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+                final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
+                final TextView title = myViewHolder.get(R.id.list_item_title);
+                title.setText(val.getTitle());
+                final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
+                subtitle.setText(val.getSubtitle());
+                if(mSharedPreferences.loadNightModeState())
+                    if(getItem(position).isDisabled()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
+                    }
+                else
+                    if(getItem(position).isDisabled()){
+                        title.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                        subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
+                    }
+            }
+
+            @Override
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
+                    @Override
+                    public void onClickListener(View view, int position){
+                        switch (position){
+                            case 0:
+                                if(getCacheDir().length() > 0){
+                                    try {
+                                        final File cacheDir = context.getCacheDir();
+                                        final AlertDialog dialog = new AlertDialog.Builder(context)
+                                                .setView(R.layout.confirmation_dialog_layout)
+                                                .show();
+                                        Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                        final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                        assert positiveButton != null;
+                                        positiveButton.setText(R.string.positive_delete_dialog_button);
+                                        positiveButton.setOnClickListener(v -> {
+                                            deleteDir(cacheDir);
+                                            mSharedPreferences.setCacheDisabled(true);
+                                            dialog.dismiss();
+                                        });
+                                        mSharedPreferences.setCacheDisabled(false);
+                                        final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                        assert dialogTitle != null;
+                                        dialogTitle.setText(R.string.cache_dialog_title);
+                                        final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                        assert dialogSubtitle != null;
+                                        dialogSubtitle.setText(R.string.cache_dialog_subtitle);
+                                        final TextView negative = dialog.findViewById(R.id.negative_button);
+                                        assert negative != null;
+                                        negative.setText(R.string.negative_dialog_button);
+                                        negative.setOnClickListener(v -> dialog.dismiss());
+                                    } catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                                break;
+                            case 1:
+                                if(downloadDatabaseHelper.getAllDownload().size() > 0 || Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() == null){
+                                    final AlertDialog dialog = new AlertDialog.Builder(context)
+                                            .setView(R.layout.confirmation_dialog_layout)
+                                            .show();
+                                    Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                    final ExtendedFloatingActionButton positiveButton = dialog.findViewById(R.id.confirm_button);
+                                    assert positiveButton != null;
+                                    positiveButton.setText(R.string.positive_delete_dialog_button);
+                                    positiveButton.setOnClickListener(v -> {
+                                        context.deleteDatabase("download.db");
+                                        final File dir = new File(Environment.getExternalStorageDirectory()+"/Android/data/cl.afubillaoliva.lsch/files");
+                                        if (dir.isDirectory()){
+                                            final String[] children = dir.list();
+                                            assert children != null;
+                                            for (String child : children){
+                                                new File(dir, child).delete();
+                                            }
+                                        }
+                                        dir.delete();
+                                        mSharedPreferences.setDownloadDisabled(true);
+                                        dialog.dismiss();
+                                        onRestart();
+                                    });
+                                    mSharedPreferences.setDownloadDisabled(false);
+                                    final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
+                                    assert dialogTitle != null;
+                                    dialogTitle.setText(R.string.download_dialog_title);
+                                    final TextView dialogSubtitle = dialog.findViewById(R.id.dialog_subtitle);
+                                    assert dialogSubtitle != null;
+                                    dialogSubtitle.setText(R.string.download_dialog_subtitle);
+                                    final TextView negative = dialog.findViewById(R.id.negative_button);
+                                    assert negative != null;
+                                    negative.setText(R.string.negative_dialog_button);
+                                    negative.setOnClickListener(v -> dialog.dismiss());
+                                }
+                                break;
+                            case 2:
+                                // TODO
+                                /*final Intent storageOptions = new Intent(context, StorageOptionsActivity.class);
+                                storageOptions.putExtra("activity", "Almacenamiento");
+                                startActivity(storageOptions);*/
+                                Toast.makeText(context, "Storage options", Toast.LENGTH_SHORT).show();
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onLongPressClickListener(View view, int position){}
+                };
+            }
+        };
+        storageList.setAdapter(storageAdapter);
+    }
+
+    public static boolean deleteDir(File dir){
+        if (dir != null && dir.isDirectory()){
+            final String[] children = dir.list();
+            assert children != null;
+            for (String child : children){
+                final boolean success = deleteDir(new File(dir, child));
+                if (!success)
+                    return false;
+            }
+            return dir.delete();
+        } else if(dir!= null && dir.isFile())
+            return dir.delete();
+        else
+            return false;
     }
 
     public ArrayList<String> libraries(){
-        ArrayList<String> items = new ArrayList<>();
+        final ArrayList<String> items = new ArrayList<>();
         items.add("Retrofit");
         items.add("Retrofit Converter Gson");
         items.add("Glide");
@@ -279,10 +687,10 @@ public class SettingsActivity extends AppCompatActivity {
         return items;
     }
     private ArrayList<SettingsItem> aboutListItems(){
-        ArrayList<SettingsItem> items = new ArrayList<>();
+        final ArrayList<SettingsItem> items = new ArrayList<>();
 
         SettingsItem item = new SettingsItem();
-        item.setTitle("Librerias de Terceros");
+        item.setTitle("Librerias de terceros");
         item.setSubtitle("Con la gran ayuda de este software!");
         //TODO: GET README FROM REPO, THIRD-PARTY LIBRARIES
         items.add(item);
@@ -295,29 +703,59 @@ public class SettingsActivity extends AppCompatActivity {
         return items;
     }
     private ArrayList<SettingsItem> searchListItems(){
-        ArrayList<SettingsItem> items = new ArrayList<>();
+        final ArrayList<SettingsItem> items = new ArrayList<>();
 
         SettingsItem item = new SettingsItem();
-        item.setTitle("Eliminar Historial");
+        item.setTitle("Eliminar historial");
         item.setSubtitle("Elimina tus busquedas recientes del menu de busqueda.");
+        item.setDisabled(mSharedPreferences.isHistoryDisabled());
+        items.add(item);
+
+        item = new SettingsItem();
+        item.setTitle("Eliminar favoritos");
+        item.setSubtitle("Elimina todos tus favoritos.");
+        item.setDisabled(mSharedPreferences.isFavoriteDisabled());
+        items.add(item);
+
+        return items;
+    }
+    private ArrayList<SettingsItem> storageListItems(){
+
+        final ArrayList<SettingsItem> items = new ArrayList<>();
+        SettingsItem item = new SettingsItem();
+
+        item.setTitle("Eliminar caché");
+        item.setSubtitle("Elimina el caché utilizado por la app. Tus favoritos y descargas no serán eliminados.");
+        item.setDisabled(mSharedPreferences.isCacheDisabled());
+        items.add(item);
+
+        item = new SettingsItem();
+        item.setTitle("Eliminar descargas");
+        item.setSubtitle("Elimina todas tus palabras descargadas.");
+        item.setDisabled(mSharedPreferences.isDownloadDisabled());
+        items.add(item);
+
+        item = new SettingsItem();
+        item.setTitle("Ubicación de almacenamiento");
+        item.setSubtitle("Establece donde quieres que los videos descargados se almacenen.");
+        item.setDisabled(false);
         items.add(item);
 
         return items;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu){
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
-            case android.R.id.home:
-                startActivity(new Intent(context, MainActivity.class));
-                finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                break;
+    public boolean onOptionsItemSelected(MenuItem item){
+        //replace with switch if has more items
+        if (item.getItemId() == android.R.id.home){
+            startActivity(new Intent(context, MainActivity.class));
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -327,5 +765,13 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(new Intent(context, MainActivity.class));
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase){
+        super.attachBaseContext(newBase);
+        final Configuration override = new Configuration(newBase.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        applyOverrideConfiguration(override);
     }
 }
