@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="colorPrimaryLight">#F5F5F5</color>
     <color name="colorSecondaryLight">#f2f2f2</color>
 
@@ -29,5 +29,7 @@
     <color name="active_icon_color">#8A000000</color>
     <color name="cards_and_dialogs_color">@android:color/white</color>
     <color name="quantum_grey_600">#757575</color>
+
+    <color name="mtrl_textinput_default_box_stroke_color" tools:override="true">@color/textDisabledLight</color>
 
 </resources>
