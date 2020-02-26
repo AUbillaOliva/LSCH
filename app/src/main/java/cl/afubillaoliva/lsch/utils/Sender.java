@@ -8,18 +8,16 @@ import org.acra.sender.ReportSenderFactory;
 
 import androidx.annotation.NonNull;
 
-public class Sender implements org.acra.sender.ReportSenderFactory {
+public class Sender implements ReportSenderFactory {
+
     @NonNull
     @Override
     public ReportSender create(@NonNull Context context, @NonNull CoreConfiguration config) {
-        return null;
+        return new SenderService();
     }
 
     @Override
     public boolean enabled(@NonNull CoreConfiguration config) {
-        return false;
+        return true;
     }
-
-    // NB requires a no arg constructor.
-
 }
