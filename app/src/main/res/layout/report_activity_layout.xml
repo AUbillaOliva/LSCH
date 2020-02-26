@@ -1,6 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="?attr/backgroundColor">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="20dp"
+        android:background="?attr/backgroundColor">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/edit_text_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:layout_marginBottom="15dp"
+            android:focusable="true"
+            android:hint="@string/report_edit_text_hint"
+            app:hintEnabled="false"
+            app:counterEnabled="true"
+            app:counterTextColor="?attr/textDisabled"
+            app:counterMaxLength="300"
+            app:boxBackgroundMode="outline"
+            app:boxBackgroundColor="@android:color/transparent"
+            app:boxStrokeErrorColor="@android:color/holo_red_light"
+            app:boxStrokeColor="@color/textDisabledLight"
+            app:errorTextColor="@color/design_default_color_error"
+            app:boxCornerRadiusBottomEnd="5dp"
+            app:boxCornerRadiusBottomStart="5dp"
+            app:boxCornerRadiusTopEnd="5dp"
+            app:boxCornerRadiusTopStart="5dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:textCursorDrawable="@drawable/edit_text_cursor"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?attr/backgroundColor">
+
+            <ImageView
+                android:id="@+id/report_image"
+                android:layout_width="100dp"
+                android:layout_height="200dp"
+                android:padding="@dimen/image_padding"
+                android:src="@drawable/ic_add_black_24dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/border_report_image" />
+
+            <ImageView
+                android:id="@+id/delete"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginVertical="88dp"
+                android:layout_marginHorizontal="38dp"
+                android:src="@drawable/ic_close_24dp"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/report_error_instructions"
+            android:textColor="?attr/textDisabled"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
