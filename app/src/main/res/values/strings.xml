@@ -1,32 +1,82 @@
 <resources>
     <string name="app_name">LSCH</string>
+    <string name="app_description">Un diccionario acerca de la lengua de señas chilena.</string>
+
     <string name="action_settings">Ajustes</string>
-    <string name="setting_dark_theme_label">Tema Oscuro</string>
+    <string name="setting_dark_theme_label">Tema oscuro</string>
     <string name="settings_general_label">General</string>
-    <string name="descripcion">Descripción</string>
-    <string name="sinonimos">Sinónimos</string>
-    <string name="antonimos">Antónimos</string>
-    <string name="reportar_error">Reportar Error</string>
-    <string name="compartir">Compartir</string>
-    <string name="search">Buscar palabra</string>
-    <string name="configurations">Ajustes</string>
-    <string name="favorite">Favorito</string>
-    <string name="favorites">Favoritos</string>
-    <string name="letter">Letra</string>
-    <string name="search_icon">Search Icon</string>
-    <string name="offline_mode">Modo offline</string>
-    <string name="offline_mode_text">Utiliza la app cuando no tengas conexión a internet, pero la app consumirá más almacenamiento.</string>
+
     <string name="settings_about_label">Acerca de</string>
     <string name="version_title">Version</string>
     <string name="version_number">app version</string>
-    <string name="third_party_libraries_title">Librerias de Terceros</string>
-    <string name="third_party_libraries_subtitle">Gracias a la ayuda de esta libreria!</string>
+    <string name="third_party_libraries_title">Librerías de Terceros</string>
+    <string name="third_party_libraries_subtitle">Gracias a la ayuda de esta librería!</string>
+
+    <string name="letter">Letra</string>
+    <string name="description">Descripción</string>
+    <string name="synonyms">Sinónimos</string>
+    <string name="antonyms">Antónimos</string>
+
+    <string name="report_error">Reportar un problema</string>
+    <string name="share">Compartir</string>
+
+    <string name="search">Buscar palabra</string>
+    <string name="search_icon">Search Icon</string>
     <string name="search_section">Búsqueda</string>
     <string name="search_check_text">Por favor, revisa que todo esté bien escrito o prueba con una palabra clave diferente.</string>
-    <string name="no_favorites">Aún no tienes favoritos?</string>
-    <string name="add_favorites">Agrega palabras a tus favoritos y las verás aquí, incluso sin internet.</string>
-    <string name="positive_history_dialog_button">ELIMINAR</string>
-    <string name="negative_dialog_button">CANCELAR</string>
+
+    <string name="configurations">Ajustes</string>
+
+    <string name="favorite">Favorito</string>
+    <string name="favorites">Favoritos</string>
+    <string name="autodownload_favorites">Descargar favoritos</string>
+    <string name="delete_favorites">Eliminar favoritos</string>
+    <string name="add_favorites">Agrega palabras a tus favoritos y las verás aquí. Puedes ajustar las configuraciones en Ajustes.</string>
+    <string name="no_favorites">¿Aún no tienes favoritos?</string>
+
+
+    <string name="delete_downloads">Eliminar descargas</string>
+
+    <string name="download">Descarga</string>
+    <string name="add_downloads">Descarga las palabras que quieras y las verás aquí para cuanto no tengas conexión a internet. Puedes ajustar las configuraciones en Ajustes.</string>
+    <string name="descargar">Descargar</string>
+    <string name="download_channel_name">Descargas</string>
+    <string name="download_channel_description">Progreso de la descarga de videos.</string>
+    <string name="downloads">Descargas</string>
+    <string name="autodownload_favorites_text">Descarga/elimina automáticamente los videos guardados en favoritos.</string>
+    <string name="no_downloads">¿Aun no has descargado palabras?</string>
+
+    <string name="favorite_dialog_title">¿Eliminar favoritos?</string>
+    <string name="favorite_dialog_subtitle">Todos tus favoritos serán eliminados.</string>
+    <string name="download_dialog_title">¿Eliminar tus descargas?</string>
+    <string name="download_dialog_subtitle">Todas tus descargas serán eliminadas.</string>
+    <string name="cache_dialog_title">¿Eliminar caché?</string>
+    <string name="cache_dialog_subtitle">El caché de la aplicación será eliminado.</string>
     <string name="history_dialog_title">¿Eliminar historial?</string>
-    <string name="history_dialog_subtitle">Tu historial de busqueda será eliminado.</string>
+    <string name="history_dialog_subtitle">Tu historial de búsqueda será eliminado.</string>
+    <string name="discard_dialog_report_title">¿Descartar reporte?</string>
+    <string name="discard_dialog_report_subtitle">Si sales ahora, se perderá el reporte.</string>
+    <string name="positive_delete_dialog_button">ELIMINAR</string>
+    <string name="negative_dialog_button">CANCELAR</string>
+    <string name="positive_discard_dialog_button">DESCARTAR</string>
+
+    <string name="report_error_instructions">Por favor, únicamente envía comentarios sobre LSCH App. Visita nuestra sección de como reportar un error, en nuestro repositorio. Todos nuestros reportes están sujetos a nuestras condiciones de uso.</string>
+    <string name="send">Enviar</string>
+    <string name="report_edit_text_hint">¿Cuál es el problema?</string>
+
+
+    <string name="storage_section_title">Almacenamiento</string>
+    <string name="download_icon">Download icon</string>
+    <string name="categories">Categorias</string>
+    <string name="error_thumbnail">Error thumbnail</string>
+    <string name="acra_toast_text">Report</string>
+    <string name="report_sended">Se ha enviado un reporte al desarrollador</string>
+    <string name="report_dont_sended">Tu reporte no pudo ser enviado</string>
+    <string name="report_max_size">El mensaje es muy pesado, intenta con otra imagen o mensaje</string>
+    <string-array name="storage_options">
+        <item>Almacenamiento interno</item>
+        <item>Tarjeta SD</item>
+    </string-array>
+
+
 </resources>
