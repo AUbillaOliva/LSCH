@@ -14,6 +14,8 @@
     <dimen name="caption_size">12sp</dimen>
     <dimen name="overline_size">10sp</dimen>
 
+    <dimen name="image_padding">90px</dimen>
+
     <dimen name="abc_action_button_min_width_overflow_material_">36dp</dimen>
     <dimen name="abc_action_button_min_width_material_">48dp</dimen>
 
