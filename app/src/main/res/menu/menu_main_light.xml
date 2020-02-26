@@ -20,4 +20,9 @@
         android:title="@string/favorites"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/downloads"
+        android:title="@string/downloads"
+        app:showAsAction="never" />
+
 </menu>

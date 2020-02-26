@@ -3,16 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="@string/reportar_error"
-        android:id="@+id/report"/>
-
-    <item
         android:id="@+id/send"
-        android:title="@string/compartir"/>
+        android:title="@string/share"/>
 
     <item
         android:id="@+id/favorite"
         android:title="@string/favorite"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/download"
+        android:title="@string/descargar"
+        app:showAsAction="ifRoom"
+        android:checkable="true" />
+
+    <item
+        android:title="@string/report_error"
+        android:id="@+id/report" />
 
 </menu>

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="@string/reportar_error"
-        android:id="@+id/report"/>
+        android:id="@+id/report"
+        android:title="@string/report_error"/>
 
 </menu>

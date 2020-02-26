@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
-        android:title="@string/reportar_error"
-        android:id="@+id/report"/>
+        android:id="@+id/download"
+        android:title="@string/descargar"
+        app:showAsAction="ifRoom"
+        android:checkable="true" />
 
     <item
         android:id="@+id/send"
-        android:title="@string/compartir"/>
+        android:title="@string/share"/>
+
+    <item
+        android:title="@string/report_error"
+        android:id="@+id/report"/>
+
 </menu>
