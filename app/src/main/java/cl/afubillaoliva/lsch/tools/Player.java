@@ -20,11 +20,11 @@ public class Player extends VideoView {
         super(context);
     }
 
-    public Player(Context context, AttributeSet attrs) {
+    public Player(Context context, AttributeSet attrs){
         super(context, attrs);
     }
 
-    public Player(Context context, AttributeSet attrs, int defStyle) {
+    public Player(Context context, AttributeSet attrs, int defStyle){
         super(context, attrs, defStyle);
         mWidth = 0;
         mHeight = 0;
@@ -35,14 +35,14 @@ public class Player extends VideoView {
         int width = getDefaultSize(0, widthMeasureSpec);
         int height = getDefaultSize(mHeight, heightMeasureSpec);
 
-        if(displayMode == DisplayMode.ORIGINAL){
+        if(displayMode == DisplayMode.ORIGINAL)
             if(mWidth > 0 && mHeight > 0)
                 height = width * mHeight / mWidth;
             else if (mWidth * height < width * mHeight)
                 width = height * mWidth / mHeight;
-        } else if (displayMode == DisplayMode.FULL_SCREEN){
+        else if (displayMode == DisplayMode.FULL_SCREEN){}
             //USE THE DEFAULT SCREEN WIDTH AND HEIGHT
-        } else if (displayMode == DisplayMode.ZOOM)
+        else if (displayMode == DisplayMode.ZOOM)
             if(mWidth > 0 && mHeight > 0 && mWidth < width)
                 height = mHeight * width / mWidth;
         setMeasuredDimension(width, height);
