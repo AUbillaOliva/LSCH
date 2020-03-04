@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -51,7 +52,6 @@ import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.Cache;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
@@ -67,6 +67,7 @@ public class WordDetailActivity extends AppCompatActivity {
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
     private Word word;
     private Network network = new Network(context);
+    private Menu mainMenu;
 
     private NotificationManagerCompat notificationManagerCompat;
 
@@ -74,9 +75,15 @@ public class WordDetailActivity extends AppCompatActivity {
     private ImageView errorThumb;
     private ProgressBar progressBar;
 
+    private ConnectivityManager connMgr;
+    private android.net.NetworkInfo wifi;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
+        connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
@@ -385,72 +392,211 @@ public class WordDetailActivity extends AppCompatActivity {
         }
     }
 
-    public void setFavorite(MenuItem item){
-        if(!mSharedPreferences.loadNightModeState())
+    public void setFavorite(MenuItem item) {
+        final MenuItem download = mainMenu.findItem(R.id.download);
+        Log.d(MainActivity.FAV, download.getItemId() + " " + R.id.download);
+        if(mSharedPreferences.loadNightModeState()){
             if(favoriteDatabaseHelper.exists(word.getTitle())){
-                favoriteDatabaseHelper.deleteFavorite(word.getTitle());
-                deleteVideo(word.getTitle());
-                Log.d(MainActivity.FAV, "DELETED: " + word.getTitle());
-                item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                Log.e(MainActivity.FAV, "exist");
+                if(mSharedPreferences.loadAutoDownload()){
+                    Log.e(MainActivity.FAV, "deleted video and favorite");
+                    favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                    deleteVideo(word.getTitle());
+                    item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                    download.setIcon(R.drawable.ic_file_download_white_24dp);
+                } else {
+                    Log.e(MainActivity.FAV, "deleted favorite only");
+                    favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                    item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                }
             } else {
-                if(mSharedPreferences.loadAutoDownload() && !word.getImages().isEmpty())
-                    setDownloaded(item);
-                favoriteDatabaseHelper.addFavorite(word);
-                mSharedPreferences.setFavoriteDisabled(false);
-                Log.d(MainActivity.FAV, "ADDED: " + word.getTitle());
-                item.setIcon(R.drawable.ic_favorite_black_24dp);
+                //IF NOT EXISTS IN DB
+                if(mSharedPreferences.isWifiOnly()){
+                    connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    //ONLY WIFI
+                    Log.e(MainActivity.FAV, "only wifi");
+                    if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
+                        //AUTODOWNLOAD ON FAVORITE CHANGE LISTENER
+                        Log.e(MainActivity.FAV, "autodonwload active");
+                        if(wifi.isConnected()){
+                            //IF IS CONNECTED, DOWNLOAD AND SAVE TO FAVORITES
+                            Log.e(MainActivity.FAV, "wifi is connected, downloaded and saved to favorites");
+                            setDownloaded(item);
+                            favoriteDatabaseHelper.addFavorite(word);
+                            item.setIcon(R.drawable.ic_favorite_white_24dp);
+                            download.setIcon(R.drawable.ic_file_downloaded_24dp);
+                            mSharedPreferences.setDownloadDisabled(false);
+                            mSharedPreferences.setFavoriteDisabled(false);
+                        } else {
+                            //TOAST
+                            Log.e(MainActivity.FAV, "autodownload active, is not connected");
+                            Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        //IF IS NOT AUTODOWNLOAD, ONLY SAVE TO FAVORITES
+                        Log.e(MainActivity.FAV, "saved to favorites only");
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_white_24dp);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    }
+                } else {
+                    //IF IS NOT WIFI ONLY
+                    Log.e(MainActivity.FAV, "is not wifi only");
+                    if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
+                        //SAVE TO FAVORITES AND DOWNLOAD
+                        Log.e(MainActivity.FAV, "saved to favorites and downloaded");
+                        setDownloaded(item);
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_white_24dp);
+                        download.setIcon(R.drawable.ic_file_downloaded_24dp);
+                        mSharedPreferences.setDownloadDisabled(false);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    } else {
+                        //JUST SAVE TO FAVORITES
+                        Log.e(MainActivity.FAV, "saved to favorites only");
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_white_24dp);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    }
+                }
             }
-        else
+        } else {
             if(favoriteDatabaseHelper.exists(word.getTitle())){
-                deleteVideo(word.getTitle());
-                favoriteDatabaseHelper.deleteFavorite(word.getTitle());
-                Log.d(MainActivity.FAV, "DELETED: " + word.getTitle());
-                item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                if(mSharedPreferences.loadAutoDownload()){
+                    Log.e(MainActivity.FAV, "deleted video and favorite");
+                    favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                    deleteVideo(word.getTitle());
+                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                    download.setIcon(R.drawable.ic_file_download_black_24dp);
+                } else {
+                    Log.e(MainActivity.FAV, "deleted favorite only");
+                    favoriteDatabaseHelper.deleteFavorite(word.getTitle());
+                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                }
             } else {
-                if(mSharedPreferences.loadAutoDownload() && !word.getImages().isEmpty())
-                    setDownloaded(item);
-                favoriteDatabaseHelper.addFavorite(word);
-                mSharedPreferences.setFavoriteDisabled(false);
-                Log.d(MainActivity.FAV, "ADDED: " + word.getTitle());
-                item.setIcon(R.drawable.ic_favorite_white_24dp);
+                //IF NOT EXISTS IN DB
+                if(mSharedPreferences.isWifiOnly()){
+                    connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    //ONLY WIFI
+                    Log.e(MainActivity.FAV, "only wifi");
+                    if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
+                        //AUTODOWNLOAD ON FAVORITE CHANGE LISTENER
+                        Log.e(MainActivity.FAV, "autodonwload active");
+                        if(wifi.isConnected()){
+                            //IF IS CONNECTED, DOWNLOAD AND SAVE TO FAVORITES
+                            Log.e(MainActivity.FAV, "wifi is connected, downloaded and saved to favorites");
+                            setDownloaded(item);
+                            favoriteDatabaseHelper.addFavorite(word);
+                            item.setIcon(R.drawable.ic_favorite_black_24dp);
+                            download.setIcon(R.drawable.ic_file_downloaded_24dp);
+                            mSharedPreferences.setDownloadDisabled(false);
+                            mSharedPreferences.setFavoriteDisabled(false);
+                        } else {
+                            //TOAST
+                            Log.e(MainActivity.FAV, "autodownload active, is not connected");
+                            Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        //IF IS NOT AUTODOWNLOAD, ONLY SAVE TO FAVORITES
+                        Log.e(MainActivity.FAV, "saved to favorites only");
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_black_24dp);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    }
+                } else {
+                    //IF IS NOT WIFI ONLY
+                    Log.e(MainActivity.FAV, "is not wifi only");
+                    if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
+                        //SAVE TO FAVORITES AND DOWNLOAD
+                        Log.e(MainActivity.FAV, "saved to favorites and downloaded");
+                        setDownloaded(item);
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_black_24dp);
+                        download.setIcon(R.drawable.ic_file_downloaded_24dp);
+                        mSharedPreferences.setDownloadDisabled(false);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    } else {
+                        //JUST SAVE TO FAVORITES
+                        Log.e(MainActivity.FAV, "saved to favorites only");
+                        favoriteDatabaseHelper.addFavorite(word);
+                        item.setIcon(R.drawable.ic_favorite_black_24dp);
+                        mSharedPreferences.setFavoriteDisabled(false);
+                    }
+                }
             }
+        }
     }
 
     public void setDownloaded(MenuItem item){
-        if(!mSharedPreferences.loadNightModeState())
-            if(downloadDatabaseHelper.exists(word.getTitle())){
-                deleteVideo(word.getTitle());
-                downloadDatabaseHelper.deleteDownload(word.getTitle());
-                item.setIcon(R.drawable.ic_file_download_black_24dp);
+        if(mSharedPreferences.isWifiOnly()){
+            assert wifi != null;
+            if(wifi.isConnected()){
+                if(!mSharedPreferences.loadNightModeState()){
+                    if(downloadDatabaseHelper.exists(word.getTitle())){
+                        deleteVideo(word.getTitle());
+                        downloadDatabaseHelper.deleteDownload(word.getTitle());
+                        item.setIcon(R.drawable.ic_file_download_black_24dp);
+                    } else {
+                        getData(word);
+                        downloadDatabaseHelper.addDownload(word);
+                        item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                        mSharedPreferences.setDownloadDisabled(false);
+                    }
+                } else {
+                    if(downloadDatabaseHelper.exists(word.getTitle())){
+                        deleteVideo(word.getTitle());
+                        downloadDatabaseHelper.deleteDownload(word.getTitle());
+                        item.setIcon(R.drawable.ic_file_download_white_24dp);
+                    } else {
+                        getData(word);
+                        downloadDatabaseHelper.addDownload(word);
+                        item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                        mSharedPreferences.setDownloadDisabled(false);
+                    }
+                }
             } else {
-                getData(word);
-                mSharedPreferences.setDownloadDisabled(false);
-                downloadDatabaseHelper.addDownload(word);
-                item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                Toast.makeText(context, "La opción solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
             }
-        else
-            if(downloadDatabaseHelper.exists(word.getTitle())){
-                deleteVideo(word.getTitle());
-                downloadDatabaseHelper.deleteDownload(word.getTitle());
-                item.setIcon(R.drawable.ic_file_download_white_24dp);
+        } else {
+            if(!mSharedPreferences.loadNightModeState()){
+                if(downloadDatabaseHelper.exists(word.getTitle())){
+                    deleteVideo(word.getTitle());
+                    downloadDatabaseHelper.deleteDownload(word.getTitle());
+                    item.setIcon(R.drawable.ic_file_download_black_24dp);
+                } else {
+                    getData(word);
+                    downloadDatabaseHelper.addDownload(word);
+                    item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                    mSharedPreferences.setDownloadDisabled(false);
+                }
             } else {
-                getData(word);
-                mSharedPreferences.setDownloadDisabled(false);
-                downloadDatabaseHelper.addDownload(word);
-                item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                if(downloadDatabaseHelper.exists(word.getTitle())){
+                    deleteVideo(word.getTitle());
+                    downloadDatabaseHelper.deleteDownload(word.getTitle());
+                    item.setIcon(R.drawable.ic_file_download_white_24dp);
+                } else {
+                    getData(word);
+                    downloadDatabaseHelper.addDownload(word);
+                    item.setIcon(R.drawable.ic_file_downloaded_24dp);
+                    mSharedPreferences.setDownloadDisabled(false);
+                }
             }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_word, menu);
 
+        mainMenu = menu;
+
         final MenuItem favoriteItem = menu.findItem(R.id.favorite);
         final MenuItem downloadItem = menu.findItem(R.id.download);
 
-        final File file = new File(getExternalFilesDir(null) + File.separator + word.getTitle().replaceAll("[^a-zA-Z0-9]", "") + ".mp4");
         if(!mSharedPreferences.loadNightModeState()){
-            if(file.exists()) {
+            if(downloadDatabaseHelper.exists(word.getTitle())) {
                 downloadItem.setIcon(R.drawable.ic_file_downloaded_24dp);
                 downloadItem.setChecked(true);
             } else
@@ -460,7 +606,7 @@ public class WordDetailActivity extends AppCompatActivity {
             else
                 favoriteItem.setIcon(R.drawable.ic_favorite_border_black_24dp);
         } else {
-            if(file.exists()){
+            if(downloadDatabaseHelper.exists(word.getTitle())){
                 downloadItem.setIcon(R.drawable.ic_file_downloaded_24dp);
                 downloadItem.setChecked(true);
             } else
@@ -472,28 +618,13 @@ public class WordDetailActivity extends AppCompatActivity {
         }
 
         downloadItem.setOnMenuItemClickListener(item -> {
-            /*if(file.exists()){
-                deleteVideo(word.getTitle());
-                if(!mSharedPreferences.loadNightModeState())
-                    downloadItem.setIcon(R.drawable.ic_file_download_black_24dp);
-                else
-                    downloadItem.setIcon(R.drawable.ic_file_download_white_24dp);
-            } else {
-                if(!word.getImages().isEmpty()){
-                    getData(word);
-                    downloadItem.setIcon(R.drawable.ic_file_downloaded_24dp);
-                }
-            }*/
             setDownloaded(item);
             return false;
         });
 
-        favoriteItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                setFavorite(item);
-                return false;
-            }
+        favoriteItem.setOnMenuItemClickListener(item -> {
+            setFavorite(item);
+            return false;
         });
         return true;
     }
