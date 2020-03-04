@@ -1,10 +1,8 @@
 package cl.afubillaoliva.lsch.activities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +21,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
-import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.models.ListItem;
@@ -33,8 +30,6 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 public class HelpActivity extends AppCompatActivity {
 
     private final Context context = this;
-
-    private GenericAdapter<ListItem> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -63,14 +58,14 @@ public class HelpActivity extends AppCompatActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setNestedScrollingEnabled(true);
-        adapter = new GenericAdapter<ListItem>(helpListItems()){
+        GenericAdapter<ListItem> adapter = new GenericAdapter<ListItem>(helpListItems()) {
             @Override
-            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
+            public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack) {
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.expandable_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position) {
                 final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final TextView title = viewHolder.get(R.id.item_title);
                 title.setText(val.getTitle());
@@ -82,7 +77,7 @@ public class HelpActivity extends AppCompatActivity {
                 final LinearLayout layout = viewHolder.get(R.id.sub_item);
                 layout.setVisibility(expanded ? View.VISIBLE : View.GONE);
                 final View divider = viewHolder.get(R.id.vw_divider);
-                if(position == getItemCount() - 1)
+                if (position == getItemCount() - 1)
                     divider.setVisibility(View.GONE);
                 holder.itemView.setOnClickListener(v -> {
                     val.setExpanded(!expanded);
@@ -92,13 +87,15 @@ public class HelpActivity extends AppCompatActivity {
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
-                return new RecyclerViewOnClickListenerHack(){
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
+                return new RecyclerViewOnClickListenerHack() {
                     @Override
-                    public void onClickListener(View view, int position){}
+                    public void onClickListener(View view, int position) {
+                    }
 
                     @Override
-                    public void onLongPressClickListener(View view, int position){}
+                    public void onLongPressClickListener(View view, int position) {
+                    }
                 };
             }
         };

@@ -103,7 +103,6 @@ public class Abecedary extends Fragment {
                         else {
                             final Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
                             intent.putExtra("letter", getItem(position).getLetter());
-                            Log.d(MainActivity.TAG, "letter: " + getItem(position).getLetter());
                             startActivity(intent);
                         }
                     }
@@ -147,20 +146,17 @@ public class Abecedary extends Fragment {
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale
-                    if (isNetworkAvailable()) {
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "ABECEDARY: using cache that was stored 5 minutes ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "ABECEDARY: using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();
@@ -177,7 +173,7 @@ public class Abecedary extends Fragment {
                 if(response.isSuccessful()){
                     final ArrayList<cl.afubillaoliva.lsch.models.Abecedary> apiResponse = response.body();
                     adapter.addItems(apiResponse);
-                } else {
+                } else{
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }
@@ -188,7 +184,7 @@ public class Abecedary extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
+                Log.d(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });

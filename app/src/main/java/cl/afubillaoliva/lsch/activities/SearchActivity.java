@@ -186,7 +186,6 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                     @Override
                     public void onLongPressClickListener(View view, int position){
                         Toast.makeText(context, "Eliminado del historial", Toast.LENGTH_SHORT).show();
-                        Log.d(MainActivity.HIS, "DELETED: " + historyAdapter.getItem(position));
                         databaseHelper.deleteHistory(historyAdapter.getItem(position));
                         historyAdapter.addItems(databaseHelper.getHistory());
                     }
@@ -226,20 +225,17 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                    if (network.isNetworkAvailable()){
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (network.isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 5 minutes ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();
@@ -254,13 +250,16 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
                     apiResponse = response.body();
                     adapter.setDataset(context,apiResponse);
                     mRecyclerView.setAdapter(adapter);
-                } else
+                } else{
+                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                }
                 loadingFrame.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(@NonNull Call<ArrayList<Word>> call, @NonNull Throwable t){
+                Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
                 loadingFrame.setVisibility(View.GONE);
             }

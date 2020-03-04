@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -147,20 +148,17 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                    if (network.isNetworkAvailable()) {
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (network.isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-age=" + 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();
@@ -168,19 +166,15 @@ public class AbecedaryListActivity extends AppCompatActivity {
         final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
         final Call<ArrayList<Word>> responseCall;
 
-        if(letter == null && theme == null){
+        if(letter == null && theme == null)
             responseCall = service.getWords(null, null);
-            Log.d(MainActivity.TAG, "NULL PARAMETERS");
-        } else if(letter != null && theme == null){
+        else if(letter != null && theme == null)
             responseCall = service.getWords(letter, null);
-            Log.d(MainActivity.TAG, "Letter: " + letter);
-        } else if(letter == null){
+        else if(letter == null)
             responseCall = service.getWords(null, theme);
-            Log.d(MainActivity.TAG, "Category: " + theme);
-        } else {
+        else
             responseCall = service.getWords(null,null);
-            Log.d(MainActivity.TAG, "Letter: " + letter + " Category: " + theme);
-        }
+
 
         responseCall.enqueue(new Callback<ArrayList<Word>>() {
             @Override
@@ -191,8 +185,10 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     apiResponse = response.body();
                     adapter.addItems(apiResponse);
-                } else
+                } else {
+                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -200,6 +196,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });

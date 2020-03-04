@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -340,12 +339,6 @@ public class SettingsActivity extends AppCompatActivity {
                                 break;
                             case 1:
                                 if(downloadDatabaseHelper.getAllDownload().size() > 0 || Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() == null){
-                                    if(context.getDatabasePath("download.db").exists())
-                                        Log.d(MainActivity.TAG, "database exists!");
-                                    else if(Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() != null)
-                                        Log.d(MainActivity.TAG, "file folder has no items!");
-                                    else
-                                        Log.d(MainActivity.TAG, "none");
                                     final AlertDialog dialog = new AlertDialog.Builder(context)
                                             .setView(R.layout.confirmation_dialog_layout)
                                             .show();

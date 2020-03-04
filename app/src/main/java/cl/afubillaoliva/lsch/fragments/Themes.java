@@ -125,20 +125,17 @@ public class Themes extends Fragment{
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                    if (isNetworkAvailable()) {
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-stale=" + 60 * 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "THEMES: using cache that was stored 5 minutes ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "THEMES: using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();

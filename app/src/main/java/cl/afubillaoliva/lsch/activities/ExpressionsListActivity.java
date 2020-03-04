@@ -127,20 +127,17 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                    if (network.isNetworkAvailable()) {
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (network.isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-age=" + 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();
@@ -157,8 +154,10 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 if (response.isSuccessful()){
                     apiResponse = response.body();
                     adapter.addItems(apiResponse);
-                } else
+                } else{
+                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -166,7 +165,7 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
-                Log.i(MainActivity.TAG, "onFailure: " + t.getMessage());
+                Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(ExpressionsListActivity.this, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });

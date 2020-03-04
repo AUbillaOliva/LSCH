@@ -295,20 +295,17 @@ public class WordDetailActivity extends AppCompatActivity {
                 .cache(cache)
                 .addInterceptor(chain -> {
                     Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7; // tolerate 4-weeks stale \
-                    if (network.isNetworkAvailable()) {
+                    int maxStale = 60 * 60 * 24 * 7;
+                    if (network.isNetworkAvailable())
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, max-age=" + 5)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 5 seconds ago");
-                    } else {
+                    else
                         request = request
                                 .newBuilder()
                                 .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
                                 .build();
-                        Log.d(MainActivity.TAG, "using cache that was stored 7 days ago");
-                    }
                     return chain.proceed(request);
                 })
                 .build();
@@ -353,11 +350,15 @@ public class WordDetailActivity extends AppCompatActivity {
                         }
                     }.execute();
                 }
-                else Log.d(MainActivity.TAG, "server contact failed");
+                else{
+                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
+                    Toast.makeText(context, "No se pudo descargar el video.", Toast.LENGTH_SHORT).show();
+                }
             }
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t){
                 Log.e(MainActivity.TAG, "Error: " + t.getMessage());
+                Toast.makeText(context, "No se pudo descargar el video.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -394,58 +395,38 @@ public class WordDetailActivity extends AppCompatActivity {
 
     public void setFavorite(MenuItem item) {
         final MenuItem download = mainMenu.findItem(R.id.download);
-        Log.d(MainActivity.FAV, download.getItemId() + " " + R.id.download);
         if(mSharedPreferences.loadNightModeState()){
             if(favoriteDatabaseHelper.exists(word.getTitle())){
-                Log.e(MainActivity.FAV, "exist");
                 if(mSharedPreferences.loadAutoDownload()){
-                    Log.e(MainActivity.FAV, "deleted video and favorite");
                     favoriteDatabaseHelper.deleteFavorite(word.getTitle());
                     deleteVideo(word.getTitle());
                     item.setIcon(R.drawable.ic_favorite_border_white_24dp);
                     download.setIcon(R.drawable.ic_file_download_white_24dp);
                 } else {
-                    Log.e(MainActivity.FAV, "deleted favorite only");
                     favoriteDatabaseHelper.deleteFavorite(word.getTitle());
                     item.setIcon(R.drawable.ic_favorite_border_white_24dp);
                 }
             } else {
-                //IF NOT EXISTS IN DB
                 if(mSharedPreferences.isWifiOnly()){
                     connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
                     wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                    //ONLY WIFI
-                    Log.e(MainActivity.FAV, "only wifi");
                     if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
-                        //AUTODOWNLOAD ON FAVORITE CHANGE LISTENER
-                        Log.e(MainActivity.FAV, "autodonwload active");
                         if(wifi.isConnected()){
-                            //IF IS CONNECTED, DOWNLOAD AND SAVE TO FAVORITES
-                            Log.e(MainActivity.FAV, "wifi is connected, downloaded and saved to favorites");
                             setDownloaded(item);
                             favoriteDatabaseHelper.addFavorite(word);
                             item.setIcon(R.drawable.ic_favorite_white_24dp);
                             download.setIcon(R.drawable.ic_file_downloaded_24dp);
                             mSharedPreferences.setDownloadDisabled(false);
                             mSharedPreferences.setFavoriteDisabled(false);
-                        } else {
-                            //TOAST
-                            Log.e(MainActivity.FAV, "autodownload active, is not connected");
+                        } else
                             Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
-                        }
                     } else {
-                        //IF IS NOT AUTODOWNLOAD, ONLY SAVE TO FAVORITES
-                        Log.e(MainActivity.FAV, "saved to favorites only");
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_white_24dp);
                         mSharedPreferences.setFavoriteDisabled(false);
                     }
                 } else {
-                    //IF IS NOT WIFI ONLY
-                    Log.e(MainActivity.FAV, "is not wifi only");
                     if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
-                        //SAVE TO FAVORITES AND DOWNLOAD
-                        Log.e(MainActivity.FAV, "saved to favorites and downloaded");
                         setDownloaded(item);
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_white_24dp);
@@ -453,8 +434,6 @@ public class WordDetailActivity extends AppCompatActivity {
                         mSharedPreferences.setDownloadDisabled(false);
                         mSharedPreferences.setFavoriteDisabled(false);
                     } else {
-                        //JUST SAVE TO FAVORITES
-                        Log.e(MainActivity.FAV, "saved to favorites only");
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_white_24dp);
                         mSharedPreferences.setFavoriteDisabled(false);
@@ -464,53 +443,35 @@ public class WordDetailActivity extends AppCompatActivity {
         } else {
             if(favoriteDatabaseHelper.exists(word.getTitle())){
                 if(mSharedPreferences.loadAutoDownload()){
-                    Log.e(MainActivity.FAV, "deleted video and favorite");
                     favoriteDatabaseHelper.deleteFavorite(word.getTitle());
                     deleteVideo(word.getTitle());
                     item.setIcon(R.drawable.ic_favorite_border_black_24dp);
                     download.setIcon(R.drawable.ic_file_download_black_24dp);
                 } else {
-                    Log.e(MainActivity.FAV, "deleted favorite only");
                     favoriteDatabaseHelper.deleteFavorite(word.getTitle());
                     item.setIcon(R.drawable.ic_favorite_border_black_24dp);
                 }
             } else {
-                //IF NOT EXISTS IN DB
                 if(mSharedPreferences.isWifiOnly()){
                     connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
                     wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                    //ONLY WIFI
-                    Log.e(MainActivity.FAV, "only wifi");
                     if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
-                        //AUTODOWNLOAD ON FAVORITE CHANGE LISTENER
-                        Log.e(MainActivity.FAV, "autodonwload active");
                         if(wifi.isConnected()){
-                            //IF IS CONNECTED, DOWNLOAD AND SAVE TO FAVORITES
-                            Log.e(MainActivity.FAV, "wifi is connected, downloaded and saved to favorites");
                             setDownloaded(item);
                             favoriteDatabaseHelper.addFavorite(word);
                             item.setIcon(R.drawable.ic_favorite_black_24dp);
                             download.setIcon(R.drawable.ic_file_downloaded_24dp);
                             mSharedPreferences.setDownloadDisabled(false);
                             mSharedPreferences.setFavoriteDisabled(false);
-                        } else {
-                            //TOAST
-                            Log.e(MainActivity.FAV, "autodownload active, is not connected");
+                        } else
                             Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
-                        }
                     } else {
-                        //IF IS NOT AUTODOWNLOAD, ONLY SAVE TO FAVORITES
-                        Log.e(MainActivity.FAV, "saved to favorites only");
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_black_24dp);
                         mSharedPreferences.setFavoriteDisabled(false);
                     }
                 } else {
-                    //IF IS NOT WIFI ONLY
-                    Log.e(MainActivity.FAV, "is not wifi only");
                     if(mSharedPreferences.loadAutoDownload() && word.getImages() != null){
-                        //SAVE TO FAVORITES AND DOWNLOAD
-                        Log.e(MainActivity.FAV, "saved to favorites and downloaded");
                         setDownloaded(item);
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_black_24dp);
@@ -518,8 +479,6 @@ public class WordDetailActivity extends AppCompatActivity {
                         mSharedPreferences.setDownloadDisabled(false);
                         mSharedPreferences.setFavoriteDisabled(false);
                     } else {
-                        //JUST SAVE TO FAVORITES
-                        Log.e(MainActivity.FAV, "saved to favorites only");
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_black_24dp);
                         mSharedPreferences.setFavoriteDisabled(false);
