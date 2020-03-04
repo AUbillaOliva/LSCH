@@ -50,17 +50,20 @@ public class SharedPreference {
         editor.apply();
     }
 
-    public boolean loadNightModeState(){
-        return mSharedPreferences.getBoolean("NightMode",false);
+    public void setWifiOnly(boolean state){
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean("wifiOnly", state);
+        editor.apply();
     }
-    public boolean isFavorite(){
-            return mSharedPreferences.getBoolean("Favorite", false);
-    }
-    public boolean loadAutoDownload() { return  mSharedPreferences.getBoolean("Autodownload", false); }
 
-    public boolean isHistoryDisabled() { return mSharedPreferences.getBoolean("historyDisabled", true); }
-    public boolean isFavoriteDisabled() { return mSharedPreferences.getBoolean("favoriteDisabled", true); }
-    public boolean isDownloadDisabled() { return mSharedPreferences.getBoolean("downloadDisabled", true); }
-    public boolean isCacheDisabled() { return mSharedPreferences.getBoolean("cacheDisabled", false); }
+    public boolean loadNightModeState(){ return mSharedPreferences.getBoolean("NightMode",false); }
+    public boolean isFavorite(){ return mSharedPreferences.getBoolean("Favorite", false); }
+    public boolean loadAutoDownload(){ return  mSharedPreferences.getBoolean("Autodownload", false); }
+
+    public boolean isHistoryDisabled(){ return mSharedPreferences.getBoolean("historyDisabled", true); }
+    public boolean isFavoriteDisabled(){ return mSharedPreferences.getBoolean("favoriteDisabled", true); }
+    public boolean isDownloadDisabled(){ return mSharedPreferences.getBoolean("downloadDisabled", true); }
+    public boolean isCacheDisabled(){ return mSharedPreferences.getBoolean("cacheDisabled", false); }
+    public boolean isWifiOnly(){ return mSharedPreferences.getBoolean("wifiOnly", false); }
 
 }
