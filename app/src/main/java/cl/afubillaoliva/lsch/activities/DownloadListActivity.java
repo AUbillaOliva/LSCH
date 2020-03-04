@@ -193,10 +193,8 @@ public class DownloadListActivity extends AppCompatActivity {
                             adapter.addItems(downloadDatabaseHelper.getAllDownload());
                             adapter.notifyDataSetChanged();
                         }
+                        mSharedPreferences.setDownloadDisabled(true);
                         dialog.dismiss();
-                        startActivity(new Intent(context, DownloadListActivity.class));
-                        finish();
-                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                     });
                     mSharedPreferences.setDownloadDisabled(false);
                     final TextView dialogTitle = dialog.findViewById(R.id.dialog_title);
