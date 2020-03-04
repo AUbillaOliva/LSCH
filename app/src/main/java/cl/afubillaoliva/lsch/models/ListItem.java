@@ -1,8 +1,12 @@
 package cl.afubillaoliva.lsch.models;
 
-public class SettingsItem {
+public class ListItem {
     private String title, subtitle;
-    private boolean isDisabled;
+    private boolean isDisabled, expanded = false;
+
+    public ListItem(){
+        this.expanded = false;
+    }
 
     public String getTitle() {
         return title;
@@ -24,4 +28,11 @@ public class SettingsItem {
 
     public void setDisabled(boolean disabled) { isDisabled = disabled; }
 
+    public boolean isExpanded(){
+        return expanded;
+    }
+
+    public void setExpanded(boolean expanded){
+        this.expanded = expanded;
+    }
 }
