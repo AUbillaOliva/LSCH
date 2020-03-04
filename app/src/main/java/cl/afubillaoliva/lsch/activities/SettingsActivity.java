@@ -35,14 +35,12 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
-import cl.afubillaoliva.lsch.models.SettingsItem;
+import cl.afubillaoliva.lsch.models.ListItem;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.HistoryDatabaseHelper;
-
-// TODO: ADD ONLY DOWNLOAD WITH WIFI
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -53,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
 
     private RecyclerView storageList, searchList, aboutList;
-    private GenericAdapter<SettingsItem> storageAdapter, searchAdapter, aboutAdapter;
+    private GenericAdapter<ListItem> storageAdapter, searchAdapter, aboutAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -68,8 +66,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final TextView toolbarTitle = mToolbar.findViewById(R.id.toolbar_title), versionTitle = findViewById(R.id.version_number);
-        final Switch mDarkSwitch = findViewById(R.id.settings_dark_theme_switch);
-        final Switch mOfflineSwitch = findViewById(R.id.settings_offline_switch);
+        final Switch mDarkSwitch = findViewById(R.id.settings_dark_theme_switch),
+                     mOfflineSwitch = findViewById(R.id.settings_offline_switch),
+                     mWifiOnly = findViewById(R.id.settings_wifi_download_only);
         aboutList = findViewById(R.id.about_list);
         searchList = findViewById(R.id.search_list);
         storageList = findViewById(R.id.storage_list);
@@ -116,23 +115,27 @@ public class SettingsActivity extends AppCompatActivity {
                 mSharedPreferences.setAutodownload(true);
         });
 
-        mSharedPreferences.setHistoryDisabled(mSharedPreferences.isHistoryDisabled());
-        mSharedPreferences.setFavoriteDisabled(mSharedPreferences.isFavoriteDisabled());
-        mSharedPreferences.setDownloadDisabled(mSharedPreferences.isDownloadDisabled());
-        mSharedPreferences.setCacheDisabled(mSharedPreferences.isCacheDisabled());
+        if(mSharedPreferences.isWifiOnly())
+            mWifiOnly.setChecked(true);
+        mWifiOnly.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(!isChecked)
+                mSharedPreferences.setWifiOnly(false);
+            else
+                mSharedPreferences.setWifiOnly(true);
+        });
 
         aboutList.setHasFixedSize(true);
         aboutList.setNestedScrollingEnabled(true);
         final LinearLayoutManager aboutLayoutManager = new LinearLayoutManager(context);
         aboutList.setLayoutManager(aboutLayoutManager);
-        aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()){
+        aboutAdapter = new GenericAdapter<ListItem>(aboutListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
@@ -145,12 +148,15 @@ public class SettingsActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack() {
                     @Override
                     public void onClickListener(View view, int position){
-                        if (position == 0){
-                            final Intent intent = new Intent(context, ListActivity.class);
-                            intent.putExtra("activity", getItem(position).getTitle());
-                            intent.putExtra("data", libraries());
-                            startActivity(intent);
-                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        switch (position){
+                            case 0:
+                                startActivity(new Intent(context, ThirdPartyLibrariesActivity.class));
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
+                            case 1:
+                                startActivity(new Intent(context, HelpActivity.class));
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
                         }
                     }
 
@@ -165,14 +171,14 @@ public class SettingsActivity extends AppCompatActivity {
         searchList.setNestedScrollingEnabled(true);
         final LinearLayoutManager searchLayoutManager = new LinearLayoutManager(context);
         searchList.setLayoutManager(searchLayoutManager);
-        searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()){
+        searchAdapter = new GenericAdapter<ListItem>(searchListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
@@ -268,14 +274,14 @@ public class SettingsActivity extends AppCompatActivity {
         storageList.setNestedScrollingEnabled(true);
         final LinearLayoutManager storageLayoutManager = new LinearLayoutManager(context);
         storageList.setLayoutManager(storageLayoutManager);
-        storageAdapter = new GenericAdapter<SettingsItem>(storageListItems()){
+        storageAdapter = new GenericAdapter<ListItem>(storageListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
@@ -404,14 +410,14 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onRestart(){
         super.onRestart();
 
-        aboutAdapter = new GenericAdapter<SettingsItem>(aboutListItems()){
+        aboutAdapter = new GenericAdapter<ListItem>(aboutListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
@@ -424,13 +430,15 @@ public class SettingsActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack(){
                     @Override
                     public void onClickListener(View view, int position){
-                        //replace with switch if has more items
-                        if (position == 0){
-                            final Intent intent = new Intent(context, ListActivity.class);
-                            intent.putExtra("activity", getItem(position).getTitle());
-                            intent.putExtra("data", libraries());
-                            startActivity(intent);
-                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        switch (position){
+                            case 0:
+                                startActivity(new Intent(context, ThirdPartyLibrariesActivity.class));
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
+                            case 1:
+                                startActivity(new Intent(context, HelpActivity.class));
+                                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
                         }
                     }
 
@@ -441,29 +449,30 @@ public class SettingsActivity extends AppCompatActivity {
         };
         aboutList.setAdapter(aboutAdapter);
 
-        searchAdapter = new GenericAdapter<SettingsItem>(searchListItems()){
+        searchAdapter = new GenericAdapter<ListItem>(searchListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
                 title.setText(val.getTitle());
                 subtitle.setText(val.getSubtitle());
-                if(mSharedPreferences.loadNightModeState())
-                    if(getItem(position).isDisabled()){
+                if(mSharedPreferences.loadNightModeState()) {
+                    if (getItem(position).isDisabled()) {
                         title.setTextColor(getResources().getColor(R.color.textDisabledDark));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
                     }
-                else
+                } else {
                     if(getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledLight));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
                     }
+                }
             }
 
             @Override
@@ -538,29 +547,30 @@ public class SettingsActivity extends AppCompatActivity {
         };
         searchList.setAdapter(searchAdapter);
 
-        storageAdapter = new GenericAdapter<SettingsItem>(storageListItems()){
+        storageAdapter = new GenericAdapter<ListItem>(storageListItems()){
             @Override
             public RecyclerView.ViewHolder setViewHolder(ViewGroup parent, RecyclerViewOnClickListenerHack recyclerViewOnClickListenerHack){
                 return new GenericViewHolder(LayoutInflater.from(context).inflate(R.layout.settings_list_item, parent, false), recyclerViewOnClickListenerHack);
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, SettingsItem val, int position){
+            public void onBindData(RecyclerView.ViewHolder holder, ListItem val, int position){
                 final GenericViewHolder myViewHolder = (GenericViewHolder) holder;
                 final TextView title = myViewHolder.get(R.id.list_item_title);
                 title.setText(val.getTitle());
                 final TextView subtitle = myViewHolder.get(R.id.list_item_subtitle);
                 subtitle.setText(val.getSubtitle());
-                if(mSharedPreferences.loadNightModeState())
+                if(mSharedPreferences.loadNightModeState()){
                     if(getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledDark));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
                     }
-                else
-                    if(getItem(position).isDisabled()){
+                } else {
+                    if (getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledLight));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
                     }
+                }
             }
 
             @Override
@@ -672,46 +682,36 @@ public class SettingsActivity extends AppCompatActivity {
             return false;
     }
 
-    public ArrayList<String> libraries(){
-        final ArrayList<String> items = new ArrayList<>();
-        items.add("Retrofit");
-        items.add("Retrofit Converter Gson");
-        items.add("Glide");
-        items.add("Gson");
-        items.add("RecyclerView-v7");
-        items.add("CardView-v7");
-        items.add("Android AppCompat-v7");
-        items.add("Android Design Library");
-        items.add("Android Support Compat");
-        items.add("Android Support Library");
-        return items;
-    }
-    private ArrayList<SettingsItem> aboutListItems(){
-        final ArrayList<SettingsItem> items = new ArrayList<>();
+    private ArrayList<ListItem> aboutListItems(){
+        final ArrayList<ListItem> items = new ArrayList<>();
 
-        SettingsItem item = new SettingsItem();
+        ListItem item = new ListItem();
         item.setTitle("Librerias de terceros");
         item.setSubtitle("Con la gran ayuda de este software!");
-        //TODO: GET README FROM REPO, THIRD-PARTY LIBRARIES
         items.add(item);
 
-        item = new SettingsItem();
+        item = new ListItem();
+        item.setTitle("Ayuda");
+        item.setSubtitle("Estamos aqui para ayudarte.");
+        items.add(item);
+
+        item = new ListItem();
         item.setTitle("Soporte");
         item.setSubtitle("Obtén ayuda de nosotros y de la comunidad.");
         items.add(item);
 
         return items;
     }
-    private ArrayList<SettingsItem> searchListItems(){
-        final ArrayList<SettingsItem> items = new ArrayList<>();
+    private ArrayList<ListItem> searchListItems(){
+        final ArrayList<ListItem> items = new ArrayList<>();
 
-        SettingsItem item = new SettingsItem();
+        ListItem item = new ListItem();
         item.setTitle("Eliminar historial");
         item.setSubtitle("Elimina tus busquedas recientes del menu de busqueda.");
         item.setDisabled(mSharedPreferences.isHistoryDisabled());
         items.add(item);
 
-        item = new SettingsItem();
+        item = new ListItem();
         item.setTitle("Eliminar favoritos");
         item.setSubtitle("Elimina todos tus favoritos.");
         item.setDisabled(mSharedPreferences.isFavoriteDisabled());
@@ -719,23 +719,23 @@ public class SettingsActivity extends AppCompatActivity {
 
         return items;
     }
-    private ArrayList<SettingsItem> storageListItems(){
+    private ArrayList<ListItem> storageListItems(){
 
-        final ArrayList<SettingsItem> items = new ArrayList<>();
-        SettingsItem item = new SettingsItem();
+        final ArrayList<ListItem> items = new ArrayList<>();
+        ListItem item = new ListItem();
 
         item.setTitle("Eliminar caché");
         item.setSubtitle("Elimina el caché utilizado por la app. Tus favoritos y descargas no serán eliminados.");
         item.setDisabled(mSharedPreferences.isCacheDisabled());
         items.add(item);
 
-        item = new SettingsItem();
+        item = new ListItem();
         item.setTitle("Eliminar descargas");
         item.setSubtitle("Elimina todas tus palabras descargadas.");
         item.setDisabled(mSharedPreferences.isDownloadDisabled());
         items.add(item);
 
-        item = new SettingsItem();
+        item = new ListItem();
         item.setTitle("Ubicación de almacenamiento");
         item.setSubtitle("Establece donde quieres que los videos descargados se almacenen.");
         item.setDisabled(false);
