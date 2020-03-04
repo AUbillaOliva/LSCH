@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="cl.afubillaoliva.lsch">
+    package="cl.afubillaoliva.lsch" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -19,12 +19,12 @@
         android:theme="@style/AppTheme"
         tools:targetApi="m"
         tools:ignore="GoogleAppIndexingWarning"
-        android:name=".MainApplication">
+        android:name=".MainApplication" >
         <!--TODO: INVESTIGATE GOOGLE APP INDEXING-->
 
         <activity
             android:screenOrientation="portrait"
-            android:name=".MainActivity">
+            android:name=".MainActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -32,34 +32,40 @@
 
         </activity>
         <activity android:name=".activities.SettingsActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.ExpressionsListActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.AbecedaryListActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.WordDetailActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.FavoriteListActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.DownloadListActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.SearchActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.ListActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.StorageOptionsActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
 
         <activity android:name=".activities.ReportActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.HelpActivity"
+            android:screenOrientation="portrait" />
+
+        <activity android:name=".activities.ThirdPartyLibrariesActivity"
+            android:screenOrientation="portrait" />
 
     </application>
 
