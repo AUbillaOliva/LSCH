@@ -73,6 +73,11 @@
     <string name="report_sended">Se ha enviado un reporte al desarrollador</string>
     <string name="report_dont_sended">Tu reporte no pudo ser enviado</string>
     <string name="report_max_size">El mensaje es muy pesado, intenta con otra imagen o mensaje</string>
+    <string name="help">Ayuda</string>
+    <string name="libraries_we_use">Librerias que utilizamos</string>
+    <string name="third_party_libraries_text">Lo siguiente establece la atribución para el software de terceros que puede estar contenido en partes del producto LSCH App. Agradecemos a la comunidad de código abierto por todas sus contribuciones.</string>
+    <string name="wifi_only">Descarga solo con wifi</string>
+    <string name="wifi_only_text">Descarga los videos, solo utilizando conexión a wifi.</string>
     <string-array name="storage_options">
         <item>Almacenamiento interno</item>
         <item>Tarjeta SD</item>
