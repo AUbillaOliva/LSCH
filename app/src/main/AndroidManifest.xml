@@ -26,6 +26,8 @@
         <service android:name=".services.DownloadService"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
+        <receiver android:name=".tools.NotificationReceiver" />
+
         <activity
             android:screenOrientation="portrait"
             android:name=".MainActivity" >
