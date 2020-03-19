@@ -1,18 +1,23 @@
 package cl.afubillaoliva.lsch;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.StateListAnimator;
-import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -45,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String UI = "INTERFACE";
     public static final String HIS = "HISTORY";
     public static final String REP = "REPORT";
+    public static final String DOWN = "DOWNLOAD";
 
     public static final String CHANNEL_ID = "channel1";
     public static final String GROUP_KEY = "cl.afubillaoliva.lsch";
 
     public static final int cacheSize = 10 * 1024 * 1024; // 10 MiB
+    public static final int REQUEST_CODE = 1;
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
@@ -61,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView toolbarIcon;
     private Toolbar.LayoutParams llp;
 
-    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -74,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
         else
             setTheme(R.style.AppTheme);
         setContentView(R.layout.activity_main);
+
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
 
         final ViewPager mViewPager = findViewById(R.id.vp_tabs);
         final StateListAnimator stateListAnimator = new StateListAnimator();
@@ -225,6 +234,17 @@ public class MainActivity extends AppCompatActivity {
             final NotificationManager notificationManager = getSystemService(NotificationManager.class);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE) {
+            if (grantResults.length == 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
+            }
         }
     }
 
