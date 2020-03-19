@@ -1,10 +1,56 @@
 package cl.afubillaoliva.lsch.tools;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.util.Log;
+
+import cl.afubillaoliva.lsch.MainActivity;
+import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
+import cl.afubillaoliva.lsch.activities.ExpressionsListActivity;
+import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.services.DownloadService;
+import cl.afubillaoliva.lsch.utils.Interface;
+import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 
 public class DownloadReceiver extends ResultReceiver {
-    public DownloadReceiver(Handler handler) {
+
+    private static DownloadDatabaseHelper mDownloadDatabaseHelper;
+    private Receiver receiver;
+
+    public DownloadReceiver(Handler handler, Context context){
         super(handler);
+        mDownloadDatabaseHelper = new DownloadDatabaseHelper(context);
     }
+
+    public interface Receiver{
+        void onReceiveResult(int resultCode, Bundle resultData);
+    }
+
+    public void setReceiver(Receiver receiver) {
+        this.receiver = receiver;
+    }
+
+    @Override
+    protected void onReceiveResult(int resultCode, Bundle resultData) {
+        super.onReceiveResult(resultCode, resultData);
+
+        if (receiver != null) {
+            receiver.onReceiveResult(resultCode, resultData);
+        }
+
+        final Word word = (Word) resultData.getSerializable("data");
+
+        if (resultCode == DownloadService.SERVICE_ID) {
+            int progress = resultData.getInt("progress");
+
+            if (progress == 100) {
+                if(word != null) {
+                    mDownloadDatabaseHelper.addDownload(word);
+                }
+            }
+        }
+    }
+
 }
