@@ -1,10 +1,12 @@
 package cl.afubillaoliva.lsch.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,12 +39,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.api.ApiClient;
+import cl.afubillaoliva.lsch.services.DownloadService;
 import cl.afubillaoliva.lsch.tools.MultipartRequest;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+
+import static cl.afubillaoliva.lsch.MainActivity.REQUEST_CODE;
 
 public class ReportActivity extends AppCompatActivity {
 
@@ -66,6 +73,9 @@ public class ReportActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
+
         final SharedPreference mSharedPreferences = new SharedPreference(context);
         if(mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
@@ -88,25 +98,28 @@ public class ReportActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         imageView.setOnClickListener(v -> {
-            if(hasNullOrEmptyDrawable(imageView)){
+            if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
+            else
+                if(hasNullOrEmptyDrawable(imageView)){
 
-                getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                getIntent.setType("image/*");
+                    getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    getIntent.setType("image/*");
 
-                pickIntent = new Intent(Intent.ACTION_PICK);
-                pickIntent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
+                    pickIntent = new Intent(Intent.ACTION_PICK);
+                    pickIntent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
 
-                chooserIntent = Intent.createChooser(getIntent, "Selecciona una imagen:");
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+                    chooserIntent = Intent.createChooser(getIntent, "Selecciona una imagen:");
+                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
 
-                startActivityForResult(pickIntent, PICK_IMAGE);
+                    startActivityForResult(pickIntent, PICK_IMAGE);
 
-            } else {
-                imageView.setImageBitmap(null);
-                imageView.setPadding(90,90,90,90);
-                imageView.setImageDrawable(getDrawable(R.drawable.ic_add_black_24dp));
-                delete.setVisibility(View.GONE);
-            }
+                } else {
+                    imageView.setImageBitmap(null);
+                    imageView.setPadding(90,90,90,90);
+                    imageView.setImageDrawable(getDrawable(R.drawable.ic_add_black_24dp));
+                    delete.setVisibility(View.GONE);
+                }
         });
     }
 
