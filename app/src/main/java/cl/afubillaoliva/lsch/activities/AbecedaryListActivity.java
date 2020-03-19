@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,9 +20,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -32,6 +36,8 @@ import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.services.DownloadService;
+import cl.afubillaoliva.lsch.tools.DownloadReceiver;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
@@ -43,25 +49,32 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AbecedaryListActivity extends AppCompatActivity {
+public class AbecedaryListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
-    private final Context context = this;
+    private Context context = this;
     private final Network network = new Network(this);
+    private DownloadReceiver receiver;
 
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
 
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private String letter, theme;
+    private String list, theme, letter;
+    private Switch onDownload;
 
-    private GenericAdapter<Word> adapter;
+    private static GenericAdapter<Word> adapter;
     private ArrayList<Word> apiResponse;
+    private SharedPreference mSharedPreferences;
+
+    private int downloadQueueLength = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        final SharedPreference mSharedPreferences = new SharedPreference(context);
+        mSharedPreferences = new SharedPreference(context);
+        receiver = new DownloadReceiver(new Handler(), context);
+        receiver.setReceiver(this);
         if (mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else
@@ -70,6 +83,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         final Intent intent = getIntent();
+        list = intent.getStringExtra("list");
         letter = intent.getStringExtra("letter");
         theme = intent.getStringExtra("theme");
 
@@ -77,6 +91,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         mProgressBar = findViewById(R.id.progress_circular);
         mSwipeRefreshLayout = findViewById(R.id.swipe_layout);
+        onDownload = findViewById(R.id.download);
 
         if(mSharedPreferences.loadNightModeState())
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
@@ -98,7 +113,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onBindData(RecyclerView.ViewHolder holder, Word val, int position) {
+            public void onBindData(RecyclerView.ViewHolder holder, Word val, int position){
                 final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final TextView title = viewHolder.get(R.id.list_item_text);
                 title.setText(val.getTitle());
@@ -110,19 +125,17 @@ public class AbecedaryListActivity extends AppCompatActivity {
             }
 
             @Override
-            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack() {
-                return new RecyclerViewOnClickListenerHack() {
+            public RecyclerViewOnClickListenerHack onGetRecyclerViewOnClickListenerHack(){
+                return new RecyclerViewOnClickListenerHack(){
                     @Override
-                    public void onClickListener(View view, int position) {
+                    public void onClickListener(View view, int position){
                         final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
                         startActivity(intent);
                     }
 
                     @Override
-                    public void onLongPressClickListener(View view, int position) {
-
-                    }
+                    public void onLongPressClickListener(View view, int position){}
                 };
             }
         };
@@ -131,7 +144,72 @@ public class AbecedaryListActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(adapter);
         mSwipeRefreshLayout.setOnRefreshListener(this::getData);
 
+        if(mSharedPreferences.isDownloaded(list))
+            onDownload.setChecked(true);
+        else
+            onDownload.setChecked(false);
+        if(apiResponse == null)
+            onDownload.setEnabled(false);
+        else
+            onDownload.setEnabled(true);
+        onDownload.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            if(isChecked){
+                mSharedPreferences.setDownloaded(list);
+                downloadVideos();
+            } else {
+                mSharedPreferences.deleteDownloads(list);
+                deleteVideos();
+            }
+        });
         getData();
+    }
+
+    public static String stripAccents(String s){
+        s = s.replaceAll("/", "");
+        s = Normalizer.normalize(s, Normalizer.Form.NFD);
+        s = s.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        return s;
+    }
+
+    private void deleteVideo(String fileName){
+        final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(fileName) + ".mp4");
+        if (file.exists()){
+            downloadDatabaseHelper.deleteDownload(fileName);
+            file.delete();
+        }
+        else
+            Log.e(MainActivity.TAG, "File don't exist's: " + fileName);
+    }
+
+    private void deleteVideos(){
+        for (Word word : apiResponse){
+            if(!word.getImages().isEmpty())
+                deleteVideo(word.getTitle());
+        }
+        mSharedPreferences.deleteDownloads(list);
+        adapter.notifyDataSetChanged();
+    }
+
+    public int getDownloadQueueLength(){
+        for(Word word : apiResponse)
+            if(!word.getImages().isEmpty())
+                downloadQueueLength++;
+
+        return downloadQueueLength;
+    }
+
+    private void downloadVideos(){
+        downloadQueueLength = getDownloadQueueLength();
+
+        for(Word word : apiResponse){
+            if(!word.getImages().isEmpty()){
+                final Intent service = new Intent(context, DownloadService.class);
+                service.putExtra("data", word);
+                service.putExtra("maxProgress", downloadQueueLength);
+                service.putExtra("receiver", receiver);
+                DownloadService.enqueueWork(context, service);
+            }
+        }
     }
 
     @Override
@@ -184,8 +262,10 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 if (response.isSuccessful()) {
                     apiResponse = response.body();
+                    onDownload.setEnabled(true);
                     adapter.addItems(apiResponse);
                 } else {
+                    onDownload.setEnabled(false);
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                 }
@@ -196,6 +276,7 @@ public class AbecedaryListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                onDownload.setEnabled(false);
                 Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
@@ -236,5 +317,15 @@ public class AbecedaryListActivity extends AppCompatActivity {
         final Configuration override = new Configuration(newBase.getResources().getConfiguration());
         override.fontScale = 1.0f;
         applyOverrideConfiguration(override);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        adapter.notifyDataSetChanged();
     }
 }

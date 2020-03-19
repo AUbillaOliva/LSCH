@@ -10,16 +10,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -30,9 +36,12 @@ import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.services.DownloadService;
+import cl.afubillaoliva.lsch.tools.DownloadReceiver;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
+import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -40,17 +49,22 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ExpressionsListActivity extends AppCompatActivity {
+public class ExpressionsListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
-    private final Context context = this;
+    private Context context = this;
     private final Network network = new Network(context);
+    private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
+    private SharedPreference mSharedPreferences;
+    private DownloadReceiver receiver;
 
-    private GenericAdapter<Word> adapter;
+    private static GenericAdapter<Word> adapter;
     private ArrayList<Word> apiResponse;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private Switch onDownload;
     private ProgressBar mProgressBar;
-    private String category;
+    private String category, list;
+    private int downloadQueueLength = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -58,12 +72,20 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         final Intent intent = getIntent();
         category = intent.getStringExtra("expression");
+        list = intent.getStringExtra("list");
 
-        final SharedPreference mSharedPreferences = new SharedPreference(this);
-        if (mSharedPreferences.loadNightModeState())
+        getData();
+
+        receiver = new DownloadReceiver(new Handler(), context);
+        receiver.setReceiver(this);
+
+        mSharedPreferences = new SharedPreference(this);
+        if (mSharedPreferences.loadNightModeState()) {
             setTheme(R.style.AppThemeDark);
-        else
+        }
+        else {
             setTheme(R.style.AppTheme);
+        }
         setContentView(R.layout.list_activity);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
@@ -71,11 +93,14 @@ public class ExpressionsListActivity extends AppCompatActivity {
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         mSwipeRefreshLayout = findViewById(R.id.swipe_layout);
         mProgressBar = findViewById(R.id.progress_circular);
+        onDownload = findViewById(R.id.download);
 
-        if(mSharedPreferences.loadNightModeState())
+        if(mSharedPreferences.loadNightModeState()) {
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
-        else
+        }
+        else {
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
+        }
         final String title = category.substring(0,1).toUpperCase() + category.substring(1);
         mToolbar.setTitle(title);
         setSupportActionBar(mToolbar);
@@ -94,6 +119,11 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 final GenericViewHolder viewHolder = (GenericViewHolder) holder;
                 final TextView title = viewHolder.get(R.id.list_item_text);
                 title.setText(val.getTitle());
+                final ImageView downloadedIcon = viewHolder.get(R.id.downloaded_icon);
+                if(downloadDatabaseHelper.exists(val.getTitle()))
+                    downloadedIcon.setVisibility(View.VISIBLE);
+                else
+                    downloadedIcon.setVisibility(View.GONE);
             }
 
             @Override
@@ -117,7 +147,28 @@ public class ExpressionsListActivity extends AppCompatActivity {
 
         mSwipeRefreshLayout.setOnRefreshListener(this::getData);
 
-        getData();
+        if(mSharedPreferences.isDownloaded(list)) {
+            onDownload.setChecked(true);
+        }
+        else {
+            onDownload.setChecked(false);
+        }
+        if(apiResponse == null) {
+            onDownload.setEnabled(false);
+        }
+        else {
+            onDownload.setEnabled(true);
+        }
+        onDownload.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            if(isChecked){
+                mSharedPreferences.setDownloaded(list);
+                downloadVideos();
+            } else {
+                mSharedPreferences.deleteDownloads(list);
+                deleteVideos();
+            }
+        });
+
     }
 
     public void getData(){
@@ -154,9 +205,11 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 if (response.isSuccessful()){
                     apiResponse = response.body();
                     adapter.addItems(apiResponse);
+                    onDownload.setEnabled(true);
                 } else{
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
                     Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                    onDownload.setEnabled(false);
                 }
             }
 
@@ -165,10 +218,66 @@ public class ExpressionsListActivity extends AppCompatActivity {
                 mSwipeRefreshLayout.setRefreshing(false);
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+                onDownload.setEnabled(false);
                 Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
                 Toast.makeText(ExpressionsListActivity.this, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public static String stripAccents(String s){
+        s = s.replaceAll("/", "");
+        s = Normalizer.normalize(s, Normalizer.Form.NFD);
+        s = s.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        return s;
+    }
+
+    private void deleteVideo(String fileName){
+        final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(fileName) + ".mp4");
+        if (file.exists()){
+            downloadDatabaseHelper.deleteDownload(fileName);
+            file.delete();
+        }
+        else
+            Log.e(MainActivity.TAG, "File don't exist's: " + fileName);
+    }
+
+    private void deleteVideos(){
+        for (Word word : apiResponse){
+            if(!word.getImages().isEmpty())
+                deleteVideo(word.getTitle());
+        }
+        mSharedPreferences.deleteDownloads(list);
+        adapter.notifyDataSetChanged();
+    }
+
+    public int getDownloadQueueLength(){
+        for(Word word : apiResponse)
+            if(!word.getImages().isEmpty())
+                downloadQueueLength++;
+
+        return downloadQueueLength;
+    }
+
+    private void downloadVideos(){
+        downloadQueueLength = getDownloadQueueLength();
+
+        for(Word word : apiResponse){
+            if(!word.getImages().isEmpty()){
+                final Intent service = new Intent(context, DownloadService.class);
+                service.putExtra("data", word);
+                service.putExtra("maxProgress", downloadQueueLength);
+                service.putExtra("receiver", receiver);
+                DownloadService.enqueueWork(context, service);
+            }
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        getData();
     }
 
     @Override
@@ -204,5 +313,10 @@ public class ExpressionsListActivity extends AppCompatActivity {
         final Configuration override = new Configuration(newBase.getResources().getConfiguration());
         override.fontScale = 1.0f;
         applyOverrideConfiguration(override);
+    }
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        adapter.notifyDataSetChanged();
     }
 }
