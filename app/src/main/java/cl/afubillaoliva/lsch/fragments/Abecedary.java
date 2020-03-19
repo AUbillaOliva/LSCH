@@ -103,6 +103,7 @@ public class Abecedary extends Fragment {
                         else {
                             final Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
                             intent.putExtra("letter", getItem(position).getLetter());
+                            intent.putExtra("list", "letter_" + position);
                             startActivity(intent);
                         }
                     }

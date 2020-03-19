@@ -90,6 +90,7 @@ public class Expressions extends Fragment {
                     public void onClickListener(View view, int position){
                         final Intent intent = new Intent(getContext(), ExpressionsListActivity.class);
                         intent.putExtra("expression", getItem(position));
+                        intent.putExtra("list", "letter_" + position);
                         startActivityForResult(intent, getTargetRequestCode());
                     }
 
