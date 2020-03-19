@@ -21,6 +21,7 @@ import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import cl.afubillaoliva.lsch.MainActivity;
+import cl.afubillaoliva.lsch.MainApplication;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
@@ -32,13 +33,12 @@ public class DownloadService extends JobIntentService {
     private static int fileLength = 0, maxProgress = 0;
     private static int i = 0;
     private NotificationManagerCompat notificationManagerCompat;
-    private static Context context;
     private NotificationCompat.Builder notification;
     private SharedPreference mSharedPreferences;
+    private Context context;
 
     public static void enqueueWork(Context context, Intent intent){
         enqueueWork(context, DownloadService.class, SERVICE_ID, intent);
-        DownloadService.context = context;
     }
 
     @Override
@@ -46,11 +46,12 @@ public class DownloadService extends JobIntentService {
         super.onCreate();
         Log.e(MainActivity.DOWN, "onCreate");
 
+        context = MainApplication.getContext();
+
         mSharedPreferences = new SharedPreference(context);
         notificationManagerCompat = NotificationManagerCompat.from(context);
 
         notification = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
-                .setShowWhen(false)
                 .setContentTitle("Descarga")
                 .setShowWhen(true)
                 .setContentText("Descarga en progreso...")
@@ -65,7 +66,7 @@ public class DownloadService extends JobIntentService {
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.e(MainActivity.DOWN, "onHandleWork");
+
         final Bundle bundle = intent.getExtras();
         assert bundle != null;
         final Word word = (Word) bundle.getSerializable("data");
