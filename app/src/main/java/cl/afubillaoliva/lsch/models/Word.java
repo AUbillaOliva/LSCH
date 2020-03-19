@@ -51,4 +51,5 @@ public class Word implements Serializable {
     public void setCategory(ArrayList<String> category) {
         this.category = category;
     }
+
 }
