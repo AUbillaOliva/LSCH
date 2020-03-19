@@ -39,7 +39,7 @@
 
     <string name="download">Descarga</string>
     <string name="add_downloads">Descarga las palabras que quieras y las verás aquí para cuanto no tengas conexión a internet. Puedes ajustar las configuraciones en Ajustes.</string>
-    <string name="descargar">Descargar</string>
+    <string name="onDownload">Descargar</string>
     <string name="download_channel_name">Descargas</string>
     <string name="download_channel_description">Progreso de la descarga de videos.</string>
     <string name="downloads">Descargas</string>
