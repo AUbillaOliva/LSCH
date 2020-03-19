@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 
 public class SharedPreference {
     private SharedPreferences mSharedPreferences;
+
     public SharedPreference(Context context){
         mSharedPreferences =  context.getSharedPreferences("filename", Context.MODE_PRIVATE);
     }
+
     public void setNightMode(boolean state){
         final SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putBoolean("NightMode",state);
@@ -56,9 +58,24 @@ public class SharedPreference {
         editor.apply();
     }
 
+    public void setDownloaded(String letter){
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(letter, letter);
+        editor.apply();
+    }
+
+    public void deleteDownloads(String letter){
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.remove(letter);
+        editor.apply();
+    }
+
     public boolean loadNightModeState(){ return mSharedPreferences.getBoolean("NightMode",false); }
     public boolean isFavorite(){ return mSharedPreferences.getBoolean("Favorite", false); }
     public boolean loadAutoDownload(){ return  mSharedPreferences.getBoolean("Autodownload", false); }
+    public boolean isDownloaded(String letter) {
+        return letter.equals(mSharedPreferences.getString(letter, ""));
+    }
 
     public boolean isHistoryDisabled(){ return mSharedPreferences.getBoolean("historyDisabled", true); }
     public boolean isFavoriteDisabled(){ return mSharedPreferences.getBoolean("favoriteDisabled", true); }
