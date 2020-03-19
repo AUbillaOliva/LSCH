@@ -5,10 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
+import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.models.Word;
 
 public class DownloadDatabaseHelper extends SQLiteOpenHelper {
@@ -112,26 +114,40 @@ public class DownloadDatabaseHelper extends SQLiteOpenHelper {
         values.put(DownloadContract.DownloadEntry.COLUMN_WORD_TITLE, word.getTitle());
         values.put(DownloadContract.DownloadEntry.COLUMN_WORD_ID, word.getTitle());
 
-        final String descriptions = convertArrayToString(word.getDescription());
-        if(descriptions.length() != 0)
-            values.put(DownloadContract.DownloadEntry.COLUMN_WORD_DESCRIPTIONS, descriptions);
+        if(word.getDescription() != null){
+            if(!word.getDescription().isEmpty()){
+                final String descriptions = convertArrayToString(word.getDescription());
+                values.put(DownloadContract.DownloadEntry.COLUMN_WORD_DESCRIPTIONS, descriptions);
+            }
+        }
 
-        final String synonyms = convertArrayToString(word.getSin());
-        if(synonyms.length() != 0)
-            values.put(DownloadContract.DownloadEntry.COLUMN_SYNONYMS, synonyms);
+        if(word.getSin() != null){
+            if(!word.getSin().isEmpty()){
+                final String synonyms = convertArrayToString(word.getSin());
+                values.put(DownloadContract.DownloadEntry.COLUMN_SYNONYMS, synonyms);
+            }
+        }
 
-        final String antonyms = convertArrayToString(word.getAnt());
-        if(antonyms.length() != 0)
-            values.put(DownloadContract.DownloadEntry.COLUMN_ANTONYMS, antonyms);
+        if(word.getAnt() != null){
+            if(word.getAnt().isEmpty()){
+                final String antonyms = convertArrayToString(word.getAnt());
+                values.put(DownloadContract.DownloadEntry.COLUMN_ANTONYMS, antonyms);
+            }
+        }
 
+        if(word.getCategory() != null){
+            if(!word.getCategory().isEmpty()){
+                final String categories = convertArrayToString(word.getCategory());
+                values.put(DownloadContract.DownloadEntry.COLUMN_CATEGORY, categories);
+            }
+        }
 
-        final String categories = convertArrayToString(word.getCategory());
-        if(categories.length() != 0)
-            values.put(DownloadContract.DownloadEntry.COLUMN_CATEGORY, categories);
-
-        final String images = convertArrayToString(word.getImages());
-        if(images.length() != 0)
-            values.put(DownloadContract.DownloadEntry.COLUMN_WORD_IMAGES, images);
+        if(word.getImages() != null){
+            if(!word.getImages().isEmpty()){
+                final String images = convertArrayToString(word.getImages());
+                values.put(DownloadContract.DownloadEntry.COLUMN_WORD_IMAGES, images);
+            }
+        }
 
         db.insert(DownloadContract.DownloadEntry.TABLE_NAME, null, values);
         db.close();
