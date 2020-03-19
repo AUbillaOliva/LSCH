@@ -1,27 +1,19 @@
 package cl.afubillaoliva.lsch.activities;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,10 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -43,21 +32,13 @@ import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
-import cl.afubillaoliva.lsch.api.ApiClient;
-import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
+import cl.afubillaoliva.lsch.services.DownloadService;
+import cl.afubillaoliva.lsch.tools.DownloadReceiver;
 import cl.afubillaoliva.lsch.tools.Player;
 import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
-import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
-import okhttp3.Cache;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class WordDetailActivity extends AppCompatActivity {
 
@@ -66,10 +47,7 @@ public class WordDetailActivity extends AppCompatActivity {
     private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
     private Word word;
-    private Network network = new Network(context);
     private Menu mainMenu;
-
-    private NotificationManagerCompat notificationManagerCompat;
 
     private Player videoView;
     private ImageView errorThumb;
@@ -88,8 +66,6 @@ public class WordDetailActivity extends AppCompatActivity {
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
 
-        notificationManagerCompat = NotificationManagerCompat.from(context);
-
         mSharedPreferences = new SharedPreference(context);
         if (mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
@@ -97,9 +73,6 @@ public class WordDetailActivity extends AppCompatActivity {
             setTheme(R.style.AppTheme);
         setContentView(R.layout.word_detail_layout);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-
-        if(ContextCompat.checkSelfPermission(context,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
 
         final Toolbar mToolbar = findViewById(R.id.toolbar);
         final RecyclerView defintionList = findViewById(R.id.definitions_list),
@@ -138,7 +111,7 @@ public class WordDetailActivity extends AppCompatActivity {
         if(!word.getImages().isEmpty())
             progressBar.setVisibility(View.VISIBLE);
 
-        final File file = new File(getExternalFilesDir(null) + File.separator + word.getTitle().replaceAll("[^a-zA-Z0-9]", "") + ".mp4");
+        final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
         final Uri uri;
         if(file.exists())
             uri = Uri.parse(file.getPath());
@@ -147,6 +120,9 @@ public class WordDetailActivity extends AppCompatActivity {
                 uri = Uri.parse(word.getImages().get(0));
             else
                 uri = null;
+
+        Log.d(MainActivity.TAG, "Path: " + file.getAbsolutePath());
+        Log.e(MainActivity.TAG, "Uri: " + uri);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
@@ -238,8 +214,6 @@ public class WordDetailActivity extends AppCompatActivity {
 
     }
 
-    // TODO: DOWNLOAD VIDEO TO CACHE AND USE IT.
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -247,10 +221,10 @@ public class WordDetailActivity extends AppCompatActivity {
         if(!word.getImages().isEmpty())
             progressBar.setVisibility(View.VISIBLE);
 
-        final File file = new File(getExternalFilesDir(null) + File.separator + word.getTitle().replaceAll("[^a-zA-Z0-9]", "") + ".mp4");
+        final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
         final Uri uri;
         if(file.exists())
-            uri = Uri.parse(file.toString());
+            uri = Uri.parse(file.getPath());
         else
             if(!word.getImages().isEmpty())
                 uri = Uri.parse(word.getImages().get(0));
@@ -288,108 +262,18 @@ public class WordDetailActivity extends AppCompatActivity {
         return options;
     }
 
-    private void getData(final Word url){
-        final Cache cache = new Cache(getCacheDir(), MainActivity.cacheSize);
-
-        final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .cache(cache)
-                .addInterceptor(chain -> {
-                    Request request = chain.request();
-                    int maxStale = 60 * 60 * 24 * 7;
-                    if (network.isNetworkAvailable())
-                        request = request
-                                .newBuilder()
-                                .header("Cache-Control", "public, max-age=" + 5)
-                                .build();
-                    else
-                        request = request
-                                .newBuilder()
-                                .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-                                .build();
-                    return chain.proceed(request);
-                })
-                .build();
-
-        final ApiService.WordService service = ApiClient.getClient(okHttpClient).create(ApiService.WordService.class);
-        final Call<ResponseBody> call = service.getVideo(url.getImages().get(0));
-
-        call.enqueue(new Callback<ResponseBody>(){
-            @SuppressLint("StaticFieldLeak")
-            @Override
-            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull final Response<ResponseBody> response){
-                if (response.isSuccessful()) {
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            assert response.body() != null;
-                            final NotificationCompat.Builder notification = new NotificationCompat.Builder(context, MainActivity.CHANNEL_ID)
-                                    .setShowWhen(false)
-                                    .setContentTitle("Descarga")
-                                    .setContentText(response.body().contentLength() / 1000 + " KB")
-                                    .setSubText("Descarga en progreso...")
-                                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                                    .setProgress(0,0,true);
-                            if(mSharedPreferences.loadNightModeState())
-                                notification.setSmallIcon(R.drawable.ic_app_icon_light);
-                            else
-                                notification.setSmallIcon(R.drawable.ic_app_icon_dark);
-                            notificationManagerCompat.notify(1, notification.build());
-                            final boolean writtenToDisk = writeResponseBodyToDisk(response.body(), word.getTitle());
-                            Log.d(MainActivity.TAG, "file download was a success? " + writtenToDisk);
-                            if(writtenToDisk){
-                                notificationManagerCompat.cancel(1);
-                                notification
-                                        .setContentTitle("Descarga completada")
-                                        .setSound(null)
-                                        .setSubText(null)
-                                        .setProgress(0,0,false);
-                                notificationManagerCompat.notify(1, notification.build());
-                            } else
-                                deleteVideo(word.getTitle());
-                            return null;
-                        }
-                    }.execute();
-                }
-                else{
-                    Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
-                    Toast.makeText(context, "No se pudo descargar el video.", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t){
-                Log.e(MainActivity.TAG, "Error: " + t.getMessage());
-                Toast.makeText(context, "No se pudo descargar el video.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+    public static String stripAccents(String s){
+        s = s.replaceAll("/", "");
+        s = Normalizer.normalize(s, Normalizer.Form.NFD);
+        s = s.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "");
+        return s;
     }
 
     private void deleteVideo(String fileName){
-        final File file = new File(getExternalFilesDir(null) + File.separator + fileName.replaceAll("[^a-zA-Z0-9]", "") + ".mp4");
-        if (file.exists())
+        final File file = new File(getExternalFilesDir(null) + File.separator  + stripAccents(fileName) + ".mp4");
+        if (file.exists()){
             downloadDatabaseHelper.deleteDownload(fileName);
-    }
-
-    private boolean writeResponseBodyToDisk(ResponseBody body, String fileName){
-        final File file = new File(getExternalFilesDir(null) + File.separator + fileName.replaceAll("[^a-zA-Z0-9]", "") + ".mp4");
-        long fileSizeDownloaded = 0;
-        final long fileSize = body.contentLength();
-        final byte[] fileReader = new byte[4096*1000];
-        try (InputStream inputStream = body.byteStream(); OutputStream outputStream = new FileOutputStream(file)){
-            while (true){
-                final int read = inputStream.read(fileReader);
-                if (read == -1)
-                    break;
-                outputStream.write(fileReader, 0, read);
-                fileSizeDownloaded += read;
-                Log.d(MainActivity.TAG, "file download: " + fileSizeDownloaded + " of " + fileSize);
-            }
-            outputStream.flush();
-            outputStream.close();
-            inputStream.close();
-            return true;
-        } catch (IOException e){
-            return false;
+            file.delete();
         }
     }
 
@@ -489,6 +373,9 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     public void setDownloaded(MenuItem item){
+        final Intent service = new Intent(context, DownloadService.class);
+        service.putExtra("data", word);
+        service.putExtra("receiver", new DownloadReceiver(new Handler(), this));
         if(mSharedPreferences.isWifiOnly()){
             assert wifi != null;
             if(wifi.isConnected()){
@@ -498,8 +385,7 @@ public class WordDetailActivity extends AppCompatActivity {
                         downloadDatabaseHelper.deleteDownload(word.getTitle());
                         item.setIcon(R.drawable.ic_file_download_black_24dp);
                     } else {
-                        getData(word);
-                        downloadDatabaseHelper.addDownload(word);
+                        DownloadService.enqueueWork(context, service);
                         item.setIcon(R.drawable.ic_file_downloaded_24dp);
                         mSharedPreferences.setDownloadDisabled(false);
                     }
@@ -509,8 +395,7 @@ public class WordDetailActivity extends AppCompatActivity {
                         downloadDatabaseHelper.deleteDownload(word.getTitle());
                         item.setIcon(R.drawable.ic_file_download_white_24dp);
                     } else {
-                        getData(word);
-                        downloadDatabaseHelper.addDownload(word);
+                        DownloadService.enqueueWork(context, service);
                         item.setIcon(R.drawable.ic_file_downloaded_24dp);
                         mSharedPreferences.setDownloadDisabled(false);
                     }
@@ -525,8 +410,7 @@ public class WordDetailActivity extends AppCompatActivity {
                     downloadDatabaseHelper.deleteDownload(word.getTitle());
                     item.setIcon(R.drawable.ic_file_download_black_24dp);
                 } else {
-                    getData(word);
-                    downloadDatabaseHelper.addDownload(word);
+                    DownloadService.enqueueWork(context, service);
                     item.setIcon(R.drawable.ic_file_downloaded_24dp);
                     mSharedPreferences.setDownloadDisabled(false);
                 }
@@ -536,8 +420,7 @@ public class WordDetailActivity extends AppCompatActivity {
                     downloadDatabaseHelper.deleteDownload(word.getTitle());
                     item.setIcon(R.drawable.ic_file_download_white_24dp);
                 } else {
-                    getData(word);
-                    downloadDatabaseHelper.addDownload(word);
+                    DownloadService.enqueueWork(context, service);
                     item.setIcon(R.drawable.ic_file_downloaded_24dp);
                     mSharedPreferences.setDownloadDisabled(false);
                 }
@@ -631,18 +514,6 @@ public class WordDetailActivity extends AppCompatActivity {
                 break;*/
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults){
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        /*if (requestCode == 1) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted.
-            } else {
-                // User refused to grant permission.
-            }
-        }*/
     }
 
     @Override
