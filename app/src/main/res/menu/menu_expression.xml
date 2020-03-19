@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/download"
-        android:title="@string/descargar"
+        android:title="@string/onDownload"
         app:showAsAction="ifRoom"
         android:checkable="true" />
 
