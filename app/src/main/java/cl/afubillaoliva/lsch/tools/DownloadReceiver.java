@@ -4,14 +4,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
-import android.util.Log;
 
-import cl.afubillaoliva.lsch.MainActivity;
-import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
-import cl.afubillaoliva.lsch.activities.ExpressionsListActivity;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.services.DownloadService;
-import cl.afubillaoliva.lsch.utils.Interface;
 import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 
 public class DownloadReceiver extends ResultReceiver {
