@@ -27,6 +27,22 @@ resReportSendFailureToast = R.string.acra_toast_text)
 @AcraToast(resText = R.string.report_sended)
 public class MainApplication extends Application {
 
+    private static Application application;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        application = this;
+    }
+
+    public static Application getApplication(){
+        return application;
+    }
+
+    public static Context getContext(){
+        return getApplication().getApplicationContext();
+    }
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
