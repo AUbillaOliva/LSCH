@@ -111,7 +111,7 @@ public class HelpActivity extends AppCompatActivity {
         ListItem item = new ListItem();
 
         item.setTitle("¿Por qué algunos videos no se pueden ver?");
-        item.setSubtitle("Actualmente se  el diccionario de lengua de señas de la universidad metropolitana de las ciencias de la educación (UMCE), y lamentablemente no tenemos otro recurso para disponer de estos videos. Pronto nos encargaremos de este asunto con representantes oficiales de la universidad.");
+        item.setSubtitle("Actualmente se el diccionario de lengua de señas de la universidad metropolitana de las ciencias de la educación (UMCE), y lamentablemente no tenemos otro recurso para disponer de estos videos. Pronto nos encargaremos de este asunto con representantes oficiales de la universidad.");
         list.add(item);
 
         item = new ListItem();
@@ -119,10 +119,10 @@ public class HelpActivity extends AppCompatActivity {
         item.setSubtitle("Puedes descargar los videos que quieras, para luego utilizarlas cuando no tengas internet.");
         list.add(item);
 
-        /*item = new ListItem();
-        item.setTitle("");
-        item.setSubtitle("");
-        list.add(item);*/
+        item = new ListItem();
+        item.setTitle("¿La aplicación envía reportes de error?");
+        item.setSubtitle("Los reportes nos ayudan a identificar problemas en el funcionamiento de la aplicación. Estos son enviados de forma automática y anónima, por lo que no tienes por qué preocuparte =).");
+        list.add(item);
 
         return list;
     }
