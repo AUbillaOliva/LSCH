@@ -160,6 +160,7 @@ public class WordDetailActivity extends AppCompatActivity {
                 public void onClickListener(View view, int position){
                     final Intent intent = new Intent(context, AbecedaryListActivity.class);
                     intent.putExtra("theme", word.getCategory().get(position));
+                    intent.putExtra("list", "themes_" + word.getCategory().get(position));
                     startActivity(intent);
                 }
 
@@ -375,6 +376,7 @@ public class WordDetailActivity extends AppCompatActivity {
     public void setDownloaded(MenuItem item){
         final Intent service = new Intent(context, DownloadService.class);
         service.putExtra("data", word);
+        service.putExtra("maxProgress", 1);
         service.putExtra("receiver", new DownloadReceiver(new Handler(), this));
         if(mSharedPreferences.isWifiOnly()){
             assert wifi != null;
