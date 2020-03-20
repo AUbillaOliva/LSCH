@@ -74,47 +74,50 @@ public class DownloadService extends JobIntentService {
         maxProgress = intent.getIntExtra("maxProgress", 0);
 
         final ResultReceiver receiver = intent.getParcelableExtra("receiver");
-        try {
-            assert word != null;
-            final URL url = new URL(word.getImages().get(0));
-            final URLConnection connection = url.openConnection();
-            connection.connect();
+        assert word != null;
+        final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
+        if(!file.exists()){
+            try {
+                final URL url = new URL(word.getImages().get(0));
+                final URLConnection connection = url.openConnection();
+                connection.connect();
 
-            fileLength += connection.getContentLength();
+                fileLength += connection.getContentLength();
 
-            final InputStream input = new BufferedInputStream(connection.getInputStream());
+                final InputStream input = new BufferedInputStream(connection.getInputStream());
 
-            final OutputStream output = new FileOutputStream(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
+                final OutputStream output = new FileOutputStream(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
 
-            final byte[] data = new byte[1024];
-            long total = 0;
-            int count;
-            notification.setContentText(i + " de " + maxProgress + " (" + (i*100)/maxProgress + "% Completado)");
-            notificationManagerCompat.notify(SERVICE_ID, notification.build());
-            while ((count = input.read(data)) != -1) {
-                total += count;
-                final Bundle resultData = new Bundle();
-                resultData.putInt("progress" ,(int) (total * 100 / fileLength));
-                assert receiver != null;
-                receiver.send(SERVICE_ID, resultData);
-                output.write(data, 0, count);
+                final byte[] data = new byte[1024];
+                long total = 0;
+                int count;
+                notification.setContentText(i + " de " + maxProgress + " (" + (i*100)/maxProgress + "% Completado)");
+                notificationManagerCompat.notify(SERVICE_ID, notification.build());
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    final Bundle resultData = new Bundle();
+                    resultData.putInt("progress" ,(int) (total * 100 / fileLength));
+                    assert receiver != null;
+                    receiver.send(SERVICE_ID, resultData);
+                    output.write(data, 0, count);
+                }
+                i++;
+                output.flush();
+                output.close();
+                input.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            i++;
-            output.flush();
-            output.close();
-            input.close();
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            final Bundle resultData = new Bundle();
+            resultData.putInt("progress" ,100);
+            resultData.putSerializable("data", word);
+            resultData.putInt("maxProgress", maxProgress);
+
+            assert receiver != null;
+            receiver.send(SERVICE_ID, resultData);
         }
-
-        final Bundle resultData = new Bundle();
-        resultData.putInt("progress" ,100);
-        resultData.putSerializable("data", word);
-        resultData.putInt("maxProgress", maxProgress);
-
-        assert receiver != null;
-        receiver.send(SERVICE_ID, resultData);
     }
 
     public static String stripAccents(String s){
