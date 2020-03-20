@@ -89,7 +89,7 @@ public class Themes extends Fragment{
                     public void onClickListener(View view, int position){
                         final Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
                         intent.putExtra("theme", getItem(position));
-                        intent.putExtra("list", "themes_" + position);
+                        intent.putExtra("list", "themes_" + getItem(position));
                         startActivity(intent);
                     }
 
