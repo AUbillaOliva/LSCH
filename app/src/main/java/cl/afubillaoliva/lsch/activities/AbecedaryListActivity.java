@@ -191,9 +191,12 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
     }
 
     public int getDownloadQueueLength(){
-        for(Word word : apiResponse)
+        for(Word word : apiResponse){
+            final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
             if(!word.getImages().isEmpty())
-                downloadQueueLength++;
+                if(!file.exists())
+                    downloadQueueLength++;
+        }
 
         return downloadQueueLength;
     }
@@ -210,6 +213,7 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
                 DownloadService.enqueueWork(context, service);
             }
         }
+        downloadQueueLength = 0;
     }
 
     @Override
