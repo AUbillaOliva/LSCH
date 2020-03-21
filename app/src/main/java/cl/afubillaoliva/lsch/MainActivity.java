@@ -116,9 +116,9 @@ public class MainActivity extends AppCompatActivity {
         toolbarTitle.setLayoutParams(llp);
 
         final TabsAdapter adapter = new TabsAdapter(getSupportFragmentManager(), context);
-        adapter.addFragment(new Abecedary(), "Abecedario");
-        adapter.addFragment(new Themes(), "Orden temático");
-        adapter.addFragment(new Expressions(), "Expresiones de uso cotidiano");
+        adapter.addFragment(new Abecedary(), context.getResources().getString(R.string.abecedary));
+        adapter.addFragment(new Themes(), context.getResources().getString(R.string.thematic));
+        adapter.addFragment(new Expressions(), context.getResources().getString(R.string.expressions));
         mViewPager.setAdapter(adapter);
 
         mSlidingTabLayout.setElevation(0);
