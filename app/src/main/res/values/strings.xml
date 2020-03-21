@@ -2,6 +2,10 @@
     <string name="app_name">LSCH</string>
     <string name="app_description">Un diccionario acerca de la lengua de señas chilena.</string>
 
+    <string name="abecedary">Abecedario</string>
+    <string name="thematic">Orden temático</string>
+    <string name="expressions">Expresiones de uso cotidiano</string>
+
     <string name="action_settings">Ajustes</string>
     <string name="setting_dark_theme_label">Tema oscuro</string>
     <string name="settings_general_label">General</string>
@@ -36,6 +40,10 @@
 
 
     <string name="delete_downloads">Eliminar descargas</string>
+    <string name="delete_subtitle">Elimina todas tus palabras descargadas.</string>
+
+    <string name="storage_location_title">Ubicación de almacenamiento</string>
+    <string name="storage_location_subtitle">Establece donde quieres que los videos descargados se almacenen.</string>
 
     <string name="download">Descarga</string>
     <string name="add_downloads">Descarga las palabras que quieras y las verás aquí para cuanto no tengas conexión a internet. Puedes ajustar las configuraciones en Ajustes.</string>
@@ -46,12 +54,18 @@
     <string name="autodownload_favorites_text">Descarga/elimina automáticamente los videos guardados en favoritos.</string>
     <string name="no_downloads">¿Aun no has descargado palabras?</string>
 
+    <string name="favorite_title">Eliminar favoritos</string>
+    <string name="favorite_subtitle">Elimina todos tus favoritos.</string>
     <string name="favorite_dialog_title">¿Eliminar favoritos?</string>
     <string name="favorite_dialog_subtitle">Todos tus favoritos serán eliminados.</string>
     <string name="download_dialog_title">¿Eliminar tus descargas?</string>
     <string name="download_dialog_subtitle">Todas tus descargas serán eliminadas.</string>
+    <string name="cache_title">Eliminar caché</string>
+    <string name="cache_subtitle">Elimina el caché utilizado por la app. Tus favoritos y descargas no serán eliminados.</string>
     <string name="cache_dialog_title">¿Eliminar caché?</string>
     <string name="cache_dialog_subtitle">El caché de la aplicación será eliminado.</string>
+    <string name="history_title">Eliminar historial</string>
+    <string name="history_subtitle">Elimina tus busquedas recientes del menu de busqueda.</string>
     <string name="history_dialog_title">¿Eliminar historial?</string>
     <string name="history_dialog_subtitle">Tu historial de búsqueda será eliminado.</string>
     <string name="discard_dialog_report_title">¿Descartar reporte?</string>
@@ -69,15 +83,20 @@
     <string name="download_icon">Download icon</string>
     <string name="categories">Categorias</string>
     <string name="error_thumbnail">Error thumbnail</string>
-    <string name="acra_toast_text">Report</string>
+    <string name="acra_toast_text">Reportar</string>
     <string name="report_sended">Se ha enviado un reporte al desarrollador</string>
     <string name="report_dont_sended">Tu reporte no pudo ser enviado</string>
-    <string name="report_max_size">El mensaje es muy pesado, intenta con otra imagen o mensaje</string>
+    <string name="report_max_size">El mensaje es muy pesado, intenta con otra imagen o mensaje.</string>
     <string name="help">Ayuda</string>
-    <string name="libraries_we_use">Librerias que utilizamos</string>
+    <string name="help_subtitle">Estamos aqui para ayudarte.</string>
+    <string name="support_title">Soporte</string>
+    <string name="support_subtitle">Obtén ayuda de nosotros y de la comunidad.</string>
+    <string name="umce_title">UMCE</string>
+    <string name="umce_subtitle">Universidad Metropolitana de Ciencias de la Educación.</string>
+    <string name="libraries_we_use">Librerías que utilizamos</string>
     <string name="third_party_libraries_text">Lo siguiente establece la atribución para el software de terceros que puede estar contenido en partes del producto LSCH App. Agradecemos a la comunidad de código abierto por todas sus contribuciones.</string>
-    <string name="wifi_only">Descarga solo con wifi</string>
-    <string name="wifi_only_text">Descarga los videos, solo utilizando conexión a wifi.</string>
+    <string name="wifi_only">Solo wifi</string>
+    <string name="wifi_only_text">Descarga los videos, utilizando solo conexión a wifi.</string>
     <string-array name="storage_options">
         <item>Almacenamiento interno</item>
         <item>Tarjeta SD</item>
