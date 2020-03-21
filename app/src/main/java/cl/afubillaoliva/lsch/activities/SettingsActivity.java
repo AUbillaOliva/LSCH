@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -155,6 +156,9 @@ public class SettingsActivity extends AppCompatActivity {
                             case 1:
                                 startActivity(new Intent(context, HelpActivity.class));
                                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                                break;
+                            case 3:
+                                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.umce.cl/")));
                                 break;
                         }
                     }
@@ -432,6 +436,9 @@ public class SettingsActivity extends AppCompatActivity {
                                 startActivity(new Intent(context, HelpActivity.class));
                                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                                 break;
+                            case 3:
+                                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.umce.cl/")));
+                                break;
                         }
                     }
 
@@ -679,18 +686,23 @@ public class SettingsActivity extends AppCompatActivity {
         final ArrayList<ListItem> items = new ArrayList<>();
 
         ListItem item = new ListItem();
-        item.setTitle("Librerias de terceros");
-        item.setSubtitle("Con la gran ayuda de este software!");
+        item.setTitle(context.getResources().getString(R.string.third_party_libraries_title));
+        item.setSubtitle(context.getResources().getString(R.string.third_party_libraries_subtitle));
         items.add(item);
 
         item = new ListItem();
-        item.setTitle("Ayuda");
-        item.setSubtitle("Estamos aqui para ayudarte.");
+        item.setTitle(context.getResources().getString(R.string.help));
+        item.setSubtitle(context.getResources().getString(R.string.help_subtitle));
         items.add(item);
 
         item = new ListItem();
-        item.setTitle("Soporte");
-        item.setSubtitle("Obtén ayuda de nosotros y de la comunidad.");
+        item.setTitle(context.getResources().getString(R.string.support_title));
+        item.setSubtitle(context.getResources().getString(R.string.support_subtitle));
+        items.add(item);
+
+        item = new ListItem();
+        item.setTitle(context.getResources().getString(R.string.umce_title));
+        item.setSubtitle(context.getResources().getString(R.string.umce_subtitle));
         items.add(item);
 
         return items;
@@ -699,14 +711,14 @@ public class SettingsActivity extends AppCompatActivity {
         final ArrayList<ListItem> items = new ArrayList<>();
 
         ListItem item = new ListItem();
-        item.setTitle("Eliminar historial");
-        item.setSubtitle("Elimina tus busquedas recientes del menu de busqueda.");
+        item.setTitle(context.getResources().getString(R.string.history_title));
+        item.setSubtitle(context.getResources().getString(R.string.history_subtitle));
         item.setDisabled(mSharedPreferences.isHistoryDisabled());
         items.add(item);
 
         item = new ListItem();
-        item.setTitle("Eliminar favoritos");
-        item.setSubtitle("Elimina todos tus favoritos.");
+        item.setTitle(context.getResources().getString(R.string.favorite_title));
+        item.setSubtitle(context.getResources().getString(R.string.favorite_subtitle));
         item.setDisabled(mSharedPreferences.isFavoriteDisabled());
         items.add(item);
 
@@ -717,20 +729,20 @@ public class SettingsActivity extends AppCompatActivity {
         final ArrayList<ListItem> items = new ArrayList<>();
         ListItem item = new ListItem();
 
-        item.setTitle("Eliminar caché");
-        item.setSubtitle("Elimina el caché utilizado por la app. Tus favoritos y descargas no serán eliminados.");
+        item.setTitle(context.getResources().getString(R.string.cache_title));
+        item.setSubtitle(context.getResources().getString(R.string.cache_subtitle));
         item.setDisabled(mSharedPreferences.isCacheDisabled());
         items.add(item);
 
         item = new ListItem();
-        item.setTitle("Eliminar descargas");
-        item.setSubtitle("Elimina todas tus palabras descargadas.");
+        item.setTitle(context.getResources().getString(R.string.delete_downloads));
+        item.setSubtitle(context.getResources().getString(R.string.delete_subtitle));
         item.setDisabled(mSharedPreferences.isDownloadDisabled());
         items.add(item);
 
         item = new ListItem();
-        item.setTitle("Ubicación de almacenamiento");
-        item.setSubtitle("Establece donde quieres que los videos descargados se almacenen.");
+        item.setTitle(context.getResources().getString(R.string.storage_location_title));
+        item.setSubtitle(context.getResources().getString(R.string.storage_location_subtitle));
         item.setDisabled(false);
         items.add(item);
 
