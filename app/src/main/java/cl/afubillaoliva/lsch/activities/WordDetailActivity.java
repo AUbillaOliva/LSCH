@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
-import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
@@ -49,6 +47,8 @@ public class WordDetailActivity extends AppCompatActivity {
     private Word word;
     private Menu mainMenu;
 
+    private String type;
+
     private Player videoView;
     private ImageView errorThumb;
     private ProgressBar progressBar;
@@ -65,6 +65,7 @@ public class WordDetailActivity extends AppCompatActivity {
 
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
+        type = intent.getStringExtra("type");
 
         mSharedPreferences = new SharedPreference(context);
         if (mSharedPreferences.loadNightModeState())
@@ -121,9 +122,6 @@ public class WordDetailActivity extends AppCompatActivity {
             else
                 uri = null;
 
-        Log.d(MainActivity.TAG, "Path: " + file.getAbsolutePath());
-        Log.e(MainActivity.TAG, "Uri: " + uri);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             videoView.setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE);
         if(uri != null)
@@ -158,9 +156,10 @@ public class WordDetailActivity extends AppCompatActivity {
             adapter.setRecyclerViewOnClickListenerHack(new RecyclerViewOnClickListenerHack(){
                 @Override
                 public void onClickListener(View view, int position){
-                    final Intent intent = new Intent(context, AbecedaryListActivity.class);
+                    final Intent intent = new Intent(context, DataListActivity.class);
+                    intent.putExtra("list", word.getCategory().get(position));
                     intent.putExtra("theme", word.getCategory().get(position));
-                    intent.putExtra("list", "themes_" + word.getCategory().get(position));
+                    intent.putExtra("type", type);
                     startActivity(intent);
                 }
 
