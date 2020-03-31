@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
+import cl.afubillaoliva.lsch.MainApplication;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.activities.DataListActivity;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
@@ -156,7 +157,7 @@ public class Expressions extends Fragment {
                         adapter.addItems(apiResponse);
                     } else {
                         Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
-                        Toast.makeText(getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainApplication.getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -166,7 +167,7 @@ public class Expressions extends Fragment {
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
-                    Toast.makeText(getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainApplication.getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
                 }
             });
 
