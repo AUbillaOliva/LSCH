@@ -69,22 +69,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
         }
     }
 
-    public void update(Context context, ArrayList<Word> list){
-        dataset.clear();
-        setDataset(context, list);
-        notifyDataSetChanged();
-    }
-
     public Word get(int position){
         return wordListFiltered.get(position);
-    }
-
-    public boolean isFilterEmpty() {
-        return wordListFiltered.size() < 1;
-    }
-
-    public boolean isEmpty(){
-        return dataset.size() < 1;
     }
 
     @NonNull
@@ -110,10 +96,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
     public int getItemCount() {
         if(dataset != null){
             int limit = 5;
-            if(wordListFiltered.size() > limit)
-                return limit;
-            else
-                return wordListFiltered.size();
+            return Math.min(wordListFiltered.size(), limit);
         } else {
             return 0;
         }
@@ -154,6 +137,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.MyViewHold
                 return filterResults;
             }
 
+            @SuppressWarnings("unchecked")
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 wordListFiltered = (ArrayList<Word>) filterResults.values;
