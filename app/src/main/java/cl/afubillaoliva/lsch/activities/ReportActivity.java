@@ -43,7 +43,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.api.ApiClient;
-import cl.afubillaoliva.lsch.services.DownloadService;
 import cl.afubillaoliva.lsch.tools.MultipartRequest;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 import okhttp3.MediaType;
