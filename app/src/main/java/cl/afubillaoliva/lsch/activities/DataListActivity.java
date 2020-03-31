@@ -49,7 +49,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
+public class DataListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
     private Context context = this;
     private final Network network = new Network(this);
@@ -131,7 +131,8 @@ public class MainListActivity extends AppCompatActivity implements DownloadRecei
                     public void onClickListener(View view, int position){
                         final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
-                        intent.putExtra("list", "word");
+                        intent.putExtra("list", adapter.getItem(position).getTitle());
+                        intent.putExtra("type", type);
                         startActivity(intent);
                     }
 
@@ -178,8 +179,6 @@ public class MainListActivity extends AppCompatActivity implements DownloadRecei
             downloadDatabaseHelper.deleteDownload(fileName);
             file.delete();
         }
-        else
-            Log.e(MainActivity.TAG, "File don't exist's: " + fileName);
     }
 
     private void deleteVideos(){
