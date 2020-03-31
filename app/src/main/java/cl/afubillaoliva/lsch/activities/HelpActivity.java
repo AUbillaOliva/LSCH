@@ -110,18 +110,18 @@ public class HelpActivity extends AppCompatActivity {
         final ArrayList<ListItem> list = new ArrayList<>();
         ListItem item = new ListItem();
 
-        item.setTitle("¿Por qué algunos videos no se pueden ver?");
-        item.setSubtitle("Actualmente se el diccionario de lengua de señas de la universidad metropolitana de las ciencias de la educación (UMCE), y lamentablemente no tenemos otro recurso para disponer de estos videos. Pronto nos encargaremos de este asunto con representantes oficiales de la universidad.");
+        item.setTitle(context.getResources().getString(R.string.help_list_item_1_title));
+        item.setSubtitle(context.getResources().getString(R.string.help_list_item_1_subtitle));
         list.add(item);
 
         item = new ListItem();
-        item.setTitle("¿Puedo utilizar la app sin internet?");
-        item.setSubtitle("Puedes descargar los videos que quieras, para luego utilizarlas cuando no tengas internet.");
+        item.setTitle(context.getResources().getString(R.string.help_list_item_2_title));
+        item.setSubtitle(context.getResources().getString(R.string.help_list_item_2_subtitle));
         list.add(item);
 
         item = new ListItem();
-        item.setTitle("¿La aplicación envía reportes de error?");
-        item.setSubtitle("Los reportes nos ayudan a identificar problemas en el funcionamiento de la aplicación. Estos son enviados de forma automática y anónima, por lo que no tienes por qué preocuparte =).");
+        item.setTitle(context.getResources().getString(R.string.help_list_item_3_title));
+        item.setSubtitle(context.getResources().getString(R.string.help_list_item_3_subtitle));
         list.add(item);
 
         return list;
