@@ -27,7 +27,7 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.activities.ExpressionsListActivity;
+import cl.afubillaoliva.lsch.activities.DataListActivity;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
@@ -88,10 +88,11 @@ public class Expressions extends Fragment {
                 return new RecyclerViewOnClickListenerHack(){
                     @Override
                     public void onClickListener(View view, int position){
-                        final Intent intent = new Intent(getContext(), ExpressionsListActivity.class);
-                        intent.putExtra("expression", getItem(position));
-                        intent.putExtra("list", "letter_" + position);
-                        startActivityForResult(intent, getTargetRequestCode());
+                        final Intent intent = new Intent(getContext(), DataListActivity.class);
+                        intent.putExtra("list", getItem(position));
+                        intent.putExtra("category", getItem(position));
+                        intent.putExtra("type", "expressions");
+                        startActivity(intent);
                     }
 
                     @Override

@@ -27,7 +27,7 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
+import cl.afubillaoliva.lsch.activities.DataListActivity;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
@@ -87,9 +87,10 @@ public class Themes extends Fragment{
                 return new RecyclerViewOnClickListenerHack(){
                     @Override
                     public void onClickListener(View view, int position){
-                        final Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
+                        final Intent intent = new Intent(getContext(), DataListActivity.class);
+                        intent.putExtra("list", getItem(position));
                         intent.putExtra("theme", getItem(position));
-                        intent.putExtra("list", "themes_" + getItem(position));
+                        intent.putExtra("type", "word");
                         startActivity(intent);
                     }
 

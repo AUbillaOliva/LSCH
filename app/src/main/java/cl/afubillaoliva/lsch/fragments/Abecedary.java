@@ -32,7 +32,7 @@ import java.util.Objects;
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
-import cl.afubillaoliva.lsch.activities.AbecedaryListActivity;
+import cl.afubillaoliva.lsch.activities.DataListActivity;
 import cl.afubillaoliva.lsch.adapters.GenericAdapter;
 import cl.afubillaoliva.lsch.api.ApiClient;
 import cl.afubillaoliva.lsch.api.ApiService;
@@ -101,9 +101,10 @@ public class Abecedary extends Fragment {
                         if(position == 24)
                             Toast.makeText(getContext(), "No hay palabras", Toast.LENGTH_SHORT).show();
                         else {
-                            final Intent intent = new Intent(getContext(), AbecedaryListActivity.class);
+                            final Intent intent = new Intent(getContext(), DataListActivity.class);
+                            intent.putExtra("list", getItem(position).getLetter());
                             intent.putExtra("letter", getItem(position).getLetter());
-                            intent.putExtra("list", "letter_" + position);
+                            intent.putExtra("type", "word");
                             startActivity(intent);
                         }
                     }
