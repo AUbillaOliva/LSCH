@@ -49,7 +49,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AbecedaryListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
+public class MainListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
     private Context context = this;
     private final Network network = new Network(this);
@@ -59,7 +59,7 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
 
     private ProgressBar mProgressBar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private String list, theme, letter;
+    private String list, type, letter, category, theme;
     private Switch onDownload;
 
     private static GenericAdapter<Word> adapter;
@@ -84,8 +84,10 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
 
         final Intent intent = getIntent();
         list = intent.getStringExtra("list");
+        type = intent.getStringExtra("type");
         letter = intent.getStringExtra("letter");
         theme = intent.getStringExtra("theme");
+        category = intent.getStringExtra("category");
 
         final RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
         final Toolbar mToolbar = findViewById(R.id.toolbar);
@@ -97,10 +99,8 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceDark);
         else
             mToolbar.setTitleTextAppearance(context, R.style.ToolbarTypefaceLight);
-        if(letter != null)
-            mToolbar.setTitle(letter.substring(0,1).toUpperCase() + letter.substring(1));
-        if(theme != null)
-            mToolbar.setTitle(theme.substring(0,1).toUpperCase() + theme.substring(1));
+        if(list != null)
+            mToolbar.setTitle(list.substring(0,1).toUpperCase() + list.substring(1));
         setSupportActionBar(mToolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -131,6 +131,7 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
                     public void onClickListener(View view, int position){
                         final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
+                        intent.putExtra("list", "word");
                         startActivity(intent);
                     }
 
@@ -245,20 +246,24 @@ public class AbecedaryListActivity extends AppCompatActivity implements Download
                 })
                 .build();
 
-        final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
-        final Call<ArrayList<Word>> responseCall;
+        Call<ArrayList<Word>> responseCall;
+        if(type != null && type.contentEquals("expressions")){
+            final ApiService.ExpressionsServiceCategories service = ApiClient.getClient(okHttpClient).create(ApiService.ExpressionsServiceCategories.class);
+            responseCall = service.getExpressionsOfCategories(list);
+        } else {
+            final ApiService.WordsService service = ApiClient.getClient(okHttpClient).create(ApiService.WordsService.class);
 
-        if(letter == null && theme == null)
-            responseCall = service.getWords(null, null);
-        else if(letter != null && theme == null)
-            responseCall = service.getWords(letter, null);
-        else if(letter == null)
-            responseCall = service.getWords(null, theme);
-        else
-            responseCall = service.getWords(null,null);
+            if(letter != null && category == null)
+                responseCall = service.getWords(letter, null);
+            else if(letter == null && category != null)
+                responseCall = service.getWords(null, category);
+            else if(letter == null && theme != null)
+                responseCall = service.getWords(null, theme);
+            else
+                responseCall = service.getWords(null, null);
+        }
 
-
-        responseCall.enqueue(new Callback<ArrayList<Word>>() {
+        responseCall.enqueue(new Callback<ArrayList<Word>>(){
             @Override
             public void onResponse(@NonNull Call<ArrayList<Word>> call, @NonNull Response<ArrayList<Word>> response) {
                 mSwipeRefreshLayout.setRefreshing(false);
