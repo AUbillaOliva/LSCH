@@ -3,7 +3,7 @@ LSCH App :raised_hands::iphone: Hecho con :heart:.
 
 LSCH App es una aplicación móvil para Android, diseñada con el proposito de brindar de manera portatil un diccionario de la lengua de señas chilena (LSCH).
 
-Puedes encontrar mas información al respecto en la página de la App.
+Puedes encontrar mas información al respecto en la [página de la app.](https://aubillaoliva.github.io/LSCH/).
 
 + [Descarga (pronto en Google Play)]()
 + [Versiones]()
@@ -23,8 +23,10 @@ Asegúrese de actualizar las pruebas según corresponda.
 ## Licencia
 Este proyecto esta licenciado bajo la licencia [GPL-3.0](https://github.com/AUbillaOliva/LSCH/blob/v1.0.1/LICENSE)
 
+Este proyecto emplea el uso de [LSCH API](https://github.com/AUbillaOliva/LSCH-Api/blob/master/LICENSE)
+
 ## Errores
-Si presentas algún error en el funcionamiento de la App, por favor publica un issue con todos los detalles posibles para poder trabajar en una solución al problema.
+Si presentas algún error en el funcionamiento de la App, por favor publica un issue con todos los detalles posibles para poder trabajar en una solución al problema o  bien, utiliza la opcion **Enviar un reporte** desde la aplicación.
 
 ## Autores
 + Álvaro Ubilla Oliva - *Trabajo inicial* - [AUbillaOliva](https://github.com/AUbillaOliva)
