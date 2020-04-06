@@ -206,11 +206,14 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
 
         for(Word word : apiResponse){
             if(!word.getImages().isEmpty()){
-                final Intent service = new Intent(context, DownloadService.class);
+                DownloadService downloadService = new DownloadService(list, context);
+                final Intent service = new Intent(context, downloadService.getClass());
                 service.putExtra("data", word);
+                service.putExtra("list", list);
                 service.putExtra("maxProgress", downloadQueueLength);
                 service.putExtra("receiver", receiver);
-                DownloadService.enqueueWork(context, service);
+                //DownloadService.enqueueWork(context, service);
+                startService(service);
             }
         }
         downloadQueueLength = 0;
@@ -221,6 +224,11 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
         super.onRestart();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         getData();
+
+        if(mSharedPreferences.isDownloaded(list))
+            onDownload.setChecked(true);
+        else
+            onDownload.setChecked(false);
     }
 
     private void getData(){
@@ -336,4 +344,5 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     public void onReceiveResult(int resultCode, Bundle resultData) {
         adapter.notifyDataSetChanged();
     }
+
 }
