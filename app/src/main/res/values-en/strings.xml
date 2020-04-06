@@ -88,4 +88,6 @@
     <string name="help_list_item_1_subtitle">Currently the Sign Language Dictionary of the Metropolitan University of Educational Sciences (UMCE) is used, and unfortunately we have no other resource to dispose of these videos. We will soon be dealing with this matter with official representatives of the university.</string>
     <string name="help_list_item_2_subtitle">You can download the videos you want, and then use them when you don\'t have internet.</string>
     <string name="help_list_item_3_subtitle">The reports help us identify problems in the operation of the application. These are sent automatically and anonymously, so you don\'t have to worry =).</string>
+    <string name="abort">ABORT</string>
+    <string name="download_in_progress">Download in progress</string>
 </resources>
