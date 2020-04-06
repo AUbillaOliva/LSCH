@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -131,7 +132,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                     public void onClickListener(View view, int position){
                         final Intent intent = new Intent(context, WordDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
-                        intent.putExtra("list", adapter.getItem(position).getTitle());
+                        intent.putExtra("list", list);
                         intent.putExtra("type", type);
                         startActivity(intent);
                     }
@@ -206,15 +207,13 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
 
         for(Word word : apiResponse){
             if(!word.getImages().isEmpty()){
-                DownloadService downloadService = new DownloadService(list, context);
+                final DownloadService downloadService = new DownloadService(list, context);
                 final Intent service = new Intent(context, downloadService.getClass());
                 service.putExtra("data", word);
                 service.putExtra("list", list);
                 service.putExtra("maxProgress", downloadQueueLength);
                 service.putExtra("receiver", receiver);
-                //DownloadService.enqueueWork(context, service);
-                startService(service);
-            }
+                ContextCompat.startForegroundService(context, service);            }
         }
         downloadQueueLength = 0;
     }
