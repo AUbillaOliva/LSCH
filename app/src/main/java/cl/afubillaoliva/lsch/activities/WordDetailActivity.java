@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -38,17 +39,18 @@ import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
-public class WordDetailActivity extends AppCompatActivity {
+public class WordDetailActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
     private final FavoriteDatabaseHelper favoriteDatabaseHelper = new FavoriteDatabaseHelper(context);
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
     private Word word;
+    private DownloadReceiver receiver;
+
+    private String type, list;
+
     private Menu mainMenu;
-
-    private String type;
-
     private Player videoView;
     private ImageView errorThumb;
     private ProgressBar progressBar;
@@ -63,8 +65,12 @@ public class WordDetailActivity extends AppCompatActivity {
         connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+        receiver = new DownloadReceiver(new Handler(), context);
+        receiver.setReceiver(this);
+
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
+        list = intent.getStringExtra("list");
         type = intent.getStringExtra("type");
 
         mSharedPreferences = new SharedPreference(context);
@@ -373,10 +379,12 @@ public class WordDetailActivity extends AppCompatActivity {
     }
 
     public void setDownloaded(MenuItem item){
-        final Intent service = new Intent(context, DownloadService.class);
+        final DownloadService downloadService = new DownloadService(list, context);
+        final Intent service = new Intent(context, downloadService.getClass());
         service.putExtra("data", word);
         service.putExtra("maxProgress", 1);
-        service.putExtra("receiver", new DownloadReceiver(new Handler(), this));
+        service.putExtra("list", list);
+        service.putExtra("receiver", receiver);
         if(mSharedPreferences.isWifiOnly()){
             assert wifi != null;
             if(wifi.isConnected()){
@@ -386,7 +394,7 @@ public class WordDetailActivity extends AppCompatActivity {
                         downloadDatabaseHelper.deleteDownload(word.getTitle());
                         item.setIcon(R.drawable.ic_file_download_black_24dp);
                     } else {
-                        DownloadService.enqueueWork(context, service);
+                        ContextCompat.startForegroundService(context, service);
                         item.setIcon(R.drawable.ic_file_downloaded_24dp);
                         mSharedPreferences.setDownloadDisabled(false);
                     }
@@ -396,7 +404,7 @@ public class WordDetailActivity extends AppCompatActivity {
                         downloadDatabaseHelper.deleteDownload(word.getTitle());
                         item.setIcon(R.drawable.ic_file_download_white_24dp);
                     } else {
-                        DownloadService.enqueueWork(context, service);
+                        ContextCompat.startForegroundService(context, service);
                         item.setIcon(R.drawable.ic_file_downloaded_24dp);
                         mSharedPreferences.setDownloadDisabled(false);
                     }
@@ -411,7 +419,7 @@ public class WordDetailActivity extends AppCompatActivity {
                     downloadDatabaseHelper.deleteDownload(word.getTitle());
                     item.setIcon(R.drawable.ic_file_download_black_24dp);
                 } else {
-                    DownloadService.enqueueWork(context, service);
+                    ContextCompat.startForegroundService(context, service);
                     item.setIcon(R.drawable.ic_file_downloaded_24dp);
                     mSharedPreferences.setDownloadDisabled(false);
                 }
@@ -421,7 +429,7 @@ public class WordDetailActivity extends AppCompatActivity {
                     downloadDatabaseHelper.deleteDownload(word.getTitle());
                     item.setIcon(R.drawable.ic_file_download_white_24dp);
                 } else {
-                    DownloadService.enqueueWork(context, service);
+                    ContextCompat.startForegroundService(context, service);
                     item.setIcon(R.drawable.ic_file_downloaded_24dp);
                     mSharedPreferences.setDownloadDisabled(false);
                 }
@@ -486,33 +494,6 @@ public class WordDetailActivity extends AppCompatActivity {
                 startActivity(report);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 break;
-            /*case R.id.send:
-                TODO: IMPROVE TEXT, CREATE SHARING OPTION WITH VIDEO URL.
-
-                final ContentValues contentValues = new ContentValues(4);
-                contentValues.put(MediaStore.Video.VideoColumns.DATE_ADDED,
-                        System.currentTimeMillis() / 1000);
-                contentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-                contentValues.put(MediaStore.Video.Media.DATA, word.getImages().get(0));
-                ContentResolver resolver = getBaseContext().getContentResolver();
-
-                Uri uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-                Intent send = new Intent(Intent.ACTION_SEND);
-                send.setType("video/*");
-                send.putExtra(Intent.EXTRA_SUBJECT, word.getTitle());
-                send.putExtra(Intent.EXTRA_STREAM, uri);
-                send.putExtra(Intent.EXTRA_TEXT, word.getTitle() + "\n" + word.getDescription() + "\n" + word
-                        .getSin() + "\n" + word.getAnt());
-                startActivity(Intent.createChooser(send, "Compartir en:"));
-
-                final Intent send = new Intent(Intent.ACTION_SEND);
-                send.putExtra(Intent.EXTRA_SUBJECT, word.getTitle());
-                send.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("\n" + "DESCRIPCION: " + word.getDescription()+ "\n\n" + "SINÓNIMOS: " + word
-                        .getSin() + "\n\n" + "ANTÓNIMOS: " + word.getAnt() + "\n\n" + word.getImages().get(0)));
-                send.setType("text/plain");
-                startActivity(Intent.createChooser(send, "Enviar a:"));
-                break;*/
         }
         return super.onOptionsItemSelected(item);
     }
@@ -531,4 +512,8 @@ public class WordDetailActivity extends AppCompatActivity {
         applyOverrideConfiguration(override);
     }
 
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+
+    }
 }
