@@ -90,4 +90,15 @@
     <string name="help_list_item_3_subtitle">The reports help us identify problems in the operation of the application. These are sent automatically and anonymously, so you don\'t have to worry =).</string>
     <string name="abort">ABORT</string>
     <string name="download_in_progress">Download in progress</string>
+    <string name="check_internet_connection">Check your internet conection</string>
+    <string name="feed_update_error">The feed could\'t be updated</string>
+    <string name="no_words">There are no words</string>
+    <string name="of">of</string>
+    <string name="completed">Completed</string>
+    <string name="wifi_only_message">The option download only with wifi is enabled</string>
+    <string name="autodownlad_message">The download favorites only with wifi is enabled</string>
+    <string name="sending">Sending...</string>
+    <string name="sending_report">Your report is being send.</string>
+    <string name="report_input_error">Enter a message or picture.</string>
+    <string name="image_select">"Select an image: "</string>
 </resources>

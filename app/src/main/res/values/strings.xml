@@ -109,4 +109,15 @@
     <string name="help_list_item_3_title">¿La aplicación envía reportes de error?</string>
     <string name="help_list_item_3_subtitle">Los reportes nos ayudan a identificar problemas en el funcionamiento de la aplicación. Estos son enviados de forma automática y anónima, por lo que no tienes por qué preocuparte =).</string>
     <string name="abort">ABORTAR</string>
+    <string name="check_internet_connection">Revisa tu conexión a internet</string>
+    <string name="feed_update_error">El feed no se pudo actualizar</string>
+    <string name="no_words">No hay palabras</string>
+    <string name="of">de</string>
+    <string name="completed">Completado</string>
+    <string name="wifi_only_message">La opción solo descargar con wifi esta activada</string>
+    <string name="autodownlad_message">La opción descargar favoritos solo con wifi esta activada</string>
+    <string name="sending">Enviando...</string>
+    <string name="sending_report">Se está enviando tu reporte.</string>
+    <string name="report_input_error">Ingrese un mensaje o una imagen.</string>
+    <string name="image_select">"Seleccione a una imagen: "</string>
 </resources>
