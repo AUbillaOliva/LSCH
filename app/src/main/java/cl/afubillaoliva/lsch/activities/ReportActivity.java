@@ -108,7 +108,7 @@ public class ReportActivity extends AppCompatActivity {
                     pickIntent = new Intent(Intent.ACTION_PICK);
                     pickIntent.setDataAndType(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
 
-                    chooserIntent = Intent.createChooser(getIntent, "Selecciona una imagen:");
+                    chooserIntent = Intent.createChooser(getIntent, context.getResources().getString(R.string.image_select));
                     chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
 
                     startActivityForResult(pickIntent, PICK_IMAGE);
@@ -218,7 +218,7 @@ public class ReportActivity extends AppCompatActivity {
                 break;
             case R.id.send:
                 if(!hasNullOrEmptyDrawable(imageView) && Objects.requireNonNull(editText.getText()).length() != 0){
-                    progressDialog = ProgressDialog.show(context, "Enviando...", "Se esta enviando tu reporte.", true);
+                    progressDialog = ProgressDialog.show(context, context.getResources().getString(R.string.sending), context.getResources().getString(R.string.sending_report), true);
                     final MultipartRequest request = new MultipartRequest(context, progressDialog);
                     request.addString(USER_KEY, USER_VAL);
                     request.addString(PASS_KEY, PASS_VAL);
@@ -227,7 +227,7 @@ public class ReportActivity extends AppCompatActivity {
                     request.execute(ApiClient.REPORT_URL);
                     request.onCode(getResources().getString(R.string.report_max_size), 504);
                 } else if(!hasNullOrEmptyDrawable(imageView) && Objects.requireNonNull(editText.getText()).length() == 0){
-                    progressDialog = ProgressDialog.show(context, "Enviando...", "Se esta enviando tu reporte.", true);
+                    progressDialog = ProgressDialog.show(context, context.getResources().getString(R.string.sending), context.getResources().getString(R.string.sending_report), true);
                     final MultipartRequest request = new MultipartRequest(context, progressDialog);
                     request.addString(USER_KEY, USER_VAL);
                     request.addString(PASS_KEY, PASS_VAL);
@@ -235,7 +235,7 @@ public class ReportActivity extends AppCompatActivity {
                     request.execute(ApiClient.REPORT_URL);
                     request.onCode(getResources().getString(R.string.report_max_size), 504);
                 } else if(hasNullOrEmptyDrawable(imageView) && Objects.requireNonNull(editText.getText()).length() != 0){
-                    progressDialog = ProgressDialog.show(context, "Enviando...", "Se esta enviando tu reporte.", true);
+                    progressDialog = ProgressDialog.show(context, context.getResources().getString(R.string.sending), context.getResources().getString(R.string.sending_report), true);
                     final MultipartRequest request = new MultipartRequest(context, progressDialog);
                     request.addString(USER_KEY, USER_VAL);
                     request.addString(PASS_KEY, PASS_VAL);
@@ -243,7 +243,7 @@ public class ReportActivity extends AppCompatActivity {
                     request.execute(ApiClient.REPORT_URL);
                     request.onCode(getResources().getString(R.string.report_max_size), 504);
                 } else
-                    Toast.makeText(context, "Ingrese una imagen o un mensaje", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.report_input_error), Toast.LENGTH_SHORT).show();
                 break;
         }
 
