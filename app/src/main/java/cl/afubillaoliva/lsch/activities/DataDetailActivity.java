@@ -39,7 +39,7 @@ import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
-public class WordDetailActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
+public class DataDetailActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
@@ -309,7 +309,7 @@ public class WordDetailActivity extends AppCompatActivity implements DownloadRec
                             mSharedPreferences.setDownloadDisabled(false);
                             mSharedPreferences.setFavoriteDisabled(false);
                         } else
-                            Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, context.getResources().getString(R.string.autodownlad_message), Toast.LENGTH_LONG).show();
                     } else {
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_white_24dp);
@@ -354,7 +354,7 @@ public class WordDetailActivity extends AppCompatActivity implements DownloadRec
                             mSharedPreferences.setDownloadDisabled(false);
                             mSharedPreferences.setFavoriteDisabled(false);
                         } else
-                            Toast.makeText(context, "La opción descargar favoritos junto con solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, context.getResources().getString(R.string.autodownlad_message), Toast.LENGTH_LONG).show();
                     } else {
                         favoriteDatabaseHelper.addFavorite(word);
                         item.setIcon(R.drawable.ic_favorite_black_24dp);
@@ -410,7 +410,7 @@ public class WordDetailActivity extends AppCompatActivity implements DownloadRec
                     }
                 }
             } else {
-                Toast.makeText(context, "La opción solo descargar con wifi esta activada.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getResources().getString(R.string.wifi_only_message), Toast.LENGTH_SHORT).show();
             }
         } else {
             if(!mSharedPreferences.loadNightModeState()){
@@ -513,7 +513,5 @@ public class WordDetailActivity extends AppCompatActivity implements DownloadRec
     }
 
     @Override
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-
-    }
+    public void onReceiveResult(int resultCode, Bundle resultData){}
 }
