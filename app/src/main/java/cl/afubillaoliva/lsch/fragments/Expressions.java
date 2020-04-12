@@ -45,6 +45,7 @@ public class Expressions extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
     private GenericAdapter<String> adapter;
+    private final Context context = MainApplication.getContext();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup viewGroup, Bundle savedInstanceState){
@@ -157,7 +158,7 @@ public class Expressions extends Fragment {
                         adapter.addItems(apiResponse);
                     } else {
                         Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
-                        Toast.makeText(MainApplication.getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context,  context.getResources().getString(R.string.check_internet_connection), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -167,7 +168,7 @@ public class Expressions extends Fragment {
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                     Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
-                    Toast.makeText(MainApplication.getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.feed_update_error), Toast.LENGTH_SHORT).show();
                 }
             });
 

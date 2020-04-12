@@ -50,6 +50,7 @@ public class Abecedary extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ProgressBar mProgressBar;
     private GenericAdapter<cl.afubillaoliva.lsch.models.Abecedary> adapter;
+    private final Context context = MainApplication.getContext();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -100,7 +101,7 @@ public class Abecedary extends Fragment {
                     @Override
                     public void onClickListener(View view, int position){
                         if(position == 24)
-                            Toast.makeText(getContext(), "No hay palabras", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), context.getResources().getString(R.string.no_words), Toast.LENGTH_SHORT).show();
                         else {
                             final Intent intent = new Intent(getContext(), DataListActivity.class);
                             intent.putExtra("list", getItem(position).getLetter());
@@ -178,7 +179,7 @@ public class Abecedary extends Fragment {
                     adapter.addItems(apiResponse);
                 } else{
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
-                    Toast.makeText(MainApplication.getContext(), "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainApplication.getContext(), context.getResources().getString(R.string.check_internet_connection), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -188,7 +189,7 @@ public class Abecedary extends Fragment {
                 mProgressBar.setVisibility(View.GONE);
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 Log.d(MainActivity.TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(MainApplication.getContext(), "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainApplication.getContext(), context.getResources().getString(R.string.feed_update_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
