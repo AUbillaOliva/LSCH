@@ -95,7 +95,7 @@ public class FavoriteListActivity extends AppCompatActivity {
                 return new RecyclerViewOnClickListenerHack(){
                     @Override
                     public void onClickListener(View view, int position){
-                        final Intent intent = new Intent(context, WordDetailActivity.class);
+                        final Intent intent = new Intent(context, DataDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
                         startActivity(intent);
                     }
