@@ -301,7 +301,7 @@ public class SearchActivity extends AppCompatActivity implements RecyclerViewOnC
             databaseHelper.addHistory(adapter.get(position).getTitle());
             mSharedPreferences.setHistoryDisabled(false);
         }
-        final Intent intent = new Intent(context, WordDetailActivity.class);
+        final Intent intent = new Intent(context, DataDetailActivity.class);
         intent.putExtra("position", adapter.get(position));
         intent.putExtra("id", position);
         startActivity(intent);
