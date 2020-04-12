@@ -3,6 +3,7 @@ package cl.afubillaoliva.lsch.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -67,11 +68,17 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     private ArrayList<Word> apiResponse;
     private SharedPreference mSharedPreferences;
 
+    private ConnectivityManager connMgr;
+    private android.net.NetworkInfo wifi;
+
     private int downloadQueueLength = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
+        connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         mSharedPreferences = new SharedPreference(context);
         receiver = new DownloadReceiver(new Handler(), context);
@@ -130,7 +137,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                 return new RecyclerViewOnClickListenerHack(){
                     @Override
                     public void onClickListener(View view, int position){
-                        final Intent intent = new Intent(context, WordDetailActivity.class);
+                        final Intent intent = new Intent(context, DataDetailActivity.class);
                         intent.putExtra("position", adapter.getItem(position));
                         intent.putExtra("list", list);
                         intent.putExtra("type", type);
@@ -156,12 +163,31 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
         else
             onDownload.setEnabled(true);
         onDownload.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            if(isChecked){
-                mSharedPreferences.setDownloaded(list);
-                downloadVideos();
+            if(mSharedPreferences.isWifiOnly()){
+                if (wifi.isConnected()){
+                    if (isChecked) {
+                        if (network.isNetworkAvailable()){
+                            mSharedPreferences.setDownloaded(list);
+                            downloadVideos();
+                        } else
+                            Toast.makeText(context, context.getResources().getString(R.string.check_internet_connection), Toast.LENGTH_SHORT).show();
+                    } else {
+                        mSharedPreferences.deleteDownloads(list);
+                        deleteVideos();
+                    }
+                } else
+                    Toast.makeText(context, context.getResources().getString(R.string.wifi_only_message), Toast.LENGTH_SHORT).show();
             } else {
-                mSharedPreferences.deleteDownloads(list);
-                deleteVideos();
+                if (isChecked){
+                    if (network.isNetworkAvailable()){
+                        mSharedPreferences.setDownloaded(list);
+                        downloadVideos();
+                    } else
+                        Toast.makeText(context, context.getResources().getString(R.string.check_internet_connection), Toast.LENGTH_SHORT).show();
+                } else {
+                    mSharedPreferences.deleteDownloads(list);
+                    deleteVideos();
+                }
             }
         });
         getData();
@@ -282,7 +308,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                 } else {
                     onDownload.setEnabled(false);
                     Log.e(MainActivity.TAG, "onResponse: " + response.errorBody());
-                    Toast.makeText(context, "Revisa tu conexión a internet", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.check_internet_connection), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -293,7 +319,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                 mSwipeRefreshLayout.setVisibility(View.VISIBLE);
                 onDownload.setEnabled(false);
                 Log.e(MainActivity.TAG, "onFailure: " + t.getMessage());
-                Toast.makeText(context, "No se pudo actualizar el feed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getResources().getString(R.string.feed_update_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
