@@ -24,13 +24,6 @@
         android:name=".MainApplication" >
         <!--TODO: INVESTIGATE GOOGLE APP INDEXING-->
 
-        <service android:name=".services.DownloadService"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-        <receiver android:name=".tools.NotificationReceiver"
-            android:enabled="true"
-            android:process=":remote" />
-
         <activity
             android:screenOrientation="portrait"
             android:name=".MainActivity">
@@ -46,7 +39,7 @@
         <activity android:name=".activities.DataListActivity"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".activities.WordDetailActivity"
+        <activity android:name=".activities.DataDetailActivity"
             android:screenOrientation="portrait" />
 
         <activity android:name=".activities.FavoriteListActivity"
@@ -72,6 +65,13 @@
 
         <activity android:name=".activities.ThirdPartyLibrariesActivity"
             android:screenOrientation="portrait" />
+
+        <service android:name=".services.DownloadService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
+        <receiver android:name=".tools.NotificationReceiver"
+            android:enabled="true"
+            android:process=":remote" />
 
     </application>
 
