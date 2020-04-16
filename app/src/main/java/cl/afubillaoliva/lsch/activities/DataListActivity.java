@@ -68,7 +68,6 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     private ArrayList<Word> apiResponse;
     private SharedPreference mSharedPreferences;
 
-    private ConnectivityManager connMgr;
     private android.net.NetworkInfo wifi;
 
     private int downloadQueueLength = 0;
@@ -77,7 +76,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         mSharedPreferences = new SharedPreference(context);
