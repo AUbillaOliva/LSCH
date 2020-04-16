@@ -129,7 +129,7 @@ public class DownloadDatabaseHelper extends SQLiteOpenHelper {
         }
 
         if(word.getAnt() != null){
-            if(word.getAnt().isEmpty()){
+            if(!word.getAnt().isEmpty()){
                 final String antonyms = convertArrayToString(word.getAnt());
                 values.put(DownloadContract.DownloadEntry.COLUMN_ANTONYMS, antonyms);
             }
