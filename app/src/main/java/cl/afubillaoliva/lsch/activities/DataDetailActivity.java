@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
+import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
@@ -154,7 +156,7 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
         });
 
         WordElementsListAdapter adapter;
-        if(word.getCategory() == null || word.getCategory().size() == 0)
+        if(word.getCategory() == null || word.getCategory().isEmpty())
             categoryFrame.setVisibility(View.GONE);
         else {
             final ArrayList<String> categories = word.getCategory();
@@ -181,7 +183,7 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
             categoryList.setLayoutManager(linearLayoutManager);
         }
 
-        if(word.getDescription() == null || word.getDescription().size() == 0)
+        if(word.getDescription() == null || word.getDescription().isEmpty())
             descriptionFrame.setVisibility(View.GONE);
         else {
             final ArrayList<String> descriptions = word.getDescription();
@@ -194,7 +196,7 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
             defintionList.setLayoutManager(linearLayoutManager);
         }
 
-        if(word.getSin() == null || word.getSin().size() == 0)
+        if(word.getSin() == null || word.getSin().isEmpty())
             synonymsFrame.setVisibility(View.GONE);
         else {
             final ArrayList<String> synonyms = word.getSin();
@@ -206,9 +208,9 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
             sinList.setLayoutManager(linearLayoutManager);
         }
 
-        if(word.getAnt() == null || word.getAnt().size() == 0)
+        if(word.getAnt() == null || word.getAnt().isEmpty()){
             antonymsFrame.setVisibility(View.GONE);
-        else {
+        } else {
             final ArrayList<String> antonyms = word.getAnt();
             adapter = new WordElementsListAdapter();
             adapter.addData(antonyms);
