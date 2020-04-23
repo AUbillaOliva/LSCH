@@ -1,22 +1,15 @@
 package cl.afubillaoliva.lsch.tools;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 
-import cl.afubillaoliva.lsch.models.Word;
-import cl.afubillaoliva.lsch.services.DownloadService;
-import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
-
 public class DownloadReceiver extends ResultReceiver {
 
-    private static DownloadDatabaseHelper mDownloadDatabaseHelper;
     private Receiver receiver;
 
-    public DownloadReceiver(Handler handler, Context context){
+    public DownloadReceiver(Handler handler){
         super(handler);
-        mDownloadDatabaseHelper = new DownloadDatabaseHelper(context);
     }
 
     public interface Receiver{
@@ -35,17 +28,8 @@ public class DownloadReceiver extends ResultReceiver {
             receiver.onReceiveResult(resultCode, resultData);
         }
 
-        final Word word = (Word) resultData.getSerializable("data");
-
-        if (resultCode == DownloadService.SERVICE_ID) {
-            int progress = resultData.getInt("progress");
-
-            if (progress == 100) {
-                if(word != null) {
-                    mDownloadDatabaseHelper.addDownload(word);
-                }
-            }
-        }
     }
+
+
 
 }
