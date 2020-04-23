@@ -18,9 +18,11 @@ import java.text.Normalizer;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.TaskStackBuilder;
 import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.MainApplication;
 import cl.afubillaoliva.lsch.R;
+import cl.afubillaoliva.lsch.activities.DataListActivity;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.tools.NotificationReceiver;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
@@ -28,18 +30,21 @@ import cl.afubillaoliva.lsch.utils.SharedPreference;
 import android.app.IntentService;
 
 import androidx.annotation.Nullable;
+import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 
-public class DownloadService extends IntentService implements NotificationReceiver.Receiver {
+public class DownloadService extends IntentService {
 
     public final static int SERVICE_ID = 371492;
     private static int fileLength = 0;
     private int i = 0, maxProgress = 1;
     private NotificationManagerCompat notificationManagerCompat;
     private NotificationCompat.Builder notification;
+    private static DownloadDatabaseHelper mDownloadDatabaseHelper;
     private Intent service;
     private PendingIntent pendingIntent;
     private String list;
     private Context context;
+    private SharedPreference mSharedPreferences;
 
     public DownloadService(){
         super(DownloadService.class.getSimpleName());
@@ -57,11 +62,12 @@ public class DownloadService extends IntentService implements NotificationReceiv
 
         context = MainApplication.getContext();
 
+        mSharedPreferences = new SharedPreference(context);
+
+        mDownloadDatabaseHelper = new DownloadDatabaseHelper(context);
+
         final SharedPreference mSharedPreferences = new SharedPreference(context);
         notificationManagerCompat = NotificationManagerCompat.from(context);
-
-        final NotificationReceiver notificationReceiver = new NotificationReceiver();
-        notificationReceiver.setReceiver(this);
 
         service = new Intent(context, NotificationReceiver.class);
         service.putExtra("list", list);
@@ -105,7 +111,8 @@ public class DownloadService extends IntentService implements NotificationReceiv
         assert word != null;
         final File file = new File(getExternalFilesDir(null) + File.separator + stripAccents(word.getTitle()) + ".mp4");
 
-        notification.setContentText(i + " " + context.getResources().getString(R.string.of) + " " + maxProgress + " (" + (i*100)/ maxProgress + "% " + context.getResources().getString(R.string.completed) +")");
+        if(maxProgress != 0)
+            notification.setContentText(i + " " + context.getResources().getString(R.string.of) + " " + maxProgress + " (" + (i*100)/ maxProgress + "% " + context.getResources().getString(R.string.completed) +")");
         notificationManagerCompat.notify(SERVICE_ID, notification.build());
 
         if(!file.exists()){
@@ -127,6 +134,7 @@ public class DownloadService extends IntentService implements NotificationReceiv
                     total += count;
                     final Bundle resultData = new Bundle();
                     resultData.putInt("progress" ,(int) (total * 100 / fileLength));
+                    resultData.putInt("maxProgress", maxProgress);
                     assert receiver != null;
                     receiver.send(SERVICE_ID, resultData);
                     output.write(data, 0, count);
@@ -147,7 +155,18 @@ public class DownloadService extends IntentService implements NotificationReceiv
 
             assert receiver != null;
             receiver.send(SERVICE_ID, resultData);
+            mDownloadDatabaseHelper.addDownload(word);
         }
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        mSharedPreferences.deleteDownloads(list);
+        context.stopService(new Intent(context, DownloadService.class));
+        notificationManagerCompat.cancel(SERVICE_ID);
+        i = 0;
+        maxProgress = 1;
     }
 
     @Override
@@ -158,6 +177,4 @@ public class DownloadService extends IntentService implements NotificationReceiv
         notificationManagerCompat.cancel(SERVICE_ID);
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent){}
 }
