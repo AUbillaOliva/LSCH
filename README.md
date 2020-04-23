@@ -9,7 +9,7 @@ Puedes encontrar mas información al respecto en la [página de la app.](https:/
 + [Versiones]()
 + [Contribuciones](#contribuciones)
 + [Licencia](#licencia)
-+ [Errores]()
++ [Errores](https://github.com/AUbillaOliva/LSCH/issues)
 + [Autores](#autores)
 
 La aplicación utiliza nuestra [API](https://github.com/AUbillaOliva/LSCH-Api) para poder entregar todas las palabras traducida a la lengua de señas.
