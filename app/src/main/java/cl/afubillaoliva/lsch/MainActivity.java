@@ -14,11 +14,11 @@ import android.os.Build;
 import android.os.Bundle;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -33,6 +33,7 @@ import android.widget.TextView;
 
 import java.util.Objects;
 
+import androidx.viewpager2.widget.ViewPager2;
 import cl.afubillaoliva.lsch.activities.DownloadListActivity;
 import cl.afubillaoliva.lsch.activities.FavoriteListActivity;
 import cl.afubillaoliva.lsch.activities.SearchActivity;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
 
-        final ViewPager mViewPager = findViewById(R.id.vp_tabs);
+        final ViewPager2 mViewPager = findViewById(R.id.vp_tabs);
         final StateListAnimator stateListAnimator = new StateListAnimator();
         final TabLayout mSlidingTabLayout = findViewById(R.id.stl_tabs);
         mToolbar = findViewById(R.id.toolbar);
@@ -115,26 +116,24 @@ public class MainActivity extends AppCompatActivity {
         llp.gravity = Gravity.CENTER;
         toolbarTitle.setLayoutParams(llp);
 
-        final TabsAdapter adapter = new TabsAdapter(getSupportFragmentManager(), context);
+        final TabsAdapter adapter = new TabsAdapter(this, context);
         adapter.addFragment(new Abecedary(), context.getResources().getString(R.string.abecedary));
         adapter.addFragment(new Themes(), context.getResources().getString(R.string.thematic));
         adapter.addFragment(new Expressions(), context.getResources().getString(R.string.expressions));
-        mViewPager.setAdapter(adapter);
 
+        mViewPager.setAdapter(adapter);
         mSlidingTabLayout.setElevation(0);
+        TabLayoutMediator tabLayoutMediator = new TabLayoutMediator(mSlidingTabLayout, mViewPager, true, (tab, position) -> {
+            tab.setText(adapter.getPageTitle(position));
+            tab.setCustomView(adapter.getTabView(position));
+        });
+        tabLayoutMediator.attach();
         if (mSharedPreferences.loadNightModeState())
             mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorSecondaryDark)); //NIGHT MODE
         else
             mSlidingTabLayout.setBackgroundColor(getResources().getColor(R.color.colorSecondaryLight)); //DAY MODE
 
-        mSlidingTabLayout.setupWithViewPager(mViewPager);
         mSlidingTabLayout.setUnboundedRipple(true);
-
-        for (int i = 0; i < mSlidingTabLayout.getTabCount(); i++){
-            final TabLayout.Tab tab = mSlidingTabLayout.getTabAt(i);
-            if (tab != null)
-                tab.setCustomView(adapter.getTabView(i));
-        }
     }
 
     @Override
@@ -241,10 +240,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults){
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE) {
-            if (grantResults.length == 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
-            }
+            if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_CODE);
         }
     }
 
