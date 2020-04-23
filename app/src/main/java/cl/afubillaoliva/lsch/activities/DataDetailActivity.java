@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import cl.afubillaoliva.lsch.Interfaces.RecyclerViewOnClickListenerHack;
-import cl.afubillaoliva.lsch.MainActivity;
 import cl.afubillaoliva.lsch.R;
 import cl.afubillaoliva.lsch.adapters.WordElementsListAdapter;
 import cl.afubillaoliva.lsch.models.Word;
@@ -41,7 +39,7 @@ import cl.afubillaoliva.lsch.utils.databases.DownloadDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.databases.FavoriteDatabaseHelper;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
 
-public class DataDetailActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
+public class DataDetailActivity extends AppCompatActivity {
 
     private final Context context = this;
     private SharedPreference mSharedPreferences;
@@ -67,8 +65,7 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
         connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
-        receiver = new DownloadReceiver(new Handler(), context);
-        receiver.setReceiver(this);
+        receiver = new DownloadReceiver(new Handler());
 
         final Intent intent = getIntent();
         word = (Word) intent.getSerializableExtra("position");
@@ -514,6 +511,4 @@ public class DataDetailActivity extends AppCompatActivity implements DownloadRec
         applyOverrideConfiguration(override);
     }
 
-    @Override
-    public void onReceiveResult(int resultCode, Bundle resultData){}
 }
