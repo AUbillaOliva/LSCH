@@ -40,6 +40,7 @@ import cl.afubillaoliva.lsch.api.ApiService;
 import cl.afubillaoliva.lsch.models.Word;
 import cl.afubillaoliva.lsch.services.DownloadService;
 import cl.afubillaoliva.lsch.tools.DownloadReceiver;
+import cl.afubillaoliva.lsch.tools.NotificationReceiver;
 import cl.afubillaoliva.lsch.utils.GenericViewHolder;
 import cl.afubillaoliva.lsch.utils.Network;
 import cl.afubillaoliva.lsch.utils.SharedPreference;
@@ -51,11 +52,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DataListActivity extends AppCompatActivity implements DownloadReceiver.Receiver {
+public class DataListActivity extends AppCompatActivity implements NotificationReceiver.Receiver, DownloadReceiver.Receiver {
 
     private Context context = this;
     private final Network network = new Network(this);
-    private DownloadReceiver receiver;
+    private DownloadReceiver downloadReceiver;
 
     private final DownloadDatabaseHelper downloadDatabaseHelper = new DownloadDatabaseHelper(context);
 
@@ -64,7 +65,7 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     private String list, type, letter, category, theme;
     private Switch onDownload;
 
-    private static GenericAdapter<Word> adapter;
+    private GenericAdapter<Word> adapter;
     private ArrayList<Word> apiResponse;
     private SharedPreference mSharedPreferences;
 
@@ -76,12 +77,17 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        ConnectivityManager connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final ConnectivityManager connMgr = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         wifi = Objects.requireNonNull(connMgr).getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+        downloadReceiver = new DownloadReceiver(new Handler());
+        final NotificationReceiver notificationReceiver = new NotificationReceiver();
+        if(!isDestroyed()){
+            downloadReceiver.setReceiver(this);
+            notificationReceiver.setReceiver(this);
+        }
+
         mSharedPreferences = new SharedPreference(context);
-        receiver = new DownloadReceiver(new Handler(), context);
-        receiver.setReceiver(this);
         if (mSharedPreferences.loadNightModeState())
             setTheme(R.style.AppThemeDark);
         else
@@ -223,13 +229,13 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                 if(!file.exists())
                     downloadQueueLength++;
         }
-
         return downloadQueueLength;
     }
 
     private void downloadVideos(){
         downloadQueueLength = getDownloadQueueLength();
-
+        mSharedPreferences.setDownloadDisabled(false);
+        int i = 0;
         for(Word word : apiResponse){
             if(!word.getImages().isEmpty()){
                 final DownloadService downloadService = new DownloadService(list, context);
@@ -237,10 +243,13 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
                 service.putExtra("data", word);
                 service.putExtra("list", list);
                 service.putExtra("maxProgress", downloadQueueLength);
-                service.putExtra("receiver", receiver);
-                ContextCompat.startForegroundService(context, service);            }
+                service.putExtra("position", i);
+                service.putExtra("receiver", downloadReceiver);
+                ContextCompat.startForegroundService(context, service);
+            }
+            i++;
         }
-        downloadQueueLength = 0;
+        downloadQueueLength = 1;
     }
 
     @Override
@@ -324,13 +333,13 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_list, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
             case android.R.id.home:
                 finish();
@@ -346,13 +355,13 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed(){
         finish();
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override
-    protected void attachBaseContext(Context newBase) {
+    protected void attachBaseContext(Context newBase){
         super.attachBaseContext(newBase);
         final Configuration override = new Configuration(newBase.getResources().getConfiguration());
         override.fontScale = 1.0f;
@@ -360,13 +369,22 @@ public class DataListActivity extends AppCompatActivity implements DownloadRecei
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy(){
         super.onDestroy();
+        Log.e(MainActivity.UI, "onDestroy");
+        context = null;
+        wifi = null;
+        mSharedPreferences = null;
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        context.stopService(new Intent(context, DownloadService.class));
+        mSharedPreferences.deleteDownloads(list);
     }
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
         adapter.notifyDataSetChanged();
     }
-
 }
