@@ -11,3 +11,4 @@
 .externalNativeBuild
 /src/main/assets
 /app
+/app/src/main/assets/ACRA-SETTINGS.json
