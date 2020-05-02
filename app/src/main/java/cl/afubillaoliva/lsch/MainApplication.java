@@ -10,6 +10,7 @@ import org.acra.config.CoreConfigurationBuilder;
 import org.acra.config.SchedulerConfigurationBuilder;
 
 import cl.afubillaoliva.lsch.utils.Sender;
+import cl.afubillaoliva.lsch.utils.SharedPreference;
 
 /*
     @Author: Álvaro Felipe Ubilla Oliva
@@ -47,12 +48,14 @@ public class MainApplication extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
 
-        CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this)
+        final CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this)
                 .setBuildConfigClass(BuildConfig.class)
                 .setEnabled(true);
         builder.getPluginConfigurationBuilder(SchedulerConfigurationBuilder.class)
                 .setEnabled(true)
                 .setRestartAfterCrash(false);
-        ACRA.init(this, builder);
+        final SharedPreference mSharedPreferences = new SharedPreference(this);
+        if(mSharedPreferences.sendReport())
+            ACRA.init(this, builder);
     }
 }

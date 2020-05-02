@@ -101,4 +101,8 @@
     <string name="sending_report">Your report is being send.</string>
     <string name="report_input_error">Enter a message or picture.</string>
     <string name="image_select">"Select an image: "</string>
+    <string name="send_reports">Send reports to the developer</string>
+    <string name="send_reports_text">Send automatic reports when an error is detected in the developer\'s operation. Read our privacy policies for more information.</string>
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_text">Read about our privacy policy.</string>
 </resources>

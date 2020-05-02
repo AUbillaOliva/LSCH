@@ -116,8 +116,12 @@
     <string name="completed">Completado</string>
     <string name="wifi_only_message">La opción solo descargar con wifi esta activada</string>
     <string name="autodownlad_message">La opción descargar favoritos solo con wifi esta activada</string>
-    <string name="sending">Enviando...</string>
+    <string name="sending">Enviando&#8230;</string>
     <string name="sending_report">Se está enviando tu reporte.</string>
     <string name="report_input_error">Ingrese un mensaje o una imagen.</string>
     <string name="image_select">"Seleccione a una imagen: "</string>
+    <string name="send_reports">Enviar reportes al desarrollador</string>
+    <string name="send_reports_text">Enviar reportes automaticos cuando se detecte un error en el funcionamiento del desarrollador. Lee nuestras politicas de privacidad para más información.</string>
+    <string name="privacy_policy_title">Política de Privacidad</string>
+    <string name="privacy_policy_text">Lee acerca de nuestras politicas de privacidad.</string>
 </resources>

@@ -70,17 +70,20 @@ public class SharedPreference {
         editor.apply();
     }
 
+    public void sendReports(Boolean state){
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putBoolean("sendReports", state);
+        editor.apply();
+    }
+
     public boolean loadNightModeState(){ return mSharedPreferences.getBoolean("NightMode",false); }
     public boolean isFavorite(){ return mSharedPreferences.getBoolean("Favorite", false); }
     public boolean loadAutoDownload(){ return  mSharedPreferences.getBoolean("Autodownload", false); }
-    public boolean isDownloaded(String letter) {
-        return letter.equals(mSharedPreferences.getString(letter, ""));
-    }
-
+    public boolean isDownloaded(String letter){ return letter.equals(mSharedPreferences.getString(letter, "")); }
     public boolean isHistoryDisabled(){ return mSharedPreferences.getBoolean("historyDisabled", true); }
     public boolean isFavoriteDisabled(){ return mSharedPreferences.getBoolean("favoriteDisabled", true); }
     public boolean isDownloadDisabled(){ return mSharedPreferences.getBoolean("downloadDisabled", true); }
     public boolean isCacheDisabled(){ return mSharedPreferences.getBoolean("cacheDisabled", false); }
     public boolean isWifiOnly(){ return mSharedPreferences.getBoolean("wifiOnly", false); }
-
+    public boolean sendReport(){ return mSharedPreferences.getBoolean("sendReports", false); }
 }

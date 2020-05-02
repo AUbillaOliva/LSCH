@@ -159,6 +159,45 @@
 
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_marginTop="10dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/send_reports"
+                            android:textSize="@dimen/subtitle_1_size"
+                            android:textColor="?attr/textColor"
+                            android:fontFamily="@font/product_sans"/>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="250dp"
+                                android:layout_height="wrap_content"
+                                android:text="@string/send_reports_text"
+                                android:layout_gravity="center"
+                                android:textColor="?attr/subtitleTextColor"/>
+
+
+                            <Switch
+                                android:id="@+id/send_report_switch"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:theme="@style/AppTheme"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

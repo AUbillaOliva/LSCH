@@ -68,7 +68,8 @@ public class SettingsActivity extends AppCompatActivity {
         final TextView toolbarTitle = mToolbar.findViewById(R.id.toolbar_title), versionTitle = findViewById(R.id.version_number);
         final Switch mDarkSwitch = findViewById(R.id.settings_dark_theme_switch),
                      mOfflineSwitch = findViewById(R.id.settings_offline_switch),
-                     mWifiOnly = findViewById(R.id.settings_wifi_download_only);
+                     mWifiOnly = findViewById(R.id.settings_wifi_download_only),
+                     mReportSwutch = findViewById(R.id.send_report_switch);
         aboutList = findViewById(R.id.about_list);
         searchList = findViewById(R.id.search_list);
         storageList = findViewById(R.id.storage_list);
@@ -93,17 +94,14 @@ public class SettingsActivity extends AppCompatActivity {
         if(mSharedPreferences.loadNightModeState())
             mDarkSwitch.setChecked(true);
         mDarkSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(!isChecked){
+            if(!isChecked)
                 mSharedPreferences.setNightMode(false);
-                startActivity(new Intent(context, SettingsActivity.class));
-                finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            } else {
+            else
                 mSharedPreferences.setNightMode(true);
-                startActivity(new Intent(context, SettingsActivity.class));
-                finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            }
+
+            startActivity(new Intent(context, SettingsActivity.class));
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
 
         if(mSharedPreferences.loadAutoDownload())
@@ -122,6 +120,19 @@ public class SettingsActivity extends AppCompatActivity {
                 mSharedPreferences.setWifiOnly(false);
             else
                 mSharedPreferences.setWifiOnly(true);
+        });
+
+        if(mSharedPreferences.sendReport())
+            mReportSwutch.setChecked(true);
+        mReportSwutch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(!isChecked)
+                mSharedPreferences.sendReports(false);
+            else
+                mSharedPreferences.sendReports(true);
+
+            startActivity(new Intent(context, SettingsActivity.class));
+            finish();
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
 
         aboutList.setHasFixedSize(true);
@@ -296,7 +307,7 @@ public class SettingsActivity extends AppCompatActivity {
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledDark));
                     }
                 } else {
-                    if (getItem(position).isDisabled()) {
+                    if (getItem(position).isDisabled()){
                         title.setTextColor(getResources().getColor(R.color.textDisabledLight));
                         subtitle.setTextColor(getResources().getColor(R.color.textDisabledLight));
                     }
@@ -340,6 +351,7 @@ public class SettingsActivity extends AppCompatActivity {
                                         e.printStackTrace();
                                     }
                                 }
+
                                 break;
                             case 1:
                                 if(downloadDatabaseHelper.getAllDownload().size() > 0 || Objects.requireNonNull(context.getExternalFilesDir(null)).listFiles() == null){
@@ -438,6 +450,9 @@ public class SettingsActivity extends AppCompatActivity {
                                 break;
                             case 3:
                                 startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://www.umce.cl/")));
+                                break;
+                            case 4:
+                                startActivity(new Intent(Intent.ACTION_VIEW).setData(Uri.parse("https://lsch-api.herokuapp.com")));
                                 break;
                         }
                     }
@@ -703,6 +718,11 @@ public class SettingsActivity extends AppCompatActivity {
         item = new ListItem();
         item.setTitle(context.getResources().getString(R.string.umce_title));
         item.setSubtitle(context.getResources().getString(R.string.umce_subtitle));
+        items.add(item);
+
+        item = new ListItem();
+        item.setTitle(context.getResources().getString(R.string.privacy_policy_title));
+        item.setSubtitle(context.getResources().getString(R.string.privacy_policy_text));
         items.add(item);
 
         return items;
