@@ -5,9 +5,14 @@ import android.util.Log;
 
 import org.acra.data.CrashReportData;
 import org.acra.sender.ReportSender;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import cl.afubillaoliva.lsch.MainActivity;
@@ -22,19 +27,38 @@ import okhttp3.Response;
 
 public class SenderService implements ReportSender {
 
+    private Context context;
+
     @Override
     public void send(@NonNull Context context, @NonNull CrashReportData report){
+
+        this.context = context;
+
         final OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = null;
 
         try {
-            requestBody = new MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", "ACRA-report-stacktrace.json", RequestBody.create(MultipartBody.FORM, report.toJSON()))
-                    .addFormDataPart("user", "ecdd7446cd389d")
-                    .addFormDataPart("pass","fce0b8515205f4")
-                    .build();
-        } catch (JSONException e){
+            try {
+                final JSONObject obj = new JSONObject(Objects.requireNonNull(loadJSONFromAsset()));
+                final JSONArray acraSettings = obj.getJSONArray("acra-settings");
+
+                for (int i = 0; i < acraSettings.length(); i++) {
+                    final JSONObject acraProperties = acraSettings.getJSONObject(i);
+                    final String user = acraProperties.getString("acra-user");
+                    final String pass = acraProperties.getString("acra-password");
+
+                    requestBody = new MultipartBody.Builder()
+                            .setType(MultipartBody.FORM)
+                            .addFormDataPart("file", "ACRA-report-stacktrace.json", RequestBody.create(MultipartBody.FORM, report.toJSON()))
+                            .addFormDataPart("user", user)
+                            .addFormDataPart("pass", pass)
+                            .build();
+
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         final Request request = new Request.Builder()
@@ -54,10 +78,23 @@ public class SenderService implements ReportSender {
                 Log.d(MainActivity.REP, String.valueOf(call.isExecuted()));
             }
         });
-
-
     }
 
+    private String loadJSONFromAsset() {
+        String json;
+        try {
+            final InputStream is = context.getAssets().open("ACRA-SETTINGS.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
 
 }
 
